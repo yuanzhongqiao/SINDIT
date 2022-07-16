@@ -21,6 +21,7 @@ def get_layout():
                 is_open=False,
                 duration=5000,
             ),
+            html.Div(id="suppl_file_visualization_container")
         ]
     )
     return graph

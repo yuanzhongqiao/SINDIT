@@ -41,7 +41,9 @@ class SupplementaryFileNodeFlat(BaseNode):
     file_name: str = Property()
 
     # Type of the value stored per time
-    file_type: str = Property(default=SupplementaryFileTypes.DOCUMENT_PDF.value)
+    file_type: str = Property(
+        key="type", default=SupplementaryFileTypes.DOCUMENT_PDF.value
+    )
 
     def validate_metamodel_conformance(self):
         """

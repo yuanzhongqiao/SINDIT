@@ -70,5 +70,7 @@ class S3PersistenceService(FilesPersistenceService):
         """
 
         return self.client.generate_presigned_url(
-            "get_object", Params={"Bucket": self.bucket_name, "Key": iri}, ExpiresIn=60
+            "get_object",
+            Params={"Bucket": self.bucket_name, "Key": iri},
+            ExpiresIn=6000,
         )
