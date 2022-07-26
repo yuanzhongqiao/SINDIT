@@ -5,6 +5,7 @@ author: Timo Peter <timo.peter@sintef.no>
 
 """
 from datetime import datetime
+import os
 import sys
 import py2neo
 from util.environment_and_configuration import get_environment_variable
@@ -137,9 +138,8 @@ def generate_alternative_cad_format():
         print(f"Converting {file['f.file_name']} ({i}/{len(step_cad_file_list)})...")
 
         # Arguments:
-        file_name = (
-            LEARNING_FACTORY_BINARIES_IMPORT_FOLDER + file["f.file_name"] + ".stl"
-        )
+        file_name = file["f.file_name"] + ".stl"
+        file_path = LEARNING_FACTORY_BINARIES_IMPORT_FOLDER + file_name
         id_short = file["f.id_short"] + "_stl_conversion"
         iri = file["f.iri"] + "_stl_conversion"
         description = (
@@ -152,11 +152,14 @@ def generate_alternative_cad_format():
             LEARNING_FACTORY_BINARIES_IMPORT_FOLDER + file["f.file_name"]
         )
 
-        cqkit.export_stl_file(step_import, file_name, tolerance=1000000000)
+        cqkit.export_stl_file(step_import, file_path, tolerance=1000000000)
 
         # Upload file
 
-        bucket.upload_file(file_name, iri)
+        bucket.upload_file(file_path, iri)
+
+        # Delete the generated file locally
+        os.remove(file_path)
 
         # Create node and relationship for KG-DT
         node = py2neo.Node(
