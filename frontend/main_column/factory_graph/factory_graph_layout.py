@@ -244,6 +244,39 @@ def get_cytoscape_elements(assets_deep: List[AssetNodeDeep]):
                 )
             )
 
+            # Alternative formats (always connected to one main type)
+            for secondary_suppl_file in suppl_file.secondary_formats:
+                # Supplementary file (alternative format):
+                secondary_file_node = _create_cytoscape_node(
+                    secondary_suppl_file, NodeTypes.SUPPLEMENTARY_FILE.value
+                )
+
+                secondary_file_node["classes"].append("")
+
+                cytoscape_elements.append(secondary_file_node)
+                cytoscape_elements.append(
+                    _create_cytoscape_relationship(
+                        suppl_file,
+                        secondary_suppl_file,
+                        RelationshipTypes.SECONDARY_FORMAT.value,
+                    )
+                )
+
+                # Database connection:
+                cytoscape_elements.append(
+                    _create_cytoscape_node(
+                        secondary_suppl_file.db_connection,
+                        NodeTypes.DATABASE_CONNECTION.value,
+                    )
+                )
+                cytoscape_elements.append(
+                    _create_cytoscape_relationship(
+                        secondary_suppl_file,
+                        secondary_suppl_file.db_connection,
+                        RelationshipTypes.FILE_DB_ACCESS.value,
+                    )
+                )
+
     # Temporary dict to remove duplicates (e.g. if same timeseries is referenced from multiple assets)
     return list(
         {

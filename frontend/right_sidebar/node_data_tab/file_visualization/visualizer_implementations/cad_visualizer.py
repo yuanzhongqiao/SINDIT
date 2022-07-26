@@ -6,6 +6,14 @@ import numpy as np
 
 from dash import dcc
 from frontend import api_client
+from graph_domain.SupplementaryFileNode import (
+    SupplementaryFileNodeDeep,
+    SupplementaryFileNodeFlat,
+    SupplementaryFileTypes,
+)
+from service.exceptions.GraphNotConformantToMetamodelError import (
+    GraphNotConformantToMetamodelError,
+)
 
 
 def stl2mesh3d(stl_mesh):
@@ -23,10 +31,32 @@ def stl2mesh3d(stl_mesh):
     return vertices, I, J, K
 
 
-def get_visualization(selected_el):
+def get_visualization(selected_el, is_stl_format: bool):
+
+    if is_stl_format:
+        stl_iri = selected_el.iri
+    else:
+        # Alternative format required!
+        available_formats_dicts = api_client.get_json(
+            relative_path="/supplementary_file/alternative_formats", iri=selected_el.iri
+        )
+
+        available_formats = [
+            SupplementaryFileNodeFlat.from_dict(m) for m in available_formats_dicts
+        ]
+
+        stl_iris = [
+            file.iri
+            for file in available_formats
+            if file.file_type == SupplementaryFileTypes.CAD_STL.value
+        ]
+        if len(stl_iris) == 0:
+            raise GraphNotConformantToMetamodelError(
+                "No STL format available to be displayed for the selected CAD file"
+            )
+
     cad_data = api_client.get_raw(
-        relative_path="/supplementary_file/data",
-        iri=selected_el.iri + "_stl_conversion",
+        relative_path="/supplementary_file/data", iri=stl_iris[0]
     )
 
     cad_file_handle = io.BytesIO(cad_data)

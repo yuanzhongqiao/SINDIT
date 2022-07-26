@@ -16,11 +16,13 @@ from service.exceptions.GraphNotConformantToMetamodelError import (
 
 LABEL = NodeTypes.SUPPLEMENTARY_FILE.value
 DB_CONNECTION_RELATIONSHIP_LABEL = RelationshipTypes.FILE_DB_ACCESS.value
+SECONDARY_FORMAT_RELATIONSHIP_LABEL = RelationshipTypes.SECONDARY_FORMAT.value
 
 
 class SupplementaryFileTypes(Enum):
     IMAGE_JPG = "IMAGE_JPG"
     CAD_STEP = "CAD_STEP"
+    CAD_STL = "CAD_STL"
     DOCUMENT_PDF = "DOCUMENT_PDF"
 
 
@@ -67,9 +69,9 @@ class SupplementaryFileNodeFlat(BaseNode):
 
 @dataclass
 @dataclass_json
-class SupplementaryFileNodeDeep(SupplementaryFileNodeFlat):
+class SupplementaryFileNodeDeepNonRecursive(SupplementaryFileNodeFlat):
     """
-    Deep supplementary file node with relationships
+    Deep supplementary file node with relationships, but no recursive attributes
     """
 
     __primarylabel__ = LABEL
@@ -98,3 +100,49 @@ class SupplementaryFileNodeDeep(SupplementaryFileNodeFlat):
             )
 
         self.db_connection.validate_metamodel_conformance()
+
+
+@dataclass
+@dataclass_json
+class SupplementaryFileNodeDeep(SupplementaryFileNodeDeepNonRecursive):
+    """
+    Deep supplementary file node with relationships
+    """
+
+    __primarylabel__ = LABEL
+
+    # The OGM framework does not allow constraining to only one item!
+    # Can only be one unit (checked by metamodel validator)
+    _db_connections: List[DatabaseConnectionNode] = RelatedTo(
+        DatabaseConnectionNode, DB_CONNECTION_RELATIONSHIP_LABEL
+    )
+
+    @property
+    def db_connection(self) -> DatabaseConnectionNode:
+        return [connection for connection in self._db_connections][0]
+
+    _secondary_formats: List[SupplementaryFileNodeDeepNonRecursive] = RelatedTo(
+        SupplementaryFileNodeDeepNonRecursive, SECONDARY_FORMAT_RELATIONSHIP_LABEL
+    )
+
+    @property
+    def secondary_formats(self) -> List[SupplementaryFileNodeDeepNonRecursive]:
+        return [suppl_file for suppl_file in self._secondary_formats]
+
+    def validate_metamodel_conformance(self):
+        """
+        Used to validate if the current node (self) and its child elements is conformant to the defined metamodel.
+        Raises GraphNotConformantToMetamodelError if there are inconsistencies
+        """
+        super().validate_metamodel_conformance()
+
+        if not len(self._db_connections) == 1:
+            raise GraphNotConformantToMetamodelError(
+                self,
+                f"Invalid number of referenced database connections: {len(self._db_connections)}",
+            )
+
+        self.db_connection.validate_metamodel_conformance()
+
+        for suppl_file in self.secondary_formats:
+            suppl_file.validate_metamodel_conformance()

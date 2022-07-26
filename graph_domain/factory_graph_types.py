@@ -16,6 +16,7 @@ class RelationshipTypes(Enum):
     HAS_SUPPLEMENTARY_FILE = "HAS_SUPPLEMENTARY_FILE"
     TIMESERIES_DB_ACCESS = "TIMESERIES_DB_ACCESS"
     FILE_DB_ACCESS = "FILE_DB_ACCESS"
+    SECONDARY_FORMAT = "SECONDARY_FORMAT"
     RUNTIME_ACCESS = "RUNTIME_ACCESS"
     HAS_UNIT = "HAS_UNIT"
 
@@ -40,6 +41,7 @@ RELATIONSHIP_TYPES_FOR_NODE_TYPE = {
     NodeTypes.SUPPLEMENTARY_FILE.value: [
         RelationshipTypes.HAS_SUPPLEMENTARY_FILE.value,
         RelationshipTypes.FILE_DB_ACCESS.value,
+        RelationshipTypes.SECONDARY_FORMAT.value,
     ],
     NodeTypes.DATABASE_CONNECTION.value: [
         RelationshipTypes.TIMESERIES_DB_ACCESS.value,

@@ -22,10 +22,10 @@ def update_factory_graph(n):
     :param n:
     :return:
     """
-    machines_deep_json = api_client.get_json("/assets")
-    machines_deep = [AssetNodeDeep.from_json(m) for m in machines_deep_json]
+    assets_deep_json = api_client.get_json("/assets")
+    assets_deep = [AssetNodeDeep.from_json(m) for m in assets_deep_json]
     cygraph_elements = factory_graph_layout.get_cytoscape_elements(
-        assets_deep=machines_deep
+        assets_deep=assets_deep
     )
 
     return cygraph_elements

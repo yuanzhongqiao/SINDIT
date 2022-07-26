@@ -143,7 +143,10 @@ def visualize_file(_, selected_el_json):
         return jpg_visualizer.get_visualization(selected_el)
 
     elif suppl_file_details.file_type == SupplementaryFileTypes.CAD_STEP.value:
-        return cad_visualizer.get_visualization(selected_el)
+        return cad_visualizer.get_visualization(selected_el, False)
+
+    elif suppl_file_details.file_type == SupplementaryFileTypes.CAD_STL.value:
+        return cad_visualizer.get_visualization(selected_el, True)
 
     elif suppl_file_details.file_type == SupplementaryFileTypes.DOCUMENT_PDF.value:
         return pdf_visualizer.get_visualization(selected_el)

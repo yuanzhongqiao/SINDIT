@@ -138,3 +138,14 @@ def get_supplementary_file(iri: str):
     :return:
     """
     return SUPPL_FILE_DAO.get_supplementary_file_node_flat(iri)
+
+
+@app.get("/supplementary_file/alternative_formats")
+def get_supplementary_file(iri: str):
+    """
+    Returns a list of all available format nodes for a supplementary file (works on both secondary and primary ones as input iri)
+    :raises IdNotFoundException: If the file is not found
+    :param iri:
+    :return:
+    """
+    return SUPPL_FILE_DAO.get_supplementary_file_available_formats(iri)

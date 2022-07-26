@@ -3,7 +3,10 @@ from typing import List
 from graph_domain.DatabaseConnectionNode import DatabaseConnectionNode
 
 from graph_domain.AssetNode import AssetNodeFlat, AssetNodeDeep
-from graph_domain.SupplementaryFileNode import SupplementaryFileNodeFlat
+from graph_domain.SupplementaryFileNode import (
+    SupplementaryFileNodeDeep,
+    SupplementaryFileNodeFlat,
+)
 from graph_domain.factory_graph_types import NodeTypes, RelationshipTypes
 from service.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
@@ -40,9 +43,7 @@ class SupplementaryFileNodesDao(object):
         )
 
     @validate_result_nodes
-    def get_supplementary_file_node_flat(
-        self, iri: str
-    ) -> List[DatabaseConnectionNode]:
+    def get_supplementary_file_node_flat(self, iri: str) -> SupplementaryFileNodeFlat:
         """
         Queries the specified supplementary file node. Does not follow any relationships
         :param self:
@@ -54,3 +55,29 @@ class SupplementaryFileNodesDao(object):
         )
 
         return suppl_file_match.first()
+
+    @validate_result_nodes
+    def get_supplementary_file_available_formats(
+        self, iri: str
+    ) -> List[SupplementaryFileNodeFlat]:
+        """
+        Queries all available formats for the specified supplementary file node.
+        :param self:
+        :return:
+        :raises GraphNotConformantToMetamodelError: If Graph not conformant
+        """
+        # suppl_file_matches = self.ps.repo.match(model=SupplementaryFileNodeFlat).where(
+        #     'MATCH (f:SUPPLEMENTARY_FILE {iri: "'
+        #     + iri
+        #     + '"})-[:SECONDARY_FORMAT *0..]->(alt: SUPPLEMENTARY_FILE)  RETURN f, alt'
+        # )
+
+        suppl_file_matches = self.ps.repo.match(model=SupplementaryFileNodeFlat).where(
+            '(_)<-[:SECONDARY_FORMAT *0..]-(: SUPPLEMENTARY_FILE {iri: "www.sintef.no/aas_identifiers/learning_factory/files/hbw_step_cad"}) '
+        )
+
+        # MATCH (f:SUPPLEMENTARY_FILE {iri: "www.sintef.no/aas_identifiers/learning_factory/files/hbw_step_cad"})-[:SECONDARY_FORMAT *0..]->(alt: SUPPLEMENTARY_FILE)  RETURN f, alt
+
+        return [
+            SupplementaryFileNodeFlat.from_json(m.to_json()) for m in suppl_file_matches
+        ]
