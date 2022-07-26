@@ -66,17 +66,10 @@ class SupplementaryFileNodesDao(object):
         :return:
         :raises GraphNotConformantToMetamodelError: If Graph not conformant
         """
-        # suppl_file_matches = self.ps.repo.match(model=SupplementaryFileNodeFlat).where(
-        #     'MATCH (f:SUPPLEMENTARY_FILE {iri: "'
-        #     + iri
-        #     + '"})-[:SECONDARY_FORMAT *0..]->(alt: SUPPLEMENTARY_FILE)  RETURN f, alt'
-        # )
 
         suppl_file_matches = self.ps.repo.match(model=SupplementaryFileNodeFlat).where(
-            '(_)<-[:SECONDARY_FORMAT *0..]-(: SUPPLEMENTARY_FILE {iri: "www.sintef.no/aas_identifiers/learning_factory/files/hbw_step_cad"}) '
+            '(_)<-[:SECONDARY_FORMAT *0..]-(: SUPPLEMENTARY_FILE {iri: "' + iri + '"}) '
         )
-
-        # MATCH (f:SUPPLEMENTARY_FILE {iri: "www.sintef.no/aas_identifiers/learning_factory/files/hbw_step_cad"})-[:SECONDARY_FORMAT *0..]->(alt: SUPPLEMENTARY_FILE)  RETURN f, alt
 
         return [
             SupplementaryFileNodeFlat.from_json(m.to_json()) for m in suppl_file_matches

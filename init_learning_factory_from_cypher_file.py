@@ -180,6 +180,23 @@ def generate_alternative_cad_format():
 
         g.create(relationship)
 
+        # Relationship to database node
+
+        db_relationship = py2neo.Relationship(
+            node,
+            "FILE_DB_ACCESS",
+            py2neo.NodeMatcher(g)
+            .match("DATABASE_CONNECTION")
+            .where(
+                '(_)<-[:FILE_DB_ACCESS]-(: SUPPLEMENTARY_FILE {iri: "'
+                + file["f.iri"]
+                + '"})'
+            )
+            .first(),
+        )
+
+        g.create(db_relationship)
+
         i += 1
 
     g.commit(tx)

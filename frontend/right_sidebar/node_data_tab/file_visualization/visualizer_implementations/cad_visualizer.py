@@ -55,9 +55,9 @@ def get_visualization(selected_el, is_stl_format: bool):
                 "No STL format available to be displayed for the selected CAD file"
             )
 
-    cad_data = api_client.get_raw(
-        relative_path="/supplementary_file/data", iri=stl_iris[0]
-    )
+        stl_iri = stl_iris[0]
+
+    cad_data = api_client.get_raw(relative_path="/supplementary_file/data", iri=stl_iri)
 
     cad_file_handle = io.BytesIO(cad_data)
 

@@ -16,7 +16,7 @@ def get_layout():
                 ]
             ),
             dbc.Alert(
-                id="suppl_file_download-notifier",
+                id="suppl_file_notifier",
                 class_name="inline-alert",
                 is_open=False,
                 duration=5000,

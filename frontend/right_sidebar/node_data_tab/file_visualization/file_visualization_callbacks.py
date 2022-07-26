@@ -50,17 +50,24 @@ print("Initializing file visualization callbacks...")
 
 
 @app.callback(
-    Output("suppl_file_download-notifier", "children"),
-    Output("suppl_file_download-notifier", "is_open"),
+    Output("suppl_file_notifier", "children"),
+    Output("suppl_file_notifier", "is_open"),
     Input("suppl_file_download_button", "n_clicks"),
-    prevent_initial_call=True,
+    prevent_initial_call=False,
 )
-def download_file_notifier(n_clicks):
+def delay_notifier(n_clicks):
 
-    return (
-        f"Download triggered. This can take a while...",
-        True,
-    )
+    if n_clicks is None:
+        # Just loading the visualization. Download button not pressed
+        return (
+            f"Visualization loading. This can take a while for file types like CAD.",
+            True,
+        )
+    else:
+        return (
+            f"Download triggered. This can take a while.",
+            True,
+        )
 
 
 @app.callback(
