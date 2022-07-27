@@ -32,6 +32,15 @@
             "envFile": "${workspaceFolder}/environment_and_configuration/devcontainer_environment_backend.env"
         },
         {
+            "name": "Learning factory: continuous ordering",
+            "type": "python",
+            "request": "launch",
+            "program": "./learning_factory_continuous_ordering.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "envFile": "${workspaceFolder}/environment_and_configuration/devcontainer_environment_backend.env"
+        },
+        {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
