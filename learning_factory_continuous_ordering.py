@@ -13,7 +13,7 @@ PORT = get_environment_variable_int(key="FACTORY_MQTT_Port", optional=True, defa
 TYPES = ["BLUE", "RED", "WHITE"]
 
 mqtt_client = mqtt.Client()
-mqtt_client.connect(host=HOST, port=PORT, keepalive=60)
+mqtt_client.connect(host=HOST, port=PORT, keepalive=600)
 
 
 
@@ -27,5 +27,4 @@ while True:
         topic="f/o/order", payload='{"type":"' + random_type + '","ts":"' + formatted_time + '"}'
     )
     
-    sleep(180)
-
+    sleep(200)

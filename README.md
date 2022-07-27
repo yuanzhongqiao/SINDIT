@@ -83,11 +83,19 @@ coming soon
 
 ## DT learning factory initialization script:
 
-Initializes the DT for the fischertechnik learning factory. Execute inside the DT-Backend container after starting all services via: 
+Initializes the DT for the fischertechnik learning factory. Execute inside the standby container after starting the database services via: 
 
 `docker-compose exec sindit_dt_standby_environment python init_learning_factory_from_cypher_file.py`
 
 After this, for the DT-services to connect to the newly created timeseries connections, restart the services with `docker-compose restart sindit_dt_backend sindit_dt_frontend` (simply restarting all containers does lead to the dependencies for database access not being resolved).
+
+## Learning factory continuous ordering script:
+
+Continuosly sends MQTT orders to the factory ordering a piece of random color. Execute inside the DT container after starting all services via: 
+
+`docker-compose exec sindit_dt_standby_environment python learning_factory_continuos_ordering.py`
+
+Alternatively, run the preconfigured launch configuration in VS Code (Inside the dev-container).
 
 ## References
 
