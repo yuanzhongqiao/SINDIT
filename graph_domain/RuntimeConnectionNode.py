@@ -5,7 +5,7 @@ from enum import Enum
 
 from dataclasses_json import dataclass_json
 from py2neo.ogm import Property, RelatedTo
-from service.exceptions.GraphNotConformantToMetamodelError import (
+from backend.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
 )
 

@@ -10,7 +10,7 @@ from graph_domain.DatabaseConnectionNode import DatabaseConnectionNode
 from graph_domain.RuntimeConnectionNode import RuntimeConnectionNode
 from graph_domain.UnitNode import UnitNode
 from graph_domain.factory_graph_types import NodeTypes, RelationshipTypes
-from service.exceptions.GraphNotConformantToMetamodelError import (
+from backend.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
 )
 

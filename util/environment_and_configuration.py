@@ -2,7 +2,7 @@ import os
 import configparser
 from enum import Enum
 
-from service.exceptions.EnvironmentalVariableNotFoundError import (
+from backend.exceptions.EnvironmentalVariableNotFoundError import (
     EnvironmentalVariableNotFoundError,
 )
 

@@ -11,7 +11,7 @@ from graph_domain.SupplementaryFileNode import (
     SupplementaryFileNodeFlat,
     SupplementaryFileTypes,
 )
-from service.exceptions.GraphNotConformantToMetamodelError import (
+from backend.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
 )
 

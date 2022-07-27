@@ -2,35 +2,35 @@ import json
 
 import uvicorn
 
-from service.api.api import app
-from service.knowledge_graph.KnowledgeGraphPersistenceService import (
+from backend.api.api import app
+from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
     KnowledgeGraphPersistenceService,
 )
-from service.knowledge_graph.dao.DatabaseConnectionsDao import DatabaseConnectionsDao
-from service.knowledge_graph.dao.TimeseriesNodesDao import TimeseriesDao
-from service.runtime_connections.RuntimeConnectionContainer import (
+from backend.knowledge_graph.dao.DatabaseConnectionsDao import DatabaseConnectionsDao
+from backend.knowledge_graph.dao.TimeseriesNodesDao import TimeseriesDao
+from backend.runtime_connections.RuntimeConnectionContainer import (
     RuntimeConnectionContainer,
 )
-from service.specialized_databases.DatabasePersistenceServiceContainer import (
+from backend.specialized_databases.DatabasePersistenceServiceContainer import (
     DatabasePersistenceServiceContainer,
 )
-from service.specialized_databases.timeseries.influx_db.InfluxDbPersistenceService import (
+from backend.specialized_databases.timeseries.influx_db.InfluxDbPersistenceService import (
     InfluxDbPersistenceService,
 )
 
 # Import endpoint files (indirectly used through annotation)
 
 # noinspection PyUnresolvedReferences
-from service.api.endpoints import timeseries_endpoints
+from backend.api.endpoints import timeseries_endpoints
 
 # noinspection PyUnresolvedReferences
-from service.api.endpoints import file_endpoints
+from backend.api.endpoints import file_endpoints
 
 # noinspection PyUnresolvedReferences
-from service.api.endpoints import asset_endpoints
+from backend.api.endpoints import asset_endpoints
 
 # noinspection PyUnresolvedReferences
-from service.api.endpoints import graph_endpoints
+from backend.api.endpoints import graph_endpoints
 from util.environment_and_configuration import (
     get_environment_variable,
     get_environment_variable_int,

@@ -6,7 +6,7 @@ from py2neo.ogm import Property
 
 from graph_domain.BaseNode import BaseNode
 from graph_domain.factory_graph_types import NodeTypes
-from service.exceptions.GraphNotConformantToMetamodelError import (
+from backend.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
 )
 

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from dataclasses_json import dataclass_json
 from py2neo.ogm import Model, Property
 
-from service.exceptions.GraphNotConformantToMetamodelError import (
+from backend.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
 )
 
