@@ -14,6 +14,8 @@ services:
     mem_limit: 2G
     networks:
       - sindit_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
     # If you want add a non-root user to your Dockerfile, you can use the "remoteUser"
     # property in devcontainer.json to cause VS Code its sub-processes (terminals, tasks, 
