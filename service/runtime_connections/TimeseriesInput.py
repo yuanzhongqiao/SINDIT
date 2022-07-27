@@ -1,6 +1,7 @@
 import abc
 from ctypes.wintypes import BOOL
 from datetime import datetime
+from math import floor
 from typing import Tuple
 
 from graph_domain.TimeseriesNode import TimeseriesNodeFlat, TimeseriesValueTypes
@@ -53,7 +54,7 @@ class TimeseriesInput(abc.ABC):
         elif self.value_type == TimeseriesValueTypes.DECIMAL.value:
             reading_value = float(reading_value)
         elif self.value_type == TimeseriesValueTypes.INT.value:
-            reading_value = int(reading_value)
+            reading_value = floor(float(reading_value))
         elif self.value_type == TimeseriesValueTypes.BOOL.value:
             if isinstance(reading_value, bool):
                 pass
