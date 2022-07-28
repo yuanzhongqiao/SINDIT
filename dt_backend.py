@@ -21,16 +21,16 @@ from backend.specialized_databases.timeseries.influx_db.InfluxDbPersistenceServi
 # Import endpoint files (indirectly used through annotation)
 
 # noinspection PyUnresolvedReferences
-from backend.api.endpoints import timeseries_endpoints
+from backend.api.rest_endpoints import timeseries_endpoints
 
 # noinspection PyUnresolvedReferences
-from backend.api.endpoints import file_endpoints
+from backend.api.rest_endpoints import file_endpoints
 
 # noinspection PyUnresolvedReferences
-from backend.api.endpoints import asset_endpoints
+from backend.api.rest_endpoints import asset_endpoints
 
 # noinspection PyUnresolvedReferences
-from backend.api.endpoints import graph_endpoints
+from backend.api.rest_endpoints import graph_endpoints
 from util.environment_and_configuration import (
     get_environment_variable,
     get_environment_variable_int,

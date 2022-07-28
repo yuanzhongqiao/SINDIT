@@ -2,7 +2,6 @@ import json
 from datetime import datetime, timedelta
 import pandas as pd
 
-from backend.api.api import app
 from backend.exceptions.IdNotFoundException import IdNotFoundException
 from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
     KnowledgeGraphPersistenceService,
@@ -25,8 +24,11 @@ DB_SERVICE_CONTAINER: DatabasePersistenceServiceContainer = (
 DB_CON_NODE_DAO: DatabaseConnectionsDao = DatabaseConnectionsDao.instance()
 
 
-@app.get("/timeseries/current_range")
-def get_timeseries_current_range(iri: str, duration: float):
+def get_timeseries_current_range(
+    iri: str,
+    duration: float,
+    aggregation_window_ms: int | None = None,
+):
     """
     Queries the current measurements for the given duration up to the current time.
     :raises IdNotFoundException: If no data is available for that id at the current time
@@ -35,14 +37,16 @@ def get_timeseries_current_range(iri: str, duration: float):
     :return: Pandas Dataframe serialized to JSON featuring the columns "time" and "value"
     """
     return get_timeseries_range(
-        iri=iri, duration=duration, date_time_str=datetime.now().isoformat()
+        iri=iri,
+        duration=duration,
+        date_time_str=datetime.now().isoformat(),
+        aggregation_window_ms=aggregation_window_ms,
     )
 
 
-@app.get("/timeseries/range")
 def get_timeseries_range(
     iri: str,
-    date_time_str: str,
+    date_time: datetime,
     duration: float,
     aggregation_window_ms: int | None = None,
 ):
@@ -54,7 +58,6 @@ def get_timeseries_range(
     :param duration: timespan to query in seconds
     :return: Pandas Dataframe serialized to JSON featuring the columns "time" and "value"
     """
-    date_time = datetime.fromisoformat(date_time_str)
 
     try:
         # Get related timeseries-database service:
@@ -78,12 +81,11 @@ def get_timeseries_range(
             aggregation_window_ms=aggregation_window_ms,
         )
 
-        return readings_df.to_json(date_format="iso")
+        return readings_df
     except IdNotFoundException:
         return pd.DataFrame(columns=["time", "value"])
 
 
-@app.get("/timeseries/entries_count")
 def get_timeseries_entries_count(iri: str, date_time_str: str, duration: float):
     """
 
@@ -111,4 +113,4 @@ def get_timeseries_entries_count(iri: str, date_time_str: str, duration: float):
             end_time=date_time,
         )
     except IdNotFoundException:
-        return pd.DataFrame(columns=["time", "value"])
+        return 0

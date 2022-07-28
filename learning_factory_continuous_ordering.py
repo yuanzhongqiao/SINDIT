@@ -31,7 +31,7 @@ def on_message(client, userdata, message):
     
 mqtt_client.on_message = on_message
 
-mqtt_client.subscribe("f/i/stock", 0)
+mqtt_client.subscribe("f/i/stock", 2)
 
 mqtt_thread = Thread(target=mqtt_client.loop_forever)
 mqtt_thread.start()
@@ -98,12 +98,15 @@ while True:
     
     # Get available pieces:
     first_available_type = None
-    if last_stock_status is not None:
-        stock_dict = json.loads(last_stock_status)
-        for storage in stock_dict['stockItems']:
-            if storage['workpiece']['type'] != '':
-                first_available_type = storage['workpiece']['type']
-                break
+    try:
+        if last_stock_status is not None:
+            stock_dict = json.loads(last_stock_status)
+            for storage in stock_dict['stockItems']:
+                if storage['workpiece']['type'] != '':
+                    first_available_type = storage['workpiece']['type']
+                    break
+    except KeyError:
+        print("KeyError in MQTT stock message!")
     
     formatted_time = datetime.now().isoformat()[:-3] + "Z"
     if first_available_type is not None:
