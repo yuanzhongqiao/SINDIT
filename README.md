@@ -106,6 +106,25 @@ Continuosly sends MQTT orders to the factory ordering a piece of random color. E
 
 Alternatively, run the preconfigured launch configuration in VS Code (Inside the dev-container).
 
+## Backups
+Making backups of the factory data is currently done manually by simply copying the mapped docker directories:
+
+`sudo cp -R docker_mounted_storage/ backups/$(date +'%Y_%m_%d-%H_%M_%S')/` or inside the devcontainer-environment: `sudo cp -R docker_mounted_storage_devcontainer/ backups/$(date +'%Y_%m_%d-%H_%M_%S')/`
+
+**Restoring:**
+To restore a specific backup, run:
+1. `docker-compose down`
+2. `sudo rm -R docker_mounted_storage`
+3. `sudo cp -R backups/<THE_BACKUP_TO_RESTORE> docker_mounted_storage/`
+4. `docker-compose up -d`
+
+Or inside the devcontainer:
+1. `docker-compose -f docker-compose.dev.yml down`
+2. `sudo rm -R docker_mounted_storage_devcontainer`
+3. `sudo cp -R backups/<THE_BACKUP_TO_RESTORE> docker_mounted_storage_devcontainer/`
+4. `docker-compose -f docker-compose.dev.yml up -d`
+5. Restart the backend afterwards.
+
 ## FAQ / Frequent bugs:
 
 ##### The learning factory does suddenly not move anymore (VGR, HBW,...), but MQTT and OPC UA are active and e.g. the camera can still be controlled and moved. Both ordering and putting new items in does not lead to any movement.
