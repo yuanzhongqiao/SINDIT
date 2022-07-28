@@ -81,6 +81,15 @@ Provides a dashboard and visualization of the DT via a web interface at [http://
 
 coming soon
 
+### Learning factory interfaces:
+Provided by fischertechnik
+
+#### fischertechnik cloud
+Available via internet at `https://www.fischertechnik-cloud.com/de/factory/`. Allows to view the status, camera image and make orders.
+
+#### Node-RED Dashboard
+Available only locally at `http://<RASPBERRY_PI_HOST>:1880/ui/`. Allows to see the extended factory status including positioning data of the machines. Allows the calibration of machines as well as acknowledging errors, if needed.
+
 ## DT learning factory initialization script:
 
 Initializes the DT for the fischertechnik learning factory. Execute inside the standby container after starting the database services via: 
@@ -96,6 +105,13 @@ Continuosly sends MQTT orders to the factory ordering a piece of random color. E
 `docker-compose exec sindit_dt_standby_environment python learning_factory_continuos_ordering.py`
 
 Alternatively, run the preconfigured launch configuration in VS Code (Inside the dev-container).
+
+## FAQ / Frequent bugs:
+
+##### The learning factory does suddenly not move anymore (VGR, HBW,...), but MQTT and OPC UA are active and e.g. the camera can still be controlled and moved. Both ordering and putting new items in does not lead to any movement.
+> The reason of this problem is currently unknown.
+> 
+> To temporally fix the problem, press 'Acknowledge Errors' at the Node-RED Dashboard.
 
 ## References
 
