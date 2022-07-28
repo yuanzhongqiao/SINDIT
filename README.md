@@ -33,7 +33,7 @@ For this project, a devcontainer-setup for Visual Studio Code is implemented. It
 2. Open the folder on the development-client (local or with the VS Code remote development extension via SSH)
 3. Reopen the folder as container with the remote containers extension
 4. Reload the window after the container is fully loaded (as suggested by the initialization script, to apply the installed modules for auto-corrections)
-5. Start the development databases manually with `docker-compose -f docker-compose.dev.yml up -d`
+5. Start the development databases manually with `docker-compose -f docker-compose.dev.yml up -d`. As there sometimes seem to be problems with creating the defined storage-mapping, execute this from the server-host, not within the devcontainer!
 
 After this, use the run and debug functionalities of the IDE to execute the separate services. The run configuration is already set up in this repository.
 

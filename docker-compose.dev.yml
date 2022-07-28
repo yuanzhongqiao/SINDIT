@@ -32,7 +32,7 @@ services:
       - 7476:7474
       - 7689:7687
     volumes:
-      - ./docker_mounted_storage_devcontai<ner/sindit_neo4j_kg/conf:/var/lib/neo4j/conf/
+      - ./docker_mounted_storage_devcontainer/sindit_neo4j_kg/conf:/var/lib/neo4j/conf/
       - ./docker_mounted_storage_devcontainer/sindit_neo4j_kg/logs:/logs
       - ./docker_mounted_storage_devcontainer/sindit_neo4j_kg/data:/data
 
