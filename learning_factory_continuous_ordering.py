@@ -1,5 +1,6 @@
 from datetime import datetime
 import random
+from threading import Thread
 from time import sleep
 import paho.mqtt.client as mqtt
 import asyncio
@@ -8,6 +9,7 @@ import asyncua.ua
 import asyncua.sync
 import asyncio.exceptions
 import time
+import json
 
 from util.environment_and_configuration import get_environment_variable, get_environment_variable_int
 
@@ -20,6 +22,20 @@ PIECE_TYPES = ["BLUE", "RED", "WHITE"]
 
 mqtt_client = mqtt.Client()
 mqtt_client.connect(host=MQTT_HOST, port=MQTT_PORT, keepalive=600)
+
+last_stock_status = None
+
+def on_message(client, userdata, message):
+    global last_stock_status
+    last_stock_status = str(message.payload.decode("utf-8"))
+    
+mqtt_client.on_message = on_message
+
+mqtt_client.subscribe("f/i/stock", 0)
+
+mqtt_thread = Thread(target=mqtt_client.loop_forever)
+mqtt_thread.start()
+# mqtt_client.loop_start()
 
 OPC_UA_HOST = get_environment_variable(
     key="FACTORY_OPC_UA_HOST", optional=True, default="host.docker.internal"
@@ -69,10 +85,10 @@ subscription = opcua_client.create_subscription(
 # polling
 subscription.subscribe_data_change(test_node)
 
+sleep(10)
 
 while True:
-    formatted_time = datetime.now().isoformat()[:-3] + "Z"
-    random_type = random.choice(PIECE_TYPES)
+    # random_type = random.choice(PIECE_TYPES)
     
     # Acknowledge errors, if some occured. This sometimes happens (reason and further error information still to be discovered)
     dv = asyncua.ua.DataValue(asyncua.ua.Variant(True, asyncua.ua.VariantType.Boolean))
@@ -80,10 +96,23 @@ while True:
     # dv.SourceTimestamp = None
     acknowledge_error_node.set_value(dv)
     
-    print(f"Ordering piece ({random_type}, {formatted_time})")
+    # Get available pieces:
+    first_available_type = None
+    if last_stock_status is not None:
+        stock_dict = json.loads(last_stock_status)
+        for storage in stock_dict['stockItems']:
+            if storage['workpiece']['type'] != '':
+                first_available_type = storage['workpiece']['type']
+                break
     
-    success_info = mqtt_client.publish(
-        topic="f/o/order", payload='{"type":"' + random_type + '","ts":"' + formatted_time + '"}'
-    )
+    formatted_time = datetime.now().isoformat()[:-3] + "Z"
+    if first_available_type is not None:
+        print(f"Ordering piece ({first_available_type}, {formatted_time})")
+        
+        success_info = mqtt_client.publish(
+            topic="f/o/order", payload='{"type":"' + first_available_type + '","ts":"' + formatted_time + '"}'
+        )
+    else:
+        print(f"No piece available! ({formatted_time})")
     
     sleep(200)
