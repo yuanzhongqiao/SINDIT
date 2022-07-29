@@ -7,7 +7,7 @@ from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
     KnowledgeGraphPersistenceService,
 )
 from backend.knowledge_graph.dao.DatabaseConnectionsDao import DatabaseConnectionsDao
-from backend.knowledge_graph.dao.TimeseriesNodesDao import TimeseriesDao
+from backend.knowledge_graph.dao.TimeseriesNodesDao import TimeseriesNodesDao
 from backend.runtime_connections.RuntimeConnectionContainer import (
     RuntimeConnectionContainer,
 )
@@ -50,18 +50,9 @@ Separated from api.py to avoid circular dependencies with endpoint files importi
 def init_database_connections():
     print("Initializing database connections...")
 
-    kg_service: KnowledgeGraphPersistenceService = (
-        KnowledgeGraphPersistenceService.instance()
-    )
-    db_con_nodes_dao: DatabaseConnectionsDao = DatabaseConnectionsDao.instance()
-
     db_con_container: DatabasePersistenceServiceContainer = (
         DatabasePersistenceServiceContainer.instance()
     )
-
-    db_con_nodes = db_con_nodes_dao.get_database_connections()
-
-    db_con_container.initialize_connections(db_con_nodes)
 
     print("Done!")
 
@@ -72,7 +63,7 @@ def init_sensors():
     kg_service: KnowledgeGraphPersistenceService = (
         KnowledgeGraphPersistenceService.instance()
     )
-    timeseries_nodes_dao: TimeseriesDao = TimeseriesDao.instance()
+    timeseries_nodes_dao: TimeseriesNodesDao = TimeseriesNodesDao.instance()
 
     runtime_con_container: RuntimeConnectionContainer = (
         RuntimeConnectionContainer.instance()

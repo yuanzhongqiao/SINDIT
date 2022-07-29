@@ -13,7 +13,7 @@ from backend.knowledge_graph.knowledge_graph_metamodel_validator import (
 )
 
 
-class TimeseriesDao(object):
+class TimeseriesNodesDao(object):
     """
     Data Access Object for Timeseries nodes
     """
@@ -30,7 +30,7 @@ class TimeseriesDao(object):
         if self.__instance is not None:
             raise Exception("Singleton instantiated multiple times!")
 
-        TimeseriesDao.__instance = self
+        TimeseriesNodesDao.__instance = self
 
         self.ps: KnowledgeGraphPersistenceService = (
             KnowledgeGraphPersistenceService.instance()

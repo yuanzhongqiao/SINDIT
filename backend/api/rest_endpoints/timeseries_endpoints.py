@@ -8,6 +8,7 @@ from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
     KnowledgeGraphPersistenceService,
 )
 from backend.knowledge_graph.dao.DatabaseConnectionsDao import DatabaseConnectionsDao
+from backend.knowledge_graph.dao.TimeseriesNodesDao import TimeseriesNodesDao
 from backend.specialized_databases.DatabasePersistenceServiceContainer import (
     DatabasePersistenceServiceContainer,
 )
@@ -24,6 +25,7 @@ DB_SERVICE_CONTAINER: DatabasePersistenceServiceContainer = (
     DatabasePersistenceServiceContainer.instance()
 )
 DB_CON_NODE_DAO: DatabaseConnectionsDao = DatabaseConnectionsDao.instance()
+TIMESERIES_NODES_DAO: TimeseriesNodesDao = TimeseriesNodesDao.instance()
 
 
 @app.get("/timeseries/current_range")
@@ -48,16 +50,16 @@ def get_timeseries_current_range(
 @app.get("/timeseries/range")
 def get_timeseries_range(
     iri: str,
-    date_time_str: str,
-    duration: float,
+    date_time_str: str | None,
+    duration: float | None,
     aggregation_window_ms: int | None = None,
 ):
     """
     Queries the measurements for the given duration up to the given date and time.
     :raises IdNotFoundException: If no data is available for that id at the current time
     :param id_uri:
-    :param date_time: date and time to be observed in iso format
-    :param duration: timespan to query in seconds
+    :param date_time: date and time to be observed in iso format or None (forever)
+    :param duration: timespan to query in seconds or None (forever)
     :return: Pandas Dataframe serialized to JSON featuring the columns "time" and "value"
     """
     date_time = datetime.fromisoformat(date_time_str)
@@ -68,15 +70,23 @@ def get_timeseries_range(
 
 
 @app.get("/timeseries/entries_count")
-def get_timeseries_entries_count(iri: str, date_time_str: str, duration: float):
+def get_timeseries_entries_count(iri: str, date_time_str: str, duration: float | None):
     """
 
     :raises IdNotFoundException: If no data is available for that id at the current time
     :param id_uri:
     :param date_time: date and time to be observed in iso format
-    :param duration: timespan to query in seconds
+    :param duration: timespan to query in seconds or None (forever)
     :return: Count of entries in that given range
     """
     return python_timeseries_endpoints.get_timeseries_entries_count(
         iri, date_time_str, duration
     )
+
+
+@app.get("/timeseries/nodes")
+def get_timeseries_nodes(deep: bool = True):
+    if deep:
+        return TIMESERIES_NODES_DAO.get_timeseries_deep_json()
+    else:
+        return TIMESERIES_NODES_DAO.get_timeseries_flat()

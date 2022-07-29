@@ -7,6 +7,7 @@ from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
     KnowledgeGraphPersistenceService,
 )
 from backend.knowledge_graph.dao.DatabaseConnectionsDao import DatabaseConnectionsDao
+from backend.knowledge_graph.dao.TimeseriesNodesDao import TimeseriesNodesDao
 from backend.specialized_databases.DatabasePersistenceServiceContainer import (
     DatabasePersistenceServiceContainer,
 )
@@ -23,39 +24,41 @@ DB_SERVICE_CONTAINER: DatabasePersistenceServiceContainer = (
 )
 DB_CON_NODE_DAO: DatabaseConnectionsDao = DatabaseConnectionsDao.instance()
 
+TIMESERIES_NODES_DAO: TimeseriesNodesDao = TimeseriesNodesDao.instance()
+
 
 def get_timeseries_current_range(
     iri: str,
-    duration: float,
+    duration: float | None,
     aggregation_window_ms: int | None = None,
 ):
     """
     Queries the current measurements for the given duration up to the current time.
     :raises IdNotFoundException: If no data is available for that id at the current time
     :param id_uri:
-    :param duration: timespan to query in seconds
+    :param duration: timespan to query in seconds or None (forever)
     :return: Pandas Dataframe serialized to JSON featuring the columns "time" and "value"
     """
     return get_timeseries_range(
         iri=iri,
         duration=duration,
-        date_time_str=datetime.now().isoformat(),
+        date_time=datetime.now(),
         aggregation_window_ms=aggregation_window_ms,
     )
 
 
 def get_timeseries_range(
     iri: str,
-    date_time: datetime,
-    duration: float,
+    date_time: datetime | None,
+    duration: float | None,
     aggregation_window_ms: int | None = None,
 ):
     """
     Queries the measurements for the given duration up to the given date and time.
     :raises IdNotFoundException: If no data is available for that id at the current time
     :param id_uri:
-    :param date_time: date and time to be observed in iso format
-    :param duration: timespan to query in seconds
+    :param date_time: date and time to be observed in iso format or None (forever)
+    :param duration: timespan to query in seconds or None (forever)
     :return: Pandas Dataframe serialized to JSON featuring the columns "time" and "value"
     """
 
@@ -76,7 +79,9 @@ def get_timeseries_range(
         # Read the actual measurements:
         readings_df = ts_service.read_period_to_dataframe(
             id_uri=iri,
-            begin_time=date_time - timedelta(seconds=duration),
+            begin_time=date_time - timedelta(seconds=duration)
+            if duration is not None
+            else None,
             end_time=date_time,
             aggregation_window_ms=aggregation_window_ms,
         )
@@ -114,3 +119,10 @@ def get_timeseries_entries_count(iri: str, date_time_str: str, duration: float):
         )
     except IdNotFoundException:
         return 0
+
+
+def get_timeseries_nodes(deep: bool = True):
+    if deep:
+        return TIMESERIES_NODES_DAO.get_timeseries_deep()
+    else:
+        return TIMESERIES_NODES_DAO.get_timeseries_flat()

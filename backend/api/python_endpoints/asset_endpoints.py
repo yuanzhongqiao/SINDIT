@@ -4,4 +4,7 @@ ASSETS_DAO: AssetsDao = AssetsDao.instance()
 
 
 def get_assets_deep(deep: bool = True):
-    return ASSETS_DAO.get_assets_deep()
+    if deep:
+        return ASSETS_DAO.get_assets_deep()
+    else:
+        return ASSETS_DAO.get_assets_flat()

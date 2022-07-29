@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client import InfluxDBClient, Point
 import pandas as pd
@@ -62,8 +62,8 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
     def read_period_to_dataframe(
         self,
         id_uri: str,
-        begin_time: datetime,
-        end_time: datetime,
+        begin_time: datetime | None,
+        end_time: datetime | None,
         aggregation_window_ms: int | None,
     ) -> pd.DataFrame:
         """
@@ -74,11 +74,25 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
         :return: Dataframe containing all measurements in that period
         :raise IdNotFoundException: if the id_uri is not found
         """
+        # Max 10 years as InfluxDB does not support unbounded queries
+        datetime_min = (
+            (datetime.now() - timedelta(days=356 * 10)).astimezone().isoformat()
+        )
+        datetime_max = datetime.now().astimezone().isoformat()
+
+        if begin_time is not None and end_time is not None:
+            range = f"|> range(start: {begin_time.astimezone().isoformat()}, stop: {end_time.astimezone().isoformat()})"
+        elif begin_time is None and end_time is not None:
+            range = f"|> range(start: {datetime_min}, stop: {end_time.astimezone().isoformat()})"
+        elif begin_time is None and end_time is not None:
+            range = f"|> range(start: {begin_time.astimezone().isoformat()}, stop: {datetime_max})"
+        else:
+            range = f"|> range(start: {datetime_min}, stop: {datetime_max})"
 
         if isinstance(aggregation_window_ms, int) and aggregation_window_ms != 0:
             query = (
                 f'from(bucket: "{self.bucket}") \n'
-                f"|> range(start: {begin_time.astimezone().isoformat()}, stop: {end_time.astimezone().isoformat()}) \n"
+                f"{range} \n"
                 f'|> filter(fn: (r) => r["_measurement"] == "{id_uri}") \n'
                 f"|> aggregateWindow(every: {aggregation_window_ms}ms, fn: first, createEmpty: false)\n"
                 f'|> keep(columns: ["_time", "_value"]) \n'
@@ -87,7 +101,7 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
         else:
             query = (
                 f'from(bucket: "{self.bucket}") \n'
-                f"|> range(start: {begin_time.astimezone().isoformat()}, stop: {end_time.astimezone().isoformat()}) \n"
+                f"{range} \n"
                 f'|> filter(fn: (r) => r["_measurement"] == "{id_uri}") \n'
                 f'|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") \n'
                 f'|> keep(columns: ["_time", "{READING_FIELD_NAME}"]) \n'

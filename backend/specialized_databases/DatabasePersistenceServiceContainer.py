@@ -13,6 +13,8 @@ from backend.specialized_databases.files.s3.S3PersistenceService import (
 from backend.specialized_databases.timeseries.influx_db.InfluxDbPersistenceService import (
     InfluxDbPersistenceService,
 )
+from backend.knowledge_graph.dao.DatabaseConnectionsDao import DatabaseConnectionsDao
+
 
 DB_CONNECTION_MAPPING = {
     DatabaseConnectionTypes.INFLUX_DB.value: InfluxDbPersistenceService,
@@ -31,6 +33,7 @@ class DatabasePersistenceServiceContainer:
     def instance(cls):
         if cls.__instance is None:
             cls()
+            cls.__instance.initialize_connections()
         return cls.__instance
 
     def __init__(self):
@@ -49,7 +52,13 @@ class DatabasePersistenceServiceContainer:
     ):
         self.services[iri] = service
 
-    def initialize_connections(self, connection_nodes: List[DatabaseConnectionNode]):
+    def initialize_connections(self):
+        # Get connection nodes from graph:
+        db_con_nodes_dao: DatabaseConnectionsDao = DatabaseConnectionsDao.instance()
+        connection_nodes: List[
+            DatabaseConnectionNode
+        ] = db_con_nodes_dao.get_database_connections()
+
         con_node: DatabaseConnectionNode
         for con_node in connection_nodes:
 
