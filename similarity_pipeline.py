@@ -4,7 +4,7 @@ import pandas as pd
 from numpy import nan
 
 import backend.api.python_endpoints.timeseries_endpoints as timeseries_endpoints
-from graph_domain.TimeseriesNode import TimeseriesNodeFlat
+from graph_domain.TimeseriesNode import TimeseriesNodeFlat, TimeseriesValueTypes
 
 # #############################################################################
 # Connection setup etc
@@ -45,6 +45,15 @@ for timeseries_node in timeseries_nodes_flat:
         duration=comparison_duration,
     )
     print(f"Total entry count: {ts_entry_count}")
+
+    # Cancel, if not int or float
+    if timeseries_node.value_type not in [
+        TimeseriesValueTypes.DECIMAL.value,
+        TimeseriesValueTypes.INT.value,
+    ]:
+        print(
+            f"Feature calculation with normal timeseries libraries not possible: Unsupported type: {timeseries_node.value_type}"
+        )
 
     print("Loading dataframe...")
     ts_range_df = timeseries_endpoints.get_timeseries_range(

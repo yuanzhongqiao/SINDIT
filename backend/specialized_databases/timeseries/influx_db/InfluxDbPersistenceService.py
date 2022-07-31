@@ -3,6 +3,8 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client import InfluxDBClient, Point
 import pandas as pd
 from urllib3.exceptions import ReadTimeoutError
+import warnings
+from influxdb_client.client.warnings import MissingPivotFunction
 
 from graph_domain.DatabaseConnectionNode import DatabaseConnectionNode
 from backend.exceptions.IdNotFoundException import IdNotFoundException
@@ -141,6 +143,7 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
         :return: number of entries
         :raise IdNotFoundException: if the id_uri is not found
         """
+        warnings.simplefilter("ignore", MissingPivotFunction)
         range_query = self._timerange_query(begin_time, end_time)
 
         query = (
