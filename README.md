@@ -116,7 +116,7 @@ To restore a specific backup, run:
 1. `docker-compose down`
 2. `sudo rm -R docker_mounted_storage`
 3. `sudo cp -R backups/<THE_BACKUP_TO_RESTORE> docker_mounted_storage/`
-4. `docker-compose up -d`
+4. `docker-compose up -d`sudo cp -R docker_mounted_storage_devcontainer/ backups/$(date +'%Y_%m_%d-%H_%M_%S')/
 
 Or inside the devcontainer:
 1. `docker-compose -f docker-compose.dev.yml down`

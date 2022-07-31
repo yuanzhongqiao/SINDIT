@@ -20,7 +20,12 @@ comparison_end_date_time = datetime(
     year=2022, month=7, day=29, hour=11, minute=0, second=0
 )
 # comparison_duration = timedelta(hours=20).total_seconds()  # ~ 30 sec per timeseries
-comparison_duration = timedelta(hours=12).total_seconds()  # ~ 10 sec per timeseries
+
+# comparison_duration = timedelta(hours=12).total_seconds()  # ~ 10 sec per timeseries
+
+# Fast testing:
+comparison_duration = timedelta(minutes=10).total_seconds()
+
 
 # Forever. Huge amount of entries!
 # comparison_end_date_time = None
@@ -54,6 +59,7 @@ for timeseries_node in timeseries_nodes_flat:
         print(
             f"Feature calculation with normal timeseries libraries not possible: Unsupported type: {timeseries_node.value_type}"
         )
+        continue
 
     print("Loading dataframe...")
     ts_range_df = timeseries_endpoints.get_timeseries_range(
@@ -71,13 +77,18 @@ for timeseries_node in timeseries_nodes_flat:
         ts_range_df, column_id="id", column_sort="time", column_value="value"
     )
     extracted_features = extracted_features.transpose()
-    extracted_features.reset_index(inplace=True)
-    extracted_features.columns = ["feature_key", "value"]
+    feature_dict = extracted_features.to_dict()[0]
+    # extracted_features.reset_index(inplace=True)
+    # extracted_features.columns = ["feature_key", "value"]
 
     pipeline_single_node_end_datetime = datetime.now()
     print(
         f"Timeseries analysis finished at {pipeline_single_node_end_datetime} after {pipeline_single_node_end_datetime - pipeline_single_node_start_datetime}"
     )
+
+    print("Writing to KG-DT...")
+    timeseries_endpoints.set_ts_feature_set(timeseries_node.iri, feature_dict)
+
     i += 1
     pass
 

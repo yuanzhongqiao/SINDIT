@@ -47,6 +47,25 @@ def get_timeseries_current_range(
     )
 
 
+def _get_related_timeseries_database_service(iri: str) -> TimeseriesPersistenceService:
+    try:
+        # Get related timeseries-database service:
+        ts_con_node: DatabaseConnectionsDao = (
+            DB_CON_NODE_DAO.get_database_connection_for_node(iri)
+        )
+
+        if ts_con_node is None:
+            print("Timeseries requested, but database connection node does not exist")
+            return pd.DataFrame(columns=["time", "value"])
+
+        ts_service: TimeseriesPersistenceService = (
+            DB_SERVICE_CONTAINER.get_persistence_service(ts_con_node.iri)
+        )
+        return ts_service
+    except IdNotFoundException as exc:
+        raise exc
+
+
 def get_timeseries_range(
     iri: str,
     date_time: datetime | None,
@@ -64,16 +83,8 @@ def get_timeseries_range(
 
     try:
         # Get related timeseries-database service:
-        ts_con_node: DatabaseConnectionsDao = (
-            DB_CON_NODE_DAO.get_database_connection_for_node(iri)
-        )
-
-        if ts_con_node is None:
-            print("Timeseries requested, but database connection node does not exist")
-            return pd.DataFrame(columns=["time", "value"])
-
         ts_service: TimeseriesPersistenceService = (
-            DB_SERVICE_CONTAINER.get_persistence_service(ts_con_node.iri)
+            _get_related_timeseries_database_service(iri)
         )
 
         # Read the actual measurements:
@@ -105,12 +116,8 @@ def get_timeseries_entries_count(
 
     try:
         # Get related timeseries-database service:
-        ts_con_node: DatabaseConnectionsDao = (
-            DB_CON_NODE_DAO.get_database_connection_for_node(iri)
-        )
-
         ts_service: TimeseriesPersistenceService = (
-            DB_SERVICE_CONTAINER.get_persistence_service(ts_con_node.iri)
+            _get_related_timeseries_database_service(iri)
         )
 
         return ts_service.count_entries_for_period(
@@ -129,3 +136,11 @@ def get_timeseries_nodes(deep: bool = True):
         return TIMESERIES_NODES_DAO.get_timeseries_deep()
     else:
         return TIMESERIES_NODES_DAO.get_timeseries_flat()
+
+
+def set_ts_feature_set(iri: str, feature_set: dict):
+    TIMESERIES_NODES_DAO.update_feature_set(iri=iri, feature_set=feature_set)
+
+
+def set_ts_reduced_feature_set(iri: str, reduced_feature_set: dict):
+    TIMESERIES_NODES_DAO.update_feature_set(iri=iri, feature_set=reduced_feature_set)

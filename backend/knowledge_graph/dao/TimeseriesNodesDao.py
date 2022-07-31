@@ -1,5 +1,7 @@
 import json
 
+from py2neo import Node, NodeMatcher
+
 from graph_domain.AssetNode import AssetNodeFlat, AssetNodeDeep
 from graph_domain.TimeseriesNode import TimeseriesNodeDeep, TimeseriesNodeFlat
 from backend.exceptions.GraphNotConformantToMetamodelError import (
@@ -80,3 +82,17 @@ class TimeseriesNodesDao(object):
             timeseries.validate_metamodel_conformance()
 
         return json.dumps([m.to_json() for m in timeseries_deep_matches])
+
+    def update_feature_set(self, iri: str, feature_set: dict):
+        matcher = NodeMatcher(self.ps.graph)
+        node: Node = matcher.match(iri=iri).first()
+        feature_set_str = json.dumps(feature_set)
+        node.update(feature_set=feature_set_str)
+        self.ps.graph.push(node)
+
+    def update_reduced_feature_set(self, iri: str, reduced_feature_set: dict):
+        matcher = NodeMatcher(self.ps.graph)
+        node: Node = matcher.match(iri=iri).first()
+        reduced_feature_set_str = json.dumps(reduced_feature_set)
+        node.update(reduced_feature_set=reduced_feature_set_str)
+        self.ps.graph.push(node)

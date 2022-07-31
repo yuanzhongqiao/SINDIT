@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+import json
 from typing import List
 
 from dataclasses_json import dataclass_json
@@ -48,6 +49,22 @@ class TimeseriesNodeFlat(BaseNode):
 
     # Type of the value stored per time
     value_type: str = Property(default=TimeseriesValueTypes.DECIMAL.value)
+
+    # Extracted features
+    _feature_set: str | None = Property()
+    _reduced_feature_set: str | None = Property()
+
+    @property
+    def feature_set(self) -> dict:
+        return json.loads(self._feature_set) if self._feature_set is not None else None
+
+    @property
+    def reduced_feature_set(self) -> dict:
+        return (
+            json.loads(self._reduced_feature_set)
+            if self._reduced_feature_set is not None
+            else None
+        )
 
     def validate_metamodel_conformance(self):
         """
