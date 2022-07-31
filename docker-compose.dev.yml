@@ -13,7 +13,7 @@ services:
 
     hostname: sindit-influx-db-devcontainer
     container_name: sindit_influx_db_devcontainer
-    mem_limit: 1G
+    mem_limit: 3G
     ports:
       - '8086:8086'
     volumes:
@@ -27,7 +27,7 @@ services:
 
     hostname: sindit-neo4j-kg-devcontainer
     container_name: sindit_neo4j_kg_devcontainer
-    mem_limit: 2G
+    mem_limit: 4G
     ports:
       - 7476:7474
       - 7689:7687
@@ -43,7 +43,7 @@ services:
 
     hostname: sindit-minio-s3-devcontainer
     container_name: sindit_minio_s3_devcontainer
-    mem_limit: 1G
+    mem_limit: 3G
     ports:
       - "9001:9000"
       - "9098:9099"

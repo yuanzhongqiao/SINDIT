@@ -32,3 +32,4 @@ boto3  # Amazon S3 client compatible also with Minio S3
 cadquery==2.2.0b0  # CAD conversion
 cqkit
 numpy-stl
+tsfresh  # timeseries feature extraction (requrires gcc)
