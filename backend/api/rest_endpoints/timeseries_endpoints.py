@@ -70,7 +70,9 @@ def get_timeseries_range(
 
 
 @app.get("/timeseries/entries_count")
-def get_timeseries_entries_count(iri: str, date_time_str: str, duration: float | None):
+def get_timeseries_entries_count(
+    iri: str, date_time_str: str | None, duration: float | None
+):
     """
 
     :raises IdNotFoundException: If no data is available for that id at the current time
@@ -79,8 +81,9 @@ def get_timeseries_entries_count(iri: str, date_time_str: str, duration: float |
     :param duration: timespan to query in seconds or None (forever)
     :return: Count of entries in that given range
     """
+    date_time = datetime.fromisoformat(date_time_str)
     return python_timeseries_endpoints.get_timeseries_entries_count(
-        iri, date_time_str, duration
+        iri, date_time, duration
     )
 
 

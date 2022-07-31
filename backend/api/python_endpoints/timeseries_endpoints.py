@@ -91,7 +91,9 @@ def get_timeseries_range(
         return pd.DataFrame(columns=["time", "value"])
 
 
-def get_timeseries_entries_count(iri: str, date_time_str: str, duration: float):
+def get_timeseries_entries_count(
+    iri: str, date_time: datetime | None, duration: float | None
+):
     """
 
     :raises IdNotFoundException: If no data is available for that id at the current time
@@ -100,7 +102,6 @@ def get_timeseries_entries_count(iri: str, date_time_str: str, duration: float):
     :param duration: timespan to query in seconds
     :return: Count of entries in that given range
     """
-    date_time = datetime.fromisoformat(date_time_str)
 
     try:
         # Get related timeseries-database service:
@@ -114,7 +115,9 @@ def get_timeseries_entries_count(iri: str, date_time_str: str, duration: float):
 
         return ts_service.count_entries_for_period(
             id_uri=iri,
-            begin_time=date_time - timedelta(seconds=duration),
+            begin_time=date_time - timedelta(seconds=duration)
+            if duration is not None
+            else None,
             end_time=date_time,
         )
     except IdNotFoundException:

@@ -58,6 +58,24 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
             pass
             # continue with new readings (drop this one)
 
+    def _timerange_query(self, begin_time: datetime | None, end_time: datetime | None):
+        # Max 10 years as InfluxDB does not support unbounded queries
+        datetime_min = (
+            (datetime.now() - timedelta(days=356 * 10)).astimezone().isoformat()
+        )
+        datetime_max = datetime.now().astimezone().isoformat()
+
+        if begin_time is not None and end_time is not None:
+            range_query = f"|> range(start: {begin_time.astimezone().isoformat()}, stop: {end_time.astimezone().isoformat()})"
+        elif begin_time is None and end_time is not None:
+            range_query = f"|> range(start: {datetime_min}, stop: {end_time.astimezone().isoformat()})"
+        elif begin_time is None and end_time is not None:
+            range_query = f"|> range(start: {begin_time.astimezone().isoformat()}, stop: {datetime_max})"
+        else:
+            range_query = f"|> range(start: {datetime_min}, stop: {datetime_max})"
+
+        return range_query
+
     # override
     def read_period_to_dataframe(
         self,
@@ -74,25 +92,12 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
         :return: Dataframe containing all measurements in that period
         :raise IdNotFoundException: if the id_uri is not found
         """
-        # Max 10 years as InfluxDB does not support unbounded queries
-        datetime_min = (
-            (datetime.now() - timedelta(days=356 * 10)).astimezone().isoformat()
-        )
-        datetime_max = datetime.now().astimezone().isoformat()
-
-        if begin_time is not None and end_time is not None:
-            range = f"|> range(start: {begin_time.astimezone().isoformat()}, stop: {end_time.astimezone().isoformat()})"
-        elif begin_time is None and end_time is not None:
-            range = f"|> range(start: {datetime_min}, stop: {end_time.astimezone().isoformat()})"
-        elif begin_time is None and end_time is not None:
-            range = f"|> range(start: {begin_time.astimezone().isoformat()}, stop: {datetime_max})"
-        else:
-            range = f"|> range(start: {datetime_min}, stop: {datetime_max})"
+        range_query = self._timerange_query(begin_time, end_time)
 
         if isinstance(aggregation_window_ms, int) and aggregation_window_ms != 0:
             query = (
                 f'from(bucket: "{self.bucket}") \n'
-                f"{range} \n"
+                f"{range_query} \n"
                 f'|> filter(fn: (r) => r["_measurement"] == "{id_uri}") \n'
                 f"|> aggregateWindow(every: {aggregation_window_ms}ms, fn: first, createEmpty: false)\n"
                 f'|> keep(columns: ["_time", "_value"]) \n'
@@ -101,7 +106,7 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
         else:
             query = (
                 f'from(bucket: "{self.bucket}") \n'
-                f"{range} \n"
+                f"{range_query} \n"
                 f'|> filter(fn: (r) => r["_measurement"] == "{id_uri}") \n'
                 f'|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") \n'
                 f'|> keep(columns: ["_time", "{READING_FIELD_NAME}"]) \n'
@@ -136,9 +141,11 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
         :return: number of entries
         :raise IdNotFoundException: if the id_uri is not found
         """
+        range_query = self._timerange_query(begin_time, end_time)
+
         query = (
             f'from(bucket: "{self.bucket}") \n'
-            f"|> range(start: {begin_time.astimezone().isoformat()}, stop: {end_time.astimezone().isoformat()}) \n"
+            f"{range_query} \n"
             f'|> filter(fn: (r) => r["_measurement"] == "{id_uri}") \n'
             f'|> count(column: "_value") \n'
             f'|> keep(columns: ["_value"])'
