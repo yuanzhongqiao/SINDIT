@@ -1,8 +1,7 @@
 black  # formatter
 networkx==2.8.4
 simpy~=4.0.1
-numpy==1.22.4
-kafka_python
+numpy==1.22.4  # specific max version required by "numba"
 plotly==5.8.2
 dash==2.5.1
 requests==2.28.0
@@ -10,7 +9,6 @@ dash_html_components
 matplotlib~=3.5.2
 pandas~=1.4.2
 py2neo~=2021.2.3
-influxdb==5.3.1  # deprecated influxdb v1
 dash_cytoscape
 jsonpickle~=2.2.0
 dash_bootstrap_components
@@ -32,4 +30,9 @@ boto3  # Amazon S3 client compatible also with Minio S3
 cadquery==2.2.0b0  # CAD conversion
 cqkit
 numpy-stl
-tsfresh  # timeseries feature extraction (requrires gcc)
+
+# tsfresh is manually installed afterwards (via Dockerfile or devcontainer.json)
+# The reason is, that otherwise some issues with importing numpy occur that can 
+# be avoided this way (ImportError: numpy.core.multiarray failed to import).
+#
+# tsfresh  # timeseries feature extraction (requrires gcc)

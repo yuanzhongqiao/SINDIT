@@ -12,11 +12,15 @@ ENV PYTHONPATH /opt/sindit
 
 COPY . .
 
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+
 RUN apt-get update && apt-get install -y curl libgl1 gcc && apt-get clean
 # libgl required for CAD module
 # gcc required for tsfresh (timeseries feature extractor)
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install tsfresh
+
 
 
 EXPOSE 8050
