@@ -137,7 +137,9 @@ print("not yet implemented...")
 # #############################################################################
 print("\n\n\nSTEP 3: Timeseries clustering\n")
 
-DBSCAN_EPS = 0.3  # maximum distance between two samples for one to be considered as in the neighborhood of the other
+DBSCAN_EPS = 0.3 * (
+    10**9
+)  # maximum distance between two samples for one to be considered as in the neighborhood of the other
 DBSCAN_MIN_SAMPLES = 2  # The number of samples (or total weight) in a neighborhood for a point to be considered as a core point
 
 # Freshly read the nodes with the newest feature vectors
@@ -177,6 +179,12 @@ for i in range(len(timeseries_nodes_flat)):
     if clustering.labels_[i] != -1:
         clusters[clustering.labels_[i]].append(timeseries_nodes_flat[i])
 
-print(f"Clusters: {clusters}")
+print("Clusters:")
+i = 1
+for cluster in clusters:
+    print(
+        f"Cluster: {i}, count: {len(cluster)}: {[ts_node.id_short for ts_node in cluster]}"
+    )
+    i += 1
 pass
 # clusters
