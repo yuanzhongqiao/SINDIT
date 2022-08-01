@@ -1,4 +1,5 @@
 import json
+from typing import List
 
 from py2neo import Node, NodeMatcher
 
@@ -83,16 +84,16 @@ class TimeseriesNodesDao(object):
 
         return json.dumps([m.to_json() for m in timeseries_deep_matches])
 
-    def update_feature_set(self, iri: str, feature_set: dict):
+    def update_feature_dict(self, iri: str, feature_dict: dict):
         matcher = NodeMatcher(self.ps.graph)
         node: Node = matcher.match(iri=iri).first()
-        feature_set_str = json.dumps(feature_set)
-        node.update(feature_set=feature_set_str)
+        feature_dict_str = json.dumps(feature_dict)
+        node.update(feature_dict=feature_dict_str)
         self.ps.graph.push(node)
 
-    def update_reduced_feature_set(self, iri: str, reduced_feature_set: dict):
+    def update_reduced_feature_list(self, iri: str, reduced_feature_list: List):
         matcher = NodeMatcher(self.ps.graph)
         node: Node = matcher.match(iri=iri).first()
-        reduced_feature_set_str = json.dumps(reduced_feature_set)
-        node.update(reduced_feature_set=reduced_feature_set_str)
+        reduced_feature_list_str = json.dumps(reduced_feature_list)
+        node.update(reduced_feature_list=reduced_feature_list_str)
         self.ps.graph.push(node)

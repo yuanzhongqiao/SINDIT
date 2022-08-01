@@ -1,5 +1,6 @@
 import json
 from datetime import datetime, timedelta
+from typing import Dict, List
 import pandas as pd
 
 from backend.exceptions.IdNotFoundException import IdNotFoundException
@@ -138,9 +139,11 @@ def get_timeseries_nodes(deep: bool = True):
         return TIMESERIES_NODES_DAO.get_timeseries_flat()
 
 
-def set_ts_feature_set(iri: str, feature_set: dict):
-    TIMESERIES_NODES_DAO.update_feature_set(iri=iri, feature_set=feature_set)
+def set_ts_feature_dict(iri: str, feature_set: Dict):
+    TIMESERIES_NODES_DAO.update_feature_dict(iri=iri, feature_dict=feature_set)
 
 
-def set_ts_reduced_feature_set(iri: str, reduced_feature_set: dict):
-    TIMESERIES_NODES_DAO.update_feature_set(iri=iri, feature_set=reduced_feature_set)
+def set_ts_reduced_feature_list(iri: str, reduced_feature_list: List):
+    TIMESERIES_NODES_DAO.update_reduced_feature_list(
+        iri=iri, reduced_feature_list=reduced_feature_list
+    )

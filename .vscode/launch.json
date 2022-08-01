@@ -55,7 +55,8 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": true,
+            "envFile": "${workspaceFolder}/environment_and_configuration/devcontainer_environment_backend.env"
         }
     ]
 }
