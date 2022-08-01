@@ -9,6 +9,7 @@ from py2neo.ogm import Property, RelatedTo
 from graph_domain.BaseNode import BaseNode
 from graph_domain.DatabaseConnectionNode import DatabaseConnectionNode
 from graph_domain.RuntimeConnectionNode import RuntimeConnectionNode
+from graph_domain.TimeseriesClusterNode import TimeseriesClusterNode
 from graph_domain.UnitNode import UnitNode
 from graph_domain.factory_graph_types import NodeTypes, RelationshipTypes
 from backend.exceptions.GraphNotConformantToMetamodelError import (
@@ -19,6 +20,7 @@ LABEL = NodeTypes.TIMESERIES_INPUT.value
 UNIT_RELATIONSHIP_LABEL = RelationshipTypes.HAS_UNIT.value
 DB_CONNECTION_RELATIONSHIP_LABEL = RelationshipTypes.TIMESERIES_DB_ACCESS.value
 RUNTIME_CONNECTION_RELATIONSHIP_LABEL = RelationshipTypes.RUNTIME_ACCESS.value
+TS_CLUSTER_RELATIONSHIP_LABEL = RelationshipTypes.PART_OF_TS_CLUSTER.value
 
 
 class TimeseriesValueTypes(Enum):
@@ -113,6 +115,12 @@ class TimeseriesNodeDeep(TimeseriesNodeFlat):
         RuntimeConnectionNode, RUNTIME_CONNECTION_RELATIONSHIP_LABEL
     )
 
+    # The OGM framework does not allow constraining to only one item!
+    # Can only be one unit (checked by metamodel validator)
+    _ts_clusters: List[TimeseriesClusterNode] = RelatedTo(
+        TimeseriesClusterNode, TS_CLUSTER_RELATIONSHIP_LABEL
+    )
+
     @property
     def unit(self) -> UnitNode | None:
         if len(self._units) > 0:
@@ -127,6 +135,11 @@ class TimeseriesNodeDeep(TimeseriesNodeFlat):
     @property
     def runtime_connection(self) -> RuntimeConnectionNode:
         return [connection for connection in self._runtime_connections][0]
+
+    @property
+    def ts_cluster(self) -> TimeseriesClusterNode | None:
+        clusters = [cluster for cluster in self._ts_clusters]
+        return clusters[0] if len(clusters) > 0 else None
 
     def validate_metamodel_conformance(self):
         """
@@ -159,3 +172,12 @@ class TimeseriesNodeDeep(TimeseriesNodeFlat):
             )
 
         self.runtime_connection.validate_metamodel_conformance()
+
+        if not len(self._ts_clusters) <= 1:
+            raise GraphNotConformantToMetamodelError(
+                self,
+                f"Invalid number of referenced timeseries clusters: {len(self._ts_clusters)}",
+            )
+
+        if self.ts_cluster is not None:
+            self.ts_cluster.validate_metamodel_conformance()

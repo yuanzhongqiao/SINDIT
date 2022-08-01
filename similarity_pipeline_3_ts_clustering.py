@@ -71,5 +71,27 @@ for cluster in clusters:
         f"Cluster: {i}, count: {len(cluster)}: {[ts_node.id_short for ts_node in cluster]}"
     )
     i += 1
+
 pass
-# clusters
+
+print("Adding clusters to KG-DT...")
+timeseries_endpoints.reset_ts_clusters()
+
+i = 0
+for cluster in clusters:
+    cluster_iri = f"www.sintef.no/aas_identifiers/learning_factory/similarity_analysis/timeseries_cluster_{i}"
+
+    timeseries_endpoints.create_ts_cluster(
+        id_short=f"timeseries_cluster_{i}",
+        iri=cluster_iri,
+        description="Node representing a cluster of timeseries inputs",
+    )
+    # TODO: maybe add mean values of the features
+    for ts_node in cluster:
+        timeseries_endpoints.add_ts_to_cluster(
+            ts_iri=ts_node.iri, cluster_iri=cluster_iri
+        )
+
+    i += 1
+
+pass

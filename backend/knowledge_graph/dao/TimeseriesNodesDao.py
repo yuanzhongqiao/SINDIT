@@ -1,10 +1,12 @@
 import json
 from typing import List
 
-from py2neo import Node, NodeMatcher
+from py2neo import Node, NodeMatcher, Relationship
 
+from graph_domain.factory_graph_types import NodeTypes, RelationshipTypes
 from graph_domain.AssetNode import AssetNodeFlat, AssetNodeDeep
 from graph_domain.TimeseriesNode import TimeseriesNodeDeep, TimeseriesNodeFlat
+from graph_domain.TimeseriesClusterNode import TimeseriesClusterNode
 from backend.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
 )
@@ -96,4 +98,30 @@ class TimeseriesNodesDao(object):
         node: Node = matcher.match(iri=iri).first()
         reduced_feature_list_str = json.dumps(reduced_feature_list)
         node.update(reduced_feature_list=reduced_feature_list_str)
-        self.ps.graph.push(node)
+        self.ps.graph.create(node)
+
+    def create_ts_cluster(
+        self, iri: str, id_short: str, description: str | None = None
+    ):
+        cluster_node = TimeseriesClusterNode(
+            iri=iri, id_short=id_short, description=description
+        )
+        self.ps.graph.push(cluster_node)
+
+    def reset_ts_clusters(self):
+        self.ps.graph.run(
+            f"MATCH (n:{NodeTypes.TIMESERIES_CLUSTER.value}) DETACH DELETE n"
+        )
+
+    def add_ts_to_cluster(self, ts_iri: str, cluster_iri: str):
+        relationship = Relationship(
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.TIMESERIES_INPUT.value, iri=ts_iri)
+            .first(),
+            RelationshipTypes.PART_OF_TS_CLUSTER.value,
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.TIMESERIES_CLUSTER.value, iri=cluster_iri)
+            .first(),
+        )
+
+        self.ps.graph.create(relationship)

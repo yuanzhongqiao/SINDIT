@@ -9,6 +9,7 @@ class NodeTypes(Enum):
     DATABASE_CONNECTION = "DATABASE_CONNECTION"
     RUNTIME_CONNECTION = "RUNTIME_CONNECTION"
     UNIT = "UNIT"
+    TIMESERIES_CLUSTER = "TIMESERIES_CLUSTER"
 
 
 class RelationshipTypes(Enum):
@@ -19,6 +20,7 @@ class RelationshipTypes(Enum):
     SECONDARY_FORMAT = "SECONDARY_FORMAT"
     RUNTIME_ACCESS = "RUNTIME_ACCESS"
     HAS_UNIT = "HAS_UNIT"
+    PART_OF_TS_CLUSTER = "PART_OF_TS_CLUSTER"
 
 
 NODE_TYPE_STRINGS = [nd_type.value for nd_type in NodeTypes]
@@ -37,6 +39,7 @@ RELATIONSHIP_TYPES_FOR_NODE_TYPE = {
         RelationshipTypes.HAS_UNIT.value,
         RelationshipTypes.RUNTIME_ACCESS.value,
         RelationshipTypes.TIMESERIES_DB_ACCESS.value,
+        RelationshipTypes.PART_OF_TS_CLUSTER.value,
     ],
     NodeTypes.SUPPLEMENTARY_FILE.value: [
         RelationshipTypes.HAS_SUPPLEMENTARY_FILE.value,
@@ -49,4 +52,5 @@ RELATIONSHIP_TYPES_FOR_NODE_TYPE = {
     ],
     NodeTypes.UNIT.value: [RelationshipTypes.HAS_UNIT.value],
     NodeTypes.RUNTIME_CONNECTION.value: [RelationshipTypes.RUNTIME_ACCESS.value],
+    NodeTypes.TIMESERIES_CLUSTER.value: [RelationshipTypes.PART_OF_TS_CLUSTER.value],
 }

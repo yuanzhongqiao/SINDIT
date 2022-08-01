@@ -147,3 +147,17 @@ def set_ts_reduced_feature_list(iri: str, reduced_feature_list: List):
     TIMESERIES_NODES_DAO.update_reduced_feature_list(
         iri=iri, reduced_feature_list=reduced_feature_list
     )
+
+
+def create_ts_cluster(iri: str, id_short: str, description: str | None = None):
+    TIMESERIES_NODES_DAO.create_ts_cluster(
+        iri=iri, id_short=id_short, description=description
+    )
+
+
+def reset_ts_clusters():
+    TIMESERIES_NODES_DAO.reset_ts_clusters()
+
+
+def add_ts_to_cluster(ts_iri: str, cluster_iri: str):
+    TIMESERIES_NODES_DAO.add_ts_to_cluster(ts_iri=ts_iri, cluster_iri=cluster_iri)
