@@ -31,6 +31,10 @@ def get_layout():
                         "value": NodeTypes.RUNTIME_CONNECTION.value,
                     },
                     {"label": "Show units", "value": NodeTypes.UNIT.value},
+                    {
+                        "label": "Show timeseries clusters",
+                        "value": NodeTypes.TIMESERIES_CLUSTER.value,
+                    },
                 ],
                 value=[
                     NodeTypes.ASSET.value,

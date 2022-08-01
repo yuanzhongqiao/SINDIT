@@ -165,6 +165,7 @@ def _create_cytoscape_relationship(
 
 def get_cytoscape_elements(assets_deep: List[AssetNodeDeep]):
     cytoscape_elements = []
+    cluster_nodes = {}
 
     for asset in assets_deep:
         # Assets (machines):
@@ -219,6 +220,24 @@ def get_cytoscape_elements(assets_deep: List[AssetNodeDeep]):
                         timeseries, timeseries.unit, RelationshipTypes.HAS_UNIT.value
                     )
                 )
+
+            # Cluster:
+            if timeseries.ts_cluster is not None:
+                if cluster_nodes.get(timeseries.ts_cluster.iri) is None:
+                    cluster_node = _create_cytoscape_node(
+                        timeseries.ts_cluster, NodeTypes.TIMESERIES_CLUSTER.value
+                    )
+                    cytoscape_elements.append(cluster_node)
+                    cluster_nodes[timeseries.ts_cluster.iri] = timeseries.ts_cluster
+
+                cytoscape_elements.append(
+                    _create_cytoscape_relationship(
+                        timeseries,
+                        cluster_nodes.get(timeseries.ts_cluster.iri),
+                        RelationshipTypes.PART_OF_TS_CLUSTER.value,
+                    )
+                )
+
         for suppl_file in asset.supplementary_files:
             # Supplementary file:
             cytoscape_elements.append(
