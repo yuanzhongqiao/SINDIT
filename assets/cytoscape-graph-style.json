@@ -67,5 +67,11 @@
         "style": {
             "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/description/wght500/48px.svg"
         }
+    },
+    {
+        "selector": ".TIMESERIES_CLUSTER",
+        "style": {
+            "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/scatter_plot/wght500/48px.svg"
+        }
     }
 ]
