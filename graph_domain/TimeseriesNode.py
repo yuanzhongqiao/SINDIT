@@ -51,18 +51,20 @@ class TimeseriesNodeFlat(BaseNode):
     value_type: str = Property(default=TimeseriesValueTypes.DECIMAL.value)
 
     # Extracted features
-    _feature_set: str | None = Property()
-    _reduced_feature_set: str | None = Property()
+    _feature_dict: str | None = Property(key="feature_set")
+    _reduced_feature_dict: str | None = Property(key="reduced_feature_set")
 
     @property
-    def feature_set(self) -> dict:
-        return json.loads(self._feature_set) if self._feature_set is not None else None
+    def feature_dict(self) -> dict:
+        return (
+            json.loads(self._feature_dict) if self._feature_dict is not None else None
+        )
 
     @property
     def reduced_feature_set(self) -> dict:
         return (
-            json.loads(self._reduced_feature_set)
-            if self._reduced_feature_set is not None
+            json.loads(self._reduced_feature_dict)
+            if self._reduced_feature_dict is not None
             else None
         )
 
