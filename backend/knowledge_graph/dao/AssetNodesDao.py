@@ -106,3 +106,19 @@ class AssetsDao(object):
         self.ps.graph.run(
             f"MATCH p=()-[r:{RelationshipTypes.ASSET_SIMILARITY.value}]->() DELETE r"
         )
+
+    def get_asset_similarities(self):
+        similarities_table = self.ps.graph.run(
+            f"MATCH p=(a1)-[r:{RelationshipTypes.ASSET_SIMILARITY.value}]->(a2) RETURN a1.iri,r.similarity_score,a2.iri"
+        ).to_table()
+
+        similarities_list = [
+            {
+                "asset1": similarity[0],
+                "similarity_score": similarity[1],
+                "asset2": similarity[2],
+            }
+            for similarity in similarities_table
+        ]
+
+        return similarities_list

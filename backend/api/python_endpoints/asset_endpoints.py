@@ -10,6 +10,10 @@ def get_asset_nodes(deep: bool = True):
         return ASSETS_DAO.get_assets_flat()
 
 
+def get_asset_similarities():
+    return ASSETS_DAO.get_asset_similarities()
+
+
 def add_asset_similarity(
     asset1_iri: str,
     asset2_iri: str,

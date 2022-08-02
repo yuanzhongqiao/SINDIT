@@ -73,5 +73,24 @@
         "style": {
             "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/scatter_plot/wght500/48px.svg"
         }
+    },
+    {
+        "selector": ".ASSET_SIMILARITY",
+        "style": {
+            "curve-style": "bezier",
+            "width": 6,
+            "line-color": "#446e9b",
+            "target-arrow-shape": "none",
+            "source-distance-from-node": 10,
+            "target-distance-from-node": 10,
+            "content": "data(label)",
+            "text-halign": "center",
+            "text-valign": "top",
+            "text-wrap": "wrap",
+            "text-max-width": 300,
+            "font-size": 14,
+            "font-weight": "bold",
+            "color": "#446e9b"
+        }
     }
 ]

@@ -1,5 +1,5 @@
 from random import randint
-from typing import List
+from typing import Dict, List
 
 from dash import html, dcc
 import dash_bootstrap_components as dbc
@@ -136,10 +136,11 @@ def _create_cytoscape_node(node: BaseNode, node_type: str = UNSPECIFIED_LABEL):
 
     return {
         "data": {
-            "id": node.id_short,
+            "id": node.iri,
             "label": node.caption,
             "type": node_type,
             "iri": node.iri,
+            "id_short": node.id_short,
             "description": node.description,
             "persisted_pos": {
                 "x": node.visualization_positioning_x,
@@ -152,18 +153,17 @@ def _create_cytoscape_node(node: BaseNode, node_type: str = UNSPECIFIED_LABEL):
 
 
 def _create_cytoscape_relationship(
-    node_from: BaseNode, node_to: BaseNode, edge_type: str = UNSPECIFIED_LABEL
+    iri_from: str, iri_to: str, edge_type: str = UNSPECIFIED_LABEL, label: str = ""
 ):
     return {
-        "data": {
-            "source": node_from.id_short,
-            "target": node_to.id_short,
-        },
+        "data": {"source": iri_from, "target": iri_to, "label": label},
         "classes": [edge_type],
     }
 
 
-def get_cytoscape_elements(assets_deep: List[AssetNodeDeep]):
+def get_cytoscape_elements(
+    assets_deep: List[AssetNodeDeep], asset_similarities: List[Dict]
+):
     cytoscape_elements = []
     cluster_nodes = {}
 
@@ -178,7 +178,7 @@ def get_cytoscape_elements(assets_deep: List[AssetNodeDeep]):
             )
             cytoscape_elements.append(
                 _create_cytoscape_relationship(
-                    asset, timeseries, RelationshipTypes.HAS_TIMESERIES.value
+                    asset.iri, timeseries.iri, RelationshipTypes.HAS_TIMESERIES.value
                 )
             )
 
@@ -190,8 +190,8 @@ def get_cytoscape_elements(assets_deep: List[AssetNodeDeep]):
             )
             cytoscape_elements.append(
                 _create_cytoscape_relationship(
-                    timeseries,
-                    timeseries.db_connection,
+                    timeseries.iri,
+                    timeseries.db_connection.iri,
                     RelationshipTypes.TIMESERIES_DB_ACCESS.value,
                 )
             )
@@ -204,8 +204,8 @@ def get_cytoscape_elements(assets_deep: List[AssetNodeDeep]):
             )
             cytoscape_elements.append(
                 _create_cytoscape_relationship(
-                    timeseries,
-                    timeseries.runtime_connection,
+                    timeseries.iri,
+                    timeseries.runtime_connection.iri,
                     RelationshipTypes.RUNTIME_ACCESS.value,
                 )
             )
@@ -217,7 +217,9 @@ def get_cytoscape_elements(assets_deep: List[AssetNodeDeep]):
                 )
                 cytoscape_elements.append(
                     _create_cytoscape_relationship(
-                        timeseries, timeseries.unit, RelationshipTypes.HAS_UNIT.value
+                        timeseries.iri,
+                        timeseries.unit.iri,
+                        RelationshipTypes.HAS_UNIT.value,
                     )
                 )
 
@@ -228,12 +230,11 @@ def get_cytoscape_elements(assets_deep: List[AssetNodeDeep]):
                         timeseries.ts_cluster, NodeTypes.TIMESERIES_CLUSTER.value
                     )
                     cytoscape_elements.append(cluster_node)
-                    cluster_nodes[timeseries.ts_cluster.iri] = timeseries.ts_cluster
 
                 cytoscape_elements.append(
                     _create_cytoscape_relationship(
-                        timeseries,
-                        cluster_nodes.get(timeseries.ts_cluster.iri),
+                        timeseries.iri,
+                        timeseries.ts_cluster.iri,
                         RelationshipTypes.PART_OF_TS_CLUSTER.value,
                     )
                 )
@@ -245,7 +246,9 @@ def get_cytoscape_elements(assets_deep: List[AssetNodeDeep]):
             )
             cytoscape_elements.append(
                 _create_cytoscape_relationship(
-                    asset, suppl_file, RelationshipTypes.HAS_SUPPLEMENTARY_FILE.value
+                    asset.iri,
+                    suppl_file.iri,
+                    RelationshipTypes.HAS_SUPPLEMENTARY_FILE.value,
                 )
             )
 
@@ -257,8 +260,8 @@ def get_cytoscape_elements(assets_deep: List[AssetNodeDeep]):
             )
             cytoscape_elements.append(
                 _create_cytoscape_relationship(
-                    suppl_file,
-                    suppl_file.db_connection,
+                    suppl_file.iri,
+                    suppl_file.db_connection.iri,
                     RelationshipTypes.FILE_DB_ACCESS.value,
                 )
             )
@@ -275,8 +278,8 @@ def get_cytoscape_elements(assets_deep: List[AssetNodeDeep]):
                 cytoscape_elements.append(secondary_file_node)
                 cytoscape_elements.append(
                     _create_cytoscape_relationship(
-                        suppl_file,
-                        secondary_suppl_file,
+                        suppl_file.iri,
+                        secondary_suppl_file.iri,
                         RelationshipTypes.SECONDARY_FORMAT.value,
                     )
                 )
@@ -290,11 +293,22 @@ def get_cytoscape_elements(assets_deep: List[AssetNodeDeep]):
                 )
                 cytoscape_elements.append(
                     _create_cytoscape_relationship(
-                        secondary_suppl_file,
-                        secondary_suppl_file.db_connection,
+                        secondary_suppl_file.iri,
+                        secondary_suppl_file.db_connection.iri,
                         RelationshipTypes.FILE_DB_ACCESS.value,
                     )
                 )
+
+    # asset similarity relationships:
+    for similarity in asset_similarities:
+        cytoscape_elements.append(
+            _create_cytoscape_relationship(
+                iri_from=similarity.get("asset1"),
+                iri_to=similarity.get("asset2"),
+                edge_type=RelationshipTypes.ASSET_SIMILARITY.value,
+                label=f"similarity:\n\n{similarity.get('similarity_score')}",
+            )
+        )
 
     # Temporary dict to remove duplicates (e.g. if same timeseries is referenced from multiple assets)
     return list(

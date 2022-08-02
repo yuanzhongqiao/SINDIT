@@ -36,7 +36,7 @@ for asset_node in asset_nodes_flat:
     )
 
 ################################################
-# print("Calculating similarity scores...") TODO
+print("Calculating similarity scores...")
 
 # Between every pair of assets (one direction only)
 for i in range(0, len(asset_nodes_flat)):

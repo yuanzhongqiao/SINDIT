@@ -24,8 +24,10 @@ def update_factory_graph(n):
     """
     assets_deep_json = api_client.get_json("/assets")
     assets_deep = [AssetNodeDeep.from_json(m) for m in assets_deep_json]
+    asset_similarities = api_client.get_json("/assets/similarities")
+
     cygraph_elements = factory_graph_layout.get_cytoscape_elements(
-        assets_deep=assets_deep
+        assets_deep=assets_deep, asset_similarities=asset_similarities
     )
 
     return cygraph_elements
