@@ -266,6 +266,19 @@ def get_cytoscape_elements(
                 )
             )
 
+            # Extracted keywords:
+            for keyword in suppl_file.extracted_keywords:
+                cytoscape_elements.append(
+                    _create_cytoscape_node(keyword, NodeTypes.EXTRACTED_KEYWORD.value)
+                )
+                cytoscape_elements.append(
+                    _create_cytoscape_relationship(
+                        suppl_file.iri,
+                        keyword.iri,
+                        RelationshipTypes.KEYWORD_EXTRACTION.value,
+                    )
+                )
+
             # Alternative formats (always connected to one main type)
             for secondary_suppl_file in suppl_file.secondary_formats:
                 # Supplementary file (alternative format):

@@ -7,6 +7,7 @@ from py2neo.ogm import Property, RelatedTo
 
 from graph_domain.BaseNode import BaseNode
 from graph_domain.DatabaseConnectionNode import DatabaseConnectionNode
+from graph_domain.ExtractedKeywordNode import ExtractedKeywordNode
 from graph_domain.RuntimeConnectionNode import RuntimeConnectionNode
 from graph_domain.UnitNode import UnitNode
 from graph_domain.factory_graph_types import NodeTypes, RelationshipTypes
@@ -17,6 +18,7 @@ from backend.exceptions.GraphNotConformantToMetamodelError import (
 LABEL = NodeTypes.SUPPLEMENTARY_FILE.value
 DB_CONNECTION_RELATIONSHIP_LABEL = RelationshipTypes.FILE_DB_ACCESS.value
 SECONDARY_FORMAT_RELATIONSHIP_LABEL = RelationshipTypes.SECONDARY_FORMAT.value
+EXTRACTED_KEYWORD_RELATIONSHIP_LABEL = RelationshipTypes.KEYWORD_EXTRACTION.value
 
 
 class SupplementaryFileTypes(Enum):
@@ -86,6 +88,14 @@ class SupplementaryFileNodeDeepNonRecursive(SupplementaryFileNodeFlat):
     def db_connection(self) -> DatabaseConnectionNode:
         return [connection for connection in self._db_connections][0]
 
+    _extracted_keywords: List[ExtractedKeywordNode] = RelatedTo(
+        ExtractedKeywordNode, EXTRACTED_KEYWORD_RELATIONSHIP_LABEL
+    )
+
+    @property
+    def extracted_keywords(self) -> DatabaseConnectionNode:
+        return [keyword for keyword in self._extracted_keywords]
+
     def validate_metamodel_conformance(self):
         """
         Used to validate if the current node (self) and its child elements is conformant to the defined metamodel.
@@ -101,6 +111,9 @@ class SupplementaryFileNodeDeepNonRecursive(SupplementaryFileNodeFlat):
 
         self.db_connection.validate_metamodel_conformance()
 
+        for keyword in self._extracted_keywords:
+            keyword.validate_metamodel_conformance()
+
 
 @dataclass
 @dataclass_json
@@ -110,16 +123,6 @@ class SupplementaryFileNodeDeep(SupplementaryFileNodeDeepNonRecursive):
     """
 
     __primarylabel__ = LABEL
-
-    # The OGM framework does not allow constraining to only one item!
-    # Can only be one unit (checked by metamodel validator)
-    _db_connections: List[DatabaseConnectionNode] = RelatedTo(
-        DatabaseConnectionNode, DB_CONNECTION_RELATIONSHIP_LABEL
-    )
-
-    @property
-    def db_connection(self) -> DatabaseConnectionNode:
-        return [connection for connection in self._db_connections][0]
 
     _secondary_formats: List[SupplementaryFileNodeDeepNonRecursive] = RelatedTo(
         SupplementaryFileNodeDeepNonRecursive, SECONDARY_FORMAT_RELATIONSHIP_LABEL

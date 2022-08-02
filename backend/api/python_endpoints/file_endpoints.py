@@ -114,3 +114,29 @@ def get_supplementary_file_available_formats(iri: str):
     :return:
     """
     return SUPPL_FILE_DAO.get_supplementary_file_available_formats(iri)
+
+
+def get_file_nodes(deep: bool = False, filter_by_type: bool = False, type: str = ""):
+    if deep and not filter_by_type:
+        return SUPPL_FILE_DAO.get_file_nodes_deep()
+    elif not deep and not filter_by_type:
+        return SUPPL_FILE_DAO.get_file_nodes_flat()
+    elif deep and filter_by_type:
+        return SUPPL_FILE_DAO.get_file_nodes_deep_by_type(type)
+    else:
+        return SUPPL_FILE_DAO.get_file_nodes_flat_by_type(type)
+
+
+def reset_extracted_keywords():
+    SUPPL_FILE_DAO.reset_extracted_keywords()
+
+
+def add_keyword(file_iri: str, keyword: str):
+    """Adds the keyword by creating a relationship to the keyword and optionally creating the keyword node,
+    if it does not yet exist
+
+    Args:
+        file_iri (str): _description_
+        keyword (str): _description_
+    """
+    SUPPL_FILE_DAO.add_keyword(file_iri=file_iri, keyword=keyword)

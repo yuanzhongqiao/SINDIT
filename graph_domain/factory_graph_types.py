@@ -10,6 +10,7 @@ class NodeTypes(Enum):
     RUNTIME_CONNECTION = "RUNTIME_CONNECTION"
     UNIT = "UNIT"
     TIMESERIES_CLUSTER = "TIMESERIES_CLUSTER"
+    EXTRACTED_KEYWORD = "EXTRACTED_KEYWORD"
 
 
 class RelationshipTypes(Enum):
@@ -22,9 +23,16 @@ class RelationshipTypes(Enum):
     HAS_UNIT = "HAS_UNIT"
     PART_OF_TS_CLUSTER = "PART_OF_TS_CLUSTER"
     ASSET_SIMILARITY = "ASSET_SIMILARITY"
+    KEYWORD_EXTRACTION = "KEYWORD_EXTRACTION"
 
 
-NODE_TYPE_STRINGS = [nd_type.value for nd_type in NodeTypes]
+class PseudoNodeTypes(Enum):
+    ASSET_SIMILARITY_PSEUDO_NODE = "ASSET_SIMILARITY_PSEUDO_NODE"
+
+
+NODE_TYPE_STRINGS = [nd_type.value for nd_type in NodeTypes] + [
+    nd_type.value for nd_type in PseudoNodeTypes
+]
 RELATIONSHIP_TYPE_STRINGS = [rl_type.value for rl_type in RelationshipTypes]
 ELEMENT_TYPE_STRINGS = list(chain(NODE_TYPE_STRINGS, RELATIONSHIP_TYPE_STRINGS))
 
@@ -46,6 +54,7 @@ RELATIONSHIP_TYPES_FOR_NODE_TYPE = {
         RelationshipTypes.HAS_SUPPLEMENTARY_FILE.value,
         RelationshipTypes.FILE_DB_ACCESS.value,
         RelationshipTypes.SECONDARY_FORMAT.value,
+        RelationshipTypes.KEYWORD_EXTRACTION.value,
     ],
     NodeTypes.DATABASE_CONNECTION.value: [
         RelationshipTypes.TIMESERIES_DB_ACCESS.value,
@@ -54,4 +63,8 @@ RELATIONSHIP_TYPES_FOR_NODE_TYPE = {
     NodeTypes.UNIT.value: [RelationshipTypes.HAS_UNIT.value],
     NodeTypes.RUNTIME_CONNECTION.value: [RelationshipTypes.RUNTIME_ACCESS.value],
     NodeTypes.TIMESERIES_CLUSTER.value: [RelationshipTypes.PART_OF_TS_CLUSTER.value],
+    NodeTypes.EXTRACTED_KEYWORD.value: [RelationshipTypes.KEYWORD_EXTRACTION.value],
+    PseudoNodeTypes.ASSET_SIMILARITY_PSEUDO_NODE.value: [
+        RelationshipTypes.ASSET_SIMILARITY.value
+    ],
 }

@@ -45,10 +45,10 @@ class AssetsDao(object):
         :return:
         :raises GraphNotConformantToMetamodelError: If Graph not conformant
         """
-        machines_flat_matches = self.ps.repo.match(model=AssetNodeFlat)
-        machines_flat = [m for m in machines_flat_matches]
+        assets_flat_matches = self.ps.repo.match(model=AssetNodeFlat)
+        assets_flat = [m for m in assets_flat_matches]
 
-        return machines_flat
+        return assets_flat
 
     @validate_result_nodes
     def get_assets_deep(self):
@@ -57,11 +57,11 @@ class AssetsDao(object):
         :param self:
         :return:
         """
-        machines_deep_matches = self.ps.repo.match(model=AssetNodeDeep)
+        assets_deep_matches = self.ps.repo.match(model=AssetNodeDeep)
 
         # Get rid of the 'Match' and 'RelatedObject' types in favor of normal lists automatically
         # by using the auto-generated json serializer
-        return [AssetNodeDeep.from_json(m.to_json()) for m in machines_deep_matches]
+        return [AssetNodeDeep.from_json(m.to_json()) for m in assets_deep_matches]
 
     # validator used manually because result type is json instead of node-list
     def get_assets_deep_json(self):

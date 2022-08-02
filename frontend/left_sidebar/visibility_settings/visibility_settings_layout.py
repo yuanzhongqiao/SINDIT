@@ -1,7 +1,7 @@
 import dash_bootstrap_components as dbc
 from dash import html, dcc
 
-from graph_domain.factory_graph_types import NodeTypes
+from graph_domain.factory_graph_types import NodeTypes, PseudoNodeTypes
 
 
 def get_layout():
@@ -34,6 +34,14 @@ def get_layout():
                     {
                         "label": "Show timeseries clusters",
                         "value": NodeTypes.TIMESERIES_CLUSTER.value,
+                    },
+                    {
+                        "label": "Show extracted keywords",
+                        "value": NodeTypes.EXTRACTED_KEYWORD.value,
+                    },
+                    {
+                        "label": "Show asset similarities",
+                        "value": PseudoNodeTypes.ASSET_SIMILARITY_PSEUDO_NODE.value,
                     },
                 ],
                 value=[

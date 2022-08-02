@@ -71,6 +71,7 @@
     {
         "selector": ".TIMESERIES_CLUSTER",
         "style": {
+            "background-color": "#1A6152",
             "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/scatter_plot/wght500/48px.svg"
         }
     },
@@ -79,7 +80,7 @@
         "style": {
             "curve-style": "bezier",
             "width": 6,
-            "line-color": "#446e9b",
+            "line-color": "#1A6152",
             "target-arrow-shape": "none",
             "source-distance-from-node": 10,
             "target-distance-from-node": 10,
@@ -90,7 +91,28 @@
             "text-max-width": 300,
             "font-size": 14,
             "font-weight": "bold",
-            "color": "#446e9b"
+            "color": "#1A6152"
+        }
+    },
+    {
+        "selector": ".EXTRACTED_KEYWORD",
+        "style": {
+            "background-color": "#1A6152",
+            "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/label/wght500/48px.svg"
+        }
+    },
+    {
+        "selector": ".KEYWORD_EXTRACTION",
+        "style": {
+            "width": 3,
+            "line-color": "#1A6152"
+        }
+    },
+    {
+        "selector": ".PART_OF_TS_CLUSTER",
+        "style": {
+            "width": 3,
+            "line-color": "#1A6152"
         }
     }
 ]
