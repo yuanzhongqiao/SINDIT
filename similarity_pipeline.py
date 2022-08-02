@@ -2,4 +2,6 @@
 # import similarity_pipeline_2_ts_dimensionality_reduction
 import similarity_pipeline_3_ts_clustering
 
+import similarity_pipeline_x_asset_similarity
+
 pass

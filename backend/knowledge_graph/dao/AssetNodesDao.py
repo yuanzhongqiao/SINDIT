@@ -1,4 +1,5 @@
 import json
+from py2neo import Node, NodeMatcher, Relationship
 
 from graph_domain.AssetNode import AssetNodeFlat, AssetNodeDeep
 from backend.exceptions.GraphNotConformantToMetamodelError import (
@@ -10,6 +11,7 @@ from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
 from backend.knowledge_graph.knowledge_graph_metamodel_validator import (
     validate_result_nodes,
 )
+from graph_domain.factory_graph_types import NodeTypes, RelationshipTypes
 
 
 class AssetsDao(object):
@@ -77,3 +79,30 @@ class AssetsDao(object):
             machine.validate_metamodel_conformance()
 
         return json.dumps([m.to_json() for m in machines_deep_matches])
+
+    def add_asset_similarity(
+        self,
+        asset1_iri: str,
+        asset2_iri: str,
+        similarity_score: float,
+    ):
+        # Stored as single-direction relationship, as Neo4J does not
+        # support undirected or bidirected relationships
+        relationship = Relationship(
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ASSET.value, iri=asset1_iri)
+            .first(),
+            RelationshipTypes.ASSET_SIMILARITY.value,
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ASSET.value, iri=asset2_iri)
+            .first(),
+            similarity_score=similarity_score,
+        )
+        # TODO: expand to multiple scores (one for TS, one for PDF keywords...)
+
+        self.ps.graph.create(relationship)
+
+    def delete_asset_similarities(self):
+        self.ps.graph.run(
+            f"MATCH p=()-[r:{RelationshipTypes.ASSET_SIMILARITY.value}]->() DELETE r"
+        )

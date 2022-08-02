@@ -21,6 +21,7 @@ class RelationshipTypes(Enum):
     RUNTIME_ACCESS = "RUNTIME_ACCESS"
     HAS_UNIT = "HAS_UNIT"
     PART_OF_TS_CLUSTER = "PART_OF_TS_CLUSTER"
+    ASSET_SIMILARITY = "ASSET_SIMILARITY"
 
 
 NODE_TYPE_STRINGS = [nd_type.value for nd_type in NodeTypes]

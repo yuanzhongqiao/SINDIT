@@ -161,3 +161,7 @@ def reset_ts_clusters():
 
 def add_ts_to_cluster(ts_iri: str, cluster_iri: str):
     TIMESERIES_NODES_DAO.add_ts_to_cluster(ts_iri=ts_iri, cluster_iri=cluster_iri)
+
+
+def get_cluster_list_for_asset(asset_iri: str):
+    return TIMESERIES_NODES_DAO.get_cluster_list_for_asset(asset_iri=asset_iri)

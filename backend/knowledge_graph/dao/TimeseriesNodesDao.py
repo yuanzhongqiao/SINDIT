@@ -125,3 +125,20 @@ class TimeseriesNodesDao(object):
         )
 
         self.ps.graph.create(relationship)
+
+    def get_cluster_list_for_asset(self, asset_iri: str) -> List[str]:
+        cluster_table = self.ps.graph.run(
+            "MATCH p=(a:"
+            + NodeTypes.ASSET.value
+            + ' {iri: "'
+            + asset_iri
+            + '"})-[r1:'
+            + RelationshipTypes.HAS_TIMESERIES.value
+            + "]->(t)-[r2:"
+            + RelationshipTypes.PART_OF_TS_CLUSTER.value
+            + "]->(c) RETURN c.iri"
+        ).to_table()
+
+        cluster_list = [cluster for cluster in cluster_table]
+
+        return cluster_list
