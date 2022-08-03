@@ -30,6 +30,7 @@ boto3  # Amazon S3 client compatible also with Minio S3
 cadquery==2.2.0b0  # CAD conversion
 cqkit
 numpy-stl
+textract  # pdf text extraction
 
 # tsfresh is manually installed afterwards (via Dockerfile or devcontainer.json)
 # The reason is, that otherwise some issues with importing numpy occur that can 

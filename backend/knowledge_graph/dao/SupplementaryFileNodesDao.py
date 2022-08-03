@@ -179,3 +179,9 @@ class SupplementaryFileNodesDao(object):
         )
 
         self.ps.graph.create(relationship)
+
+    def save_extracted_text(self, file_iri: str, text: str):
+        matcher = NodeMatcher(self.ps.graph)
+        node: Node = matcher.match(iri=file_iri).first()
+        node.update(extracted_text=text)
+        self.ps.graph.push(node)

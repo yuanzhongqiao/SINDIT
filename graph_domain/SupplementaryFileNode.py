@@ -49,6 +49,8 @@ class SupplementaryFileNodeFlat(BaseNode):
         key="type", default=SupplementaryFileTypes.DOCUMENT_PDF.value
     )
 
+    # extracted text excluded here for performance reasons!
+
     def validate_metamodel_conformance(self):
         """
         Used to validate if the current node (self) and its child elements is conformant to the defined metamodel.

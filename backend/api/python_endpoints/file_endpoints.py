@@ -140,3 +140,7 @@ def add_keyword(file_iri: str, keyword: str):
         keyword (str): _description_
     """
     SUPPL_FILE_DAO.add_keyword(file_iri=file_iri, keyword=keyword)
+
+
+def save_extracted_text(file_iri: str, text: str):
+    SUPPL_FILE_DAO.save_extracted_text(file_iri=file_iri, text=text)
