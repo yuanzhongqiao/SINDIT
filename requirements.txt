@@ -31,6 +31,7 @@ cadquery==2.2.0b0  # CAD conversion
 cqkit
 numpy-stl
 textract  # pdf text extraction
+git+https://github.com/boudinfl/pke.git  # pke keyphrase extraction library
 
 # tsfresh is manually installed afterwards (via Dockerfile or devcontainer.json)
 # The reason is, that otherwise some issues with importing numpy occur that can 
