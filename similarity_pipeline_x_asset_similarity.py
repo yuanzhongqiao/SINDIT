@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta
 import sys
-from typing import Dict, List
+from typing import Dict, List, Set
 from tsfresh import extract_features
 import pandas as pd
 from numpy import nan
@@ -11,6 +11,7 @@ from sklearn.decomposition import PCA
 
 from backend.api.python_endpoints import asset_endpoints
 from backend.api.python_endpoints import timeseries_endpoints
+from backend.api.python_endpoints import file_endpoints
 from graph_domain.TimeseriesNode import TimeseriesNodeFlat, TimeseriesValueTypes
 
 # #############################################################################
@@ -35,6 +36,12 @@ for asset_node in asset_nodes_flat:
         timeseries_endpoints.get_cluster_list_for_asset(asset_iri=asset_node.iri)
     )
 
+keyword_sets = []
+for asset_node in asset_nodes_flat:
+    keyword_sets.append(
+        file_endpoints.get_keywords_set_for_asset(asset_iri=asset_node.iri)
+    )
+
 ################################################
 print("Calculating similarity scores...")
 
@@ -45,6 +52,8 @@ for i in range(0, len(asset_nodes_flat)):
         asset2 = asset_nodes_flat[j]
         ts_clusters1: List = timeseries_clusters[i]
         ts_clusters2: List = timeseries_clusters[j]
+        keyword_set1: Set = keyword_sets[i]
+        keyword_set2: Set = keyword_sets[j]
 
         # For timeseries, count multiple occurences multiple times!
         # -> Cosinus similarity
@@ -62,17 +71,25 @@ for i in range(0, len(asset_nodes_flat)):
 
         # For keywords, use set-based logic
         # -> Jaccard similarity
-        # TODO
+
+        keyword_intersect = keyword_set1.intersection(keyword_set2)
+        jaccard_similarity = float(len(keyword_intersect)) / (
+            len(keyword_set1) + len(keyword_set2) - len(keyword_intersect)
+        )
+
+        # TODO: maybe include relevance scores for each keyword to weight them differently
+
+        combined_similarity = (cosine_similarity + jaccard_similarity) / 2
 
         print(
-            f"Similarity between {asset1.id_short} and {asset2.id_short}:\t{cosine_similarity}"
+            f"Similarity between {asset1.id_short} and {asset2.id_short}:\n\tTimeseries: {cosine_similarity}\n\tKeywords: {jaccard_similarity}\n\tCombined: {combined_similarity}"
         )
 
         # Save similarity relationship
         asset_endpoints.add_asset_similarity(
             asset1_iri=asset1.iri,
             asset2_iri=asset2.iri,
-            similarity_score=cosine_similarity,
+            similarity_score=combined_similarity,
         )
 
 

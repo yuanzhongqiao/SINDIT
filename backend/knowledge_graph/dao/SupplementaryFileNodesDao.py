@@ -185,3 +185,20 @@ class SupplementaryFileNodesDao(object):
         node: Node = matcher.match(iri=file_iri).first()
         node.update(extracted_text=text)
         self.ps.graph.push(node)
+
+    def get_keywords_set_for_asset(self, asset_iri: str):
+        keywords_table = self.ps.graph.run(
+            "MATCH p=(a:"
+            + NodeTypes.ASSET.value
+            + ' {iri: "'
+            + asset_iri
+            + '"})-[r1:'
+            + RelationshipTypes.HAS_SUPPLEMENTARY_FILE.value
+            + "]->(t)-[r2:"
+            + RelationshipTypes.KEYWORD_EXTRACTION.value
+            + "]->(c) RETURN c.keyword"
+        ).to_table()
+
+        keyword_list = [keyword[0] for keyword in keywords_table]
+
+        return set(keyword_list)

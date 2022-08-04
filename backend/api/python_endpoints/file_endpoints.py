@@ -144,3 +144,7 @@ def add_keyword(file_iri: str, keyword: str):
 
 def save_extracted_text(file_iri: str, text: str):
     SUPPL_FILE_DAO.save_extracted_text(file_iri=file_iri, text=text)
+
+
+def get_keywords_set_for_asset(asset_iri: str):
+    return SUPPL_FILE_DAO.get_keywords_set_for_asset(asset_iri=asset_iri)
