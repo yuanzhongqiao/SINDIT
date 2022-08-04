@@ -78,109 +78,23 @@ for file_node in file_nodes_flat:
 
     print("Processing text: Searching most relevant keyphrases from the text...")
 
-    extractor = pke.unsupervised.PositionRank()
-    extractor.load_document(text, language="en")
-
-    extractor.candidate_selection()
-    extractor.candidate_weighting()
-    keyphrases = extractor.get_n_best(n=10)
-
-    print("\n PositionRank")
-    print(keyphrases)
-
-    extractor = pke.unsupervised.FirstPhrases()
-    extractor.load_document(text, language="en")
-
-    extractor.candidate_selection()
-    extractor.candidate_weighting()
-    keyphrases = extractor.get_n_best(n=10)
-
-    print("\n FirstPhrases")
-    print(keyphrases)
-
-    extractor = pke.unsupervised.KPMiner()
-    extractor.load_document(text, language="en")
-
-    extractor.candidate_selection()
-    extractor.candidate_weighting()
-    keyphrases = extractor.get_n_best(n=10)
-
-    print("\n KPMiner")
-    print(keyphrases)
-
-    extractor = pke.unsupervised.MultipartiteRank()
-    extractor.load_document(text, language="en")
-
-    extractor.candidate_selection()
-    extractor.candidate_weighting()
-    keyphrases = extractor.get_n_best(n=10)
-
-    print("\n MultipartiteRank")
-    print(keyphrases)
-
-    extractor = pke.unsupervised.SingleRank()
-    extractor.load_document(text, language="en")
-
-    extractor.candidate_selection()
-    extractor.candidate_weighting()
-    keyphrases = extractor.get_n_best(n=10)
-
-    print("\n SingleRank")
-    print(keyphrases)
-
-    extractor = pke.unsupervised.TextRank()
-    extractor.load_document(text, language="en")
-
-    extractor.candidate_selection()
-    extractor.candidate_weighting()
-    keyphrases = extractor.get_n_best(n=10)
-
-    print("\n TextRank")
-    print(keyphrases)
-
-    extractor = pke.unsupervised.TfIdf()
-    extractor.load_document(text, language="en")
-
-    extractor.candidate_selection()
-    extractor.candidate_weighting()
-    keyphrases = extractor.get_n_best(n=10)
-
-    print("\n TfIdf")
-    print(keyphrases)
-
-    extractor = pke.unsupervised.TopicalPageRank()
-    extractor.load_document(text, language="en")
-
-    extractor.candidate_selection()
-    extractor.candidate_weighting()
-    keyphrases = extractor.get_n_best(n=10)
-
-    print("\n TopicalPageRank")
-    print(keyphrases)
-
     extractor = pke.unsupervised.TopicRank()
     extractor.load_document(text, language="en")
 
     extractor.candidate_selection()
     extractor.candidate_weighting()
-    keyphrases = extractor.get_n_best(n=10)
+    keyphrases = extractor.get_n_best(n=30)
 
-    print("\n TopicRank")
-    print(keyphrases)
+    # TODO: evtl. nachfiltern (redundanzen entfernen etc.)
 
-    extractor = pke.unsupervised.YAKE()
-    extractor.load_document(text, language="en")
-
-    extractor.candidate_selection()
-    extractor.candidate_weighting()
-    keyphrases = extractor.get_n_best(n=10)
-
-    print("\n YAKE")
-    print(keyphrases)
+    # print("\n TopicRank")
+    # print(keyphrases)
 
     # TODO
 
-    extracted_keywords = ["Test-Keyword"]
+    extracted_keywords = [
+        keyphrase_score_pair[0] for keyphrase_score_pair in keyphrases
+    ]
 
     print(f"Extracted {len(extracted_keywords)} keywords")
 
