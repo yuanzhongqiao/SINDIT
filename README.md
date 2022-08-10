@@ -51,7 +51,7 @@ For the learning factory example, remember to access the VPN / make a port mappi
 
  
 
-For updating the DT after pushing to the deployment branch, run manually on the workstation: `docker-compose down && git pull && sudo chmod 777 -R docker_mounted_storage && docker-compose build && docker-compose up -d`.
+For updating the DT after pushing to the deployment branch, run manually on the workstation: `docker-compose down && git pull && sudo chmod 777 -R docker_mounted_storage && sudo chmod 777 -R backups && docker-compose build && docker-compose up -d`.
 
 ## Exposed interfaces:
 
