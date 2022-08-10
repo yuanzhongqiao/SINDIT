@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN apt-get update
 
 # libgl required for CAD module
-RUN apt-get install -y curl libgl1 gcc
+RUN apt-get install -y curl libgl1 gcc git
 
 # required for textract (PDF text extraction) (but removed pstotext because it is no longer available!)
 RUN apt-get install -y python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils tesseract-ocr flac ffmpeg lame libmad0 libsox-fmt-mp3 sox libjpeg-dev swig
