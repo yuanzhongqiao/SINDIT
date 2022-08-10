@@ -2,14 +2,16 @@ version: '2.4'
 
 networks:
   # Required for the devcontainer
-  sindit_network:
-    name: sindit_network
+  sindit_devcontainer_network:
+    name: sindit_devcontainer_network
 
 services:
   sindit_influx_db_devcontainer:
     extends:
       file: docker-compose.databases.yml
       service: sindit_influx_db
+    networks:
+      - sindit_devcontainer_network
 
     hostname: sindit-influx-db-devcontainer
     container_name: sindit_influx_db_devcontainer
@@ -24,6 +26,8 @@ services:
     extends:
       file: docker-compose.databases.yml
       service: sindit_neo4j_kg
+    networks:
+      - sindit_devcontainer_network
 
     hostname: sindit-neo4j-kg-devcontainer
     container_name: sindit_neo4j_kg_devcontainer
@@ -40,6 +44,8 @@ services:
     extends:
       file: docker-compose.databases.yml
       service: sindit_minio_s3
+    networks:
+      - sindit_devcontainer_network
 
     hostname: sindit-minio-s3-devcontainer
     container_name: sindit_minio_s3_devcontainer

@@ -10,7 +10,8 @@ services:
     extends:
       file: docker-compose.databases.yml
       service: sindit_influx_db
-
+    networks:
+      - sindit_network
     ports:
       - '8087:8086'
 
@@ -18,7 +19,8 @@ services:
     extends:
       file: docker-compose.databases.yml
       service: sindit_neo4j_kg
-
+    networks:
+      - sindit_network
     ports:
       - 7475:7474
       - 7688:7687
@@ -27,7 +29,8 @@ services:
     extends:
       file: docker-compose.databases.yml
       service: sindit_minio_s3
-
+    networks:
+      - sindit_network
     ports:
       - "9000:9000"
       - "9099:9099"
