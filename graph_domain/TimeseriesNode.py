@@ -133,8 +133,11 @@ class TimeseriesNodeDeep(TimeseriesNodeFlat):
         return [connection for connection in self._db_connections][0]
 
     @property
-    def runtime_connection(self) -> RuntimeConnectionNode:
-        return [connection for connection in self._runtime_connections][0]
+    def runtime_connection(self) -> RuntimeConnectionNode | None:
+        if len(self._runtime_connections) > 0:
+            return [connection for connection in self._runtime_connections][0]
+        else:
+            return None
 
     @property
     def ts_cluster(self) -> TimeseriesClusterNode | None:

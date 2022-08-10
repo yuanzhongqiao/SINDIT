@@ -30,6 +30,9 @@ RUN pip install tsfresh
 
 RUN apt-get clean
 
+# Requirements for the pke keyphrase extraction library
+RUN python -m spacy download en_core_web_sm
+
 EXPOSE 8050
 EXPOSE 8000
 

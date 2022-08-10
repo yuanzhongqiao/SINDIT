@@ -20,7 +20,7 @@ class BaseNode(Model):
     # Core properties:
     id_short: str = Property()
     iri: str = Property()
-    description: str = Property()  # may be None
+    description: str | None = Property()  # may be None
 
     _explizit_caption: str | None = Property("caption")  # explizit caption. Optional
 
