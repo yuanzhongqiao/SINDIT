@@ -2,6 +2,7 @@
 # import similarity_pipeline_2_ts_dimensionality_reduction
 import similarity_pipeline_3_ts_clustering
 import similarity_pipeline_4_pdf_keyword_extraction
+import similarity_pipeline_5_cad_analysis
 
 import similarity_pipeline_x_asset_similarity
 

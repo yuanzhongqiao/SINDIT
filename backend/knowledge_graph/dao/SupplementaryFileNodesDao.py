@@ -69,7 +69,6 @@ class SupplementaryFileNodesDao(object):
         :return:
         :raises GraphNotConformantToMetamodelError: If Graph not conformant
         """
-
         suppl_file_matches = self.ps.repo.match(model=SupplementaryFileNodeFlat).where(
             '(_)<-[:SECONDARY_FORMAT *0..]-(: SUPPLEMENTARY_FILE {iri: "' + iri + '"}) '
         )
@@ -79,15 +78,21 @@ class SupplementaryFileNodesDao(object):
         ]
 
     @validate_result_nodes
-    def get_file_nodes_flat(self):
+    def get_file_nodes_flat(self, exclude_secondary_format_nodes: bool = True):
         """
         Queries all file nodes (excluding secondary format noded). Does not follow any relationships
         :param self:
         :return:
         :raises GraphNotConformantToMetamodelError: If Graph not conformant
         """
+        exclude_secondary_format_filter = (
+            '" AND NOT (_:SUPPLEMENTARY_FILE)<-[:SECONDARY_FORMAT]-(: SUPPLEMENTARY_FILE)'
+            if exclude_secondary_format_nodes
+            else '"'
+        )
+
         files_flat_matches = self.ps.repo.match(model=SupplementaryFileNodeFlat).where(
-            "NOT (_:SUPPLEMENTARY_FILE)<-[:SECONDARY_FORMAT]-(: SUPPLEMENTARY_FILE)"
+            exclude_secondary_format_filter
         )
 
         files_flat = [m for m in files_flat_matches]
@@ -95,14 +100,20 @@ class SupplementaryFileNodesDao(object):
         return files_flat
 
     @validate_result_nodes
-    def get_file_nodes_deep(self):
+    def get_file_nodes_deep(self, exclude_secondary_format_nodes: bool = True):
         """
         Queries all asset nodes (excluding secondary format noded). Follows relationships to build nested objects for related nodes (e.g. sensors)
         :param self:
         :return:
         """
+        exclude_secondary_format_filter = (
+            '" AND NOT (_:SUPPLEMENTARY_FILE)<-[:SECONDARY_FORMAT]-(: SUPPLEMENTARY_FILE)'
+            if exclude_secondary_format_nodes
+            else '"'
+        )
+
         file_deep_matches = self.ps.repo.match(model=SupplementaryFileNodeDeep).where(
-            "NOT (_:SUPPLEMENTARY_FILE)<-[:SECONDARY_FORMAT]-(: SUPPLEMENTARY_FILE)"
+            exclude_secondary_format_filter
         )
 
         # Get rid of the 'Match' and 'RelatedObject' types in favor of normal lists automatically
@@ -112,17 +123,23 @@ class SupplementaryFileNodesDao(object):
         ]
 
     @validate_result_nodes
-    def get_file_nodes_flat_by_type(self, type: str):
+    def get_file_nodes_flat_by_type(
+        self, type: str, exclude_secondary_format_nodes: bool = True
+    ):
         """
-        Queries all file nodes (excluding secondary format noded). Does not follow any relationships
+        Queries all file nodes. Does not follow any relationships
         :param self:
         :return:
         :raises GraphNotConformantToMetamodelError: If Graph not conformant
         """
+        exclude_secondary_format_filter = (
+            '" AND NOT (_:SUPPLEMENTARY_FILE)<-[:SECONDARY_FORMAT]-(: SUPPLEMENTARY_FILE)'
+            if exclude_secondary_format_nodes
+            else '"'
+        )
+
         files_flat_matches = self.ps.repo.match(model=SupplementaryFileNodeFlat).where(
-            '_.type="'
-            + type
-            + '" AND NOT (_:SUPPLEMENTARY_FILE)<-[:SECONDARY_FORMAT]-(: SUPPLEMENTARY_FILE)'
+            '_.type="' + type + exclude_secondary_format_filter
         )
 
         files_flat = [m for m in files_flat_matches]
@@ -130,16 +147,22 @@ class SupplementaryFileNodesDao(object):
         return files_flat
 
     @validate_result_nodes
-    def get_file_nodes_deep_by_type(self, type: str):
+    def get_file_nodes_deep_by_type(
+        self, type: str, exclude_secondary_format_nodes: bool = True
+    ):
         """
-        Queries all asset nodes (excluding secondary format noded). Follows relationships to build nested objects for related nodes (e.g. sensors)
+        Queries all asset nodes. Follows relationships to build nested objects for related nodes (e.g. sensors)
         :param self:
         :return:
         """
+        exclude_secondary_format_filter = (
+            '" AND NOT (_:SUPPLEMENTARY_FILE)<-[:SECONDARY_FORMAT]-(: SUPPLEMENTARY_FILE)'
+            if exclude_secondary_format_nodes
+            else '"'
+        )
+
         file_deep_matches = self.ps.repo.match(model=SupplementaryFileNodeDeep).where(
-            '_.type="'
-            + type
-            + '" AND NOT (_:SUPPLEMENTARY_FILE)<-[:SECONDARY_FORMAT]-(: SUPPLEMENTARY_FILE)'
+            '_.type="' + type + exclude_secondary_format_filter
         )
 
         # Get rid of the 'Match' and 'RelatedObject' types in favor of normal lists automatically

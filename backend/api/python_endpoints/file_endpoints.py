@@ -116,15 +116,24 @@ def get_supplementary_file_available_formats(iri: str):
     return SUPPL_FILE_DAO.get_supplementary_file_available_formats(iri)
 
 
-def get_file_nodes(deep: bool = False, filter_by_type: bool = False, type: str = ""):
+def get_file_nodes(
+    deep: bool = False,
+    filter_by_type: bool = False,
+    type: str = "",
+    exclude_secondary_format_nodes: bool = True,
+):
     if deep and not filter_by_type:
-        return SUPPL_FILE_DAO.get_file_nodes_deep()
+        return SUPPL_FILE_DAO.get_file_nodes_deep(exclude_secondary_format_nodes)
     elif not deep and not filter_by_type:
-        return SUPPL_FILE_DAO.get_file_nodes_flat()
+        return SUPPL_FILE_DAO.get_file_nodes_flat(exclude_secondary_format_nodes)
     elif deep and filter_by_type:
-        return SUPPL_FILE_DAO.get_file_nodes_deep_by_type(type)
+        return SUPPL_FILE_DAO.get_file_nodes_deep_by_type(
+            type, exclude_secondary_format_nodes
+        )
     else:
-        return SUPPL_FILE_DAO.get_file_nodes_flat_by_type(type)
+        return SUPPL_FILE_DAO.get_file_nodes_flat_by_type(
+            type, exclude_secondary_format_nodes
+        )
 
 
 def reset_extracted_keywords():

@@ -143,8 +143,10 @@ def generate_alternative_cad_format():
         id_short = file["f.id_short"] + "_stl_conversion"
         iri = file["f.iri"] + "_stl_conversion"
         description = (
-            file["f.description"]
-            + f" (Converted automatically to STL for visualization on {datetime.now().isoformat()}. This conversion is not loss-free!)"
+            (
+                file["f.description"]
+                + f" (Converted automatically to STL for visualization on {datetime.now().isoformat()}. This conversion is not loss-free!)"
+            ),
         )
 
         # Convert file
