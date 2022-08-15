@@ -134,7 +134,7 @@ def toggle_layout_saver_visibility(selected_el_json, elements):
     :param elements:
     :return:
     """
-    if selected_el_json is not None:
+    if selected_el_json is not None and elements is not None:
         selected_el: GraphSelectedElement = GraphSelectedElement.from_json(
             selected_el_json
         )

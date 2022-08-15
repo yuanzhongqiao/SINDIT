@@ -2,7 +2,12 @@ from dataclasses import dataclass
 from itertools import chain
 from dataclasses_json import dataclass_json
 
-from graph_domain.factory_graph_types import ELEMENT_TYPE_STRINGS, UNSPECIFIED_LABEL, NodeTypes, RelationshipTypes
+from graph_domain.factory_graph_types import (
+    ELEMENT_TYPE_STRINGS,
+    UNSPECIFIED_LABEL,
+    NodeTypes,
+    RelationshipTypes,
+)
 
 
 # Take care: the order of this annotations makes a difference. Does not work with @dataclass before @dataclass_json
@@ -42,10 +47,7 @@ class GraphSelectedElement(object):
             el_type = UNSPECIFIED_LABEL
 
         return GraphSelectedElement(
-            id_short='NA',
-            iri='NA',
-            type=el_type,
-            is_node=False
+            id_short="NA", iri="NA", type=el_type, is_node=False
         )
 
     @classmethod
@@ -65,10 +67,10 @@ class GraphSelectedElement(object):
             el_type = UNSPECIFIED_LABEL
 
         return cls(
-            id_short=tap_node['data']['id'],
-            iri=tap_node['data']['iri'],
+            id_short=tap_node["data"]["id_short"],
+            iri=tap_node["data"]["iri"],
             type=el_type,
             is_node=True,
-            position_x=tap_node['position']['x'],
-            position_y=tap_node['position']['y']
+            position_x=tap_node["position"]["x"],
+            position_y=tap_node["position"]["y"],
         )
