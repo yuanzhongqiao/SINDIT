@@ -323,6 +323,8 @@ def get_cytoscape_elements(
             )
         )
 
+    # TODO: maybe change the thickness of the relationship-representations according to the rank of similarity
+
     # Temporary dict to remove duplicates (e.g. if same timeseries is referenced from multiple assets)
     return list(
         {
