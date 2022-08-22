@@ -38,6 +38,20 @@ RUN apt-get clean
 # Requirements for the pke keyphrase extraction library
 RUN python -m spacy download en_core_web_sm
 
+# OpenMMLab (must be after the pip requirements for mim)
+# RUN mim install mmcv-full
+
+RUN pip install torch==1.12.1+cpu torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
+RUN pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cpu/torch1.12.0/index.html
+
+# RUN pip install mmdet
+RUN cd dependencies
+RUN git clone https://github.com/open-mmlab/mmdetection.git
+RUN cd mmdetection
+RUN pip install -v -e .
+RUN cd ..
+
+
 EXPOSE 8050
 EXPOSE 8000
 

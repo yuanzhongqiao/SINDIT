@@ -13,13 +13,9 @@
 	// The optional 'workspaceFolder' property is the path VS Code should open by default when
 	// connected. This is typically a file mount in .devcontainer/docker-compose.yml
 	"workspaceFolder": "/workspace",
-	// Install requirements (here instead of the dockerfile, to be able to use the workspace)
-	// libgl required for CAD module
-	// python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr flac ffmpeg lame libmad0 libsox-fmt-mp3 sox libjpeg-dev swig
-	// required for textract PDF module (but removed pstotext because it is no longer available!)
-	// python -m spacy download en_core_web_sm  -> required for the pke keyphrase extraction library
-	"postCreateCommand": "apt-get update && apt-get install -y python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils tesseract-ocr flac ffmpeg lame libmad0 libsox-fmt-mp3 sox libjpeg-dev swig && pip install --upgrade pip && pip --disable-pip-version-check --no-cache-dir install -r ./requirements.txt && apt-get install -y curl libgl1 gcc && apt-get clean && pip install tsfresh && python -m spacy download en_core_web_sm && printf '\n\n\n\n\nTo activate code analysis, execute:\n\n\t > Developer: Reload Window\n\n\n\n\n'",
-	// "postCreateCommand": "apt-get update && apt-get install -y curl libgl1 gcc && apt-get clean && pip install --upgrade pip && pip --disable-pip-version-check --no-cache-dir install -r ./requirements.txt && printf '\n\n\n\n\nTo activate code analysis, execute:\n\n\t > Developer: Reload Window\n\n\n\n\n'",
+	// Install requirements (here instead of the Dockerfile, to be able to use the workspace)
+	// See the main Dockerfile for explanations
+	"postCreateCommand": "apt-get update && apt-get install -y curl && apt-get install -y git && pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt && apt-get install -y libgl1 && apt-get install -y python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils tesseract-ocr flac ffmpeg lame libmad0 libsox-fmt-mp3 sox libjpeg-dev swig && apt-get install -y gcc && pip install tsfresh && apt-get clean && python -m spacy download en_core_web_sm && pip install torch==1.12.1+cpu torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu && pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cpu/torch1.12.0/index.html && cd dependencies && git clone https://github.com/open-mmlab/mmdetection.git && cd mmdetection && pip install -v -e . && cd .. && && printf '\n\n\n\n\nTo activate code analysis, execute:\n\n\t > Developer: Reload Window\n\n\n\n\n'",
 	// Configure tool-specific properties.
 	"customizations": {
 		// Configure properties specific to VS Code.

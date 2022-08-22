@@ -7,3 +7,4 @@ docker/
 docker_mounted_storage/
 docker_mounted_storage_devcontainer/
 backups/
+dependencies/

@@ -38,3 +38,11 @@ git+https://github.com/boudinfl/pke.git  # pke keyphrase extraction library
 # be avoided this way (ImportError: numpy.core.multiarray failed to import).
 #
 # tsfresh  # timeseries feature extraction (requrires gcc)
+
+# Image object detection:
+# torch~=1.11
+# torchvision~=0.12
+opencv-python
+# openmim  # OpenMMLab package manager
+# mmdet
+# END Image object detection
