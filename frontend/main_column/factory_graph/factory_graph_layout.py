@@ -8,11 +8,11 @@ import dash_cytoscape as cyto
 from frontend.app import app
 from frontend import resources_manager
 from graph_domain.BaseNode import BaseNode
-from graph_domain.DatabaseConnectionNode import DatabaseConnectionNode
-from graph_domain.AssetNode import AssetNodeDeep
-from graph_domain.TimeseriesNode import TimeseriesNodeDeep
-from graph_domain.UnitNode import UnitNode
-from graph_domain.factory_graph_types import (
+from graph_domain.main_digital_twin.DatabaseConnectionNode import DatabaseConnectionNode
+from graph_domain.main_digital_twin.AssetNode import AssetNodeDeep
+from graph_domain.main_digital_twin.TimeseriesNode import TimeseriesNodeDeep
+from graph_domain.main_digital_twin.UnitNode import UnitNode
+from graph_domain.main_digital_twin.factory_graph_types import (
     UNSPECIFIED_LABEL,
     NodeTypes,
     RelationshipTypes,

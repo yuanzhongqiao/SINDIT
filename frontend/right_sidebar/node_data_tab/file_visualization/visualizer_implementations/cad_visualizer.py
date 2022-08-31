@@ -6,7 +6,7 @@ import numpy as np
 
 from dash import dcc
 from frontend import api_client
-from graph_domain.SupplementaryFileNode import (
+from graph_domain.main_digital_twin.SupplementaryFileNode import (
     SupplementaryFileNodeDeep,
     SupplementaryFileNodeFlat,
     SupplementaryFileTypes,

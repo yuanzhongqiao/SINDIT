@@ -7,7 +7,7 @@ from frontend import api_client
 from frontend.app import app
 from frontend.main_column.factory_graph import factory_graph_layout
 from frontend.main_column.factory_graph.GraphSelectedElement import GraphSelectedElement
-from graph_domain.AssetNode import AssetNodeDeep
+from graph_domain.main_digital_twin.AssetNode import AssetNodeDeep
 
 
 print("Initializing factory graph callbacks...")

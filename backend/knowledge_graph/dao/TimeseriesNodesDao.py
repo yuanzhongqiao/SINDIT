@@ -3,10 +3,16 @@ from typing import List
 
 from py2neo import Node, NodeMatcher, Relationship
 
-from graph_domain.factory_graph_types import NodeTypes, RelationshipTypes
-from graph_domain.AssetNode import AssetNodeFlat, AssetNodeDeep
-from graph_domain.TimeseriesNode import TimeseriesNodeDeep, TimeseriesNodeFlat
-from graph_domain.TimeseriesClusterNode import TimeseriesClusterNode
+from graph_domain.main_digital_twin.factory_graph_types import (
+    NodeTypes,
+    RelationshipTypes,
+)
+from graph_domain.main_digital_twin.AssetNode import AssetNodeFlat, AssetNodeDeep
+from graph_domain.main_digital_twin.TimeseriesNode import (
+    TimeseriesNodeDeep,
+    TimeseriesNodeFlat,
+)
+from graph_domain.similarities.TimeseriesClusterNode import TimeseriesClusterNode
 from backend.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
 )

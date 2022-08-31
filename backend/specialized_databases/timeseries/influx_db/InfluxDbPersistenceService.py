@@ -6,7 +6,7 @@ from urllib3.exceptions import ReadTimeoutError
 import warnings
 from influxdb_client.client.warnings import MissingPivotFunction
 
-from graph_domain.DatabaseConnectionNode import DatabaseConnectionNode
+from graph_domain.main_digital_twin.DatabaseConnectionNode import DatabaseConnectionNode
 from backend.exceptions.IdNotFoundException import IdNotFoundException
 from backend.specialized_databases.timeseries.TimeseriesPersistenceService import (
     TimeseriesPersistenceService,

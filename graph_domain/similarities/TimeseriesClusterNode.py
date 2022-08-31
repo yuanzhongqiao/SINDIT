@@ -7,10 +7,13 @@ from dataclasses_json import dataclass_json
 from py2neo.ogm import Property, RelatedTo
 
 from graph_domain.BaseNode import BaseNode
-from graph_domain.DatabaseConnectionNode import DatabaseConnectionNode
-from graph_domain.RuntimeConnectionNode import RuntimeConnectionNode
-from graph_domain.UnitNode import UnitNode
-from graph_domain.factory_graph_types import NodeTypes, RelationshipTypes
+from graph_domain.main_digital_twin.DatabaseConnectionNode import DatabaseConnectionNode
+from graph_domain.main_digital_twin.RuntimeConnectionNode import RuntimeConnectionNode
+from graph_domain.main_digital_twin.UnitNode import UnitNode
+from graph_domain.main_digital_twin.factory_graph_types import (
+    NodeTypes,
+    RelationshipTypes,
+)
 from backend.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
 )

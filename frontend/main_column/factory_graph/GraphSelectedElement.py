@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from itertools import chain
 from dataclasses_json import dataclass_json
 
-from graph_domain.factory_graph_types import (
+from graph_domain.main_digital_twin.factory_graph_types import (
     ELEMENT_TYPE_STRINGS,
     UNSPECIFIED_LABEL,
     NodeTypes,

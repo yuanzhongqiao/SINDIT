@@ -1,7 +1,7 @@
 import json
 from py2neo import Node, NodeMatcher, Relationship
 
-from graph_domain.AssetNode import AssetNodeFlat, AssetNodeDeep
+from graph_domain.main_digital_twin.AssetNode import AssetNodeFlat, AssetNodeDeep
 from backend.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
 )
@@ -11,7 +11,10 @@ from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
 from backend.knowledge_graph.knowledge_graph_metamodel_validator import (
     validate_result_nodes,
 )
-from graph_domain.factory_graph_types import NodeTypes, RelationshipTypes
+from graph_domain.main_digital_twin.factory_graph_types import (
+    NodeTypes,
+    RelationshipTypes,
+)
 
 
 class AssetsDao(object):

@@ -20,10 +20,15 @@ import mmcv
 from backend.api.python_endpoints import asset_endpoints
 from backend.api.python_endpoints import timeseries_endpoints
 from backend.api.python_endpoints import file_endpoints
-from graph_domain.SupplementaryFileNode import SupplementaryFileNodeFlat
-from graph_domain.SupplementaryFileNode import SupplementaryFileTypes
+from graph_domain.main_digital_twin.SupplementaryFileNode import (
+    SupplementaryFileNodeFlat,
+)
+from graph_domain.main_digital_twin.SupplementaryFileNode import SupplementaryFileTypes
 
-from graph_domain.TimeseriesNode import TimeseriesNodeFlat, TimeseriesValueTypes
+from graph_domain.main_digital_twin.TimeseriesNode import (
+    TimeseriesNodeFlat,
+    TimeseriesValueTypes,
+)
 
 # #############################################################################
 # Image object detection

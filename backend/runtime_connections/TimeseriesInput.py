@@ -4,7 +4,10 @@ from datetime import datetime
 from math import floor
 from typing import Tuple
 
-from graph_domain.TimeseriesNode import TimeseriesNodeFlat, TimeseriesValueTypes
+from graph_domain.main_digital_twin.TimeseriesNode import (
+    TimeseriesNodeFlat,
+    TimeseriesValueTypes,
+)
 
 
 class TimeseriesInput(abc.ABC):

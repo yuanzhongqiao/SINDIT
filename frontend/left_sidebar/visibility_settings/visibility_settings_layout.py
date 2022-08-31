@@ -1,7 +1,10 @@
 import dash_bootstrap_components as dbc
 from dash import html, dcc
 
-from graph_domain.factory_graph_types import NodeTypes, PseudoNodeTypes
+from graph_domain.main_digital_twin.factory_graph_types import (
+    NodeTypes,
+    PseudoNodeTypes,
+)
 
 
 def get_layout():

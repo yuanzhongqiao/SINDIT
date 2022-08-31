@@ -1,5 +1,5 @@
 from typing import Dict, List
-from graph_domain.DatabaseConnectionNode import (
+from graph_domain.main_digital_twin.DatabaseConnectionNode import (
     DatabaseConnectionNode,
     DatabaseConnectionTypes,
 )

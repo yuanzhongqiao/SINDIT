@@ -2,7 +2,7 @@ import json
 
 from py2neo import Node, NodeMatcher
 
-from graph_domain.AssetNode import AssetNodeFlat, AssetNodeDeep
+from graph_domain.main_digital_twin.AssetNode import AssetNodeFlat, AssetNodeDeep
 from backend.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
 )

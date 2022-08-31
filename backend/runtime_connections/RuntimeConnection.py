@@ -1,6 +1,6 @@
 import abc
 
-from graph_domain.RuntimeConnectionNode import RuntimeConnectionNode
+from graph_domain.main_digital_twin.RuntimeConnectionNode import RuntimeConnectionNode
 from backend.runtime_connections.TimeseriesInput import TimeseriesInput
 from util.environment_and_configuration import (
     get_environment_variable,

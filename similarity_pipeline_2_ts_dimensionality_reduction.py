@@ -11,7 +11,10 @@ from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 
 import backend.api.python_endpoints.timeseries_endpoints as timeseries_endpoints
-from graph_domain.TimeseriesNode import TimeseriesNodeFlat, TimeseriesValueTypes
+from graph_domain.main_digital_twin.TimeseriesNode import (
+    TimeseriesNodeFlat,
+    TimeseriesValueTypes,
+)
 
 # #############################################################################
 # Timeseries dimensionality reduction
@@ -47,6 +50,8 @@ feature_lists = [
 
 pca = PCA(n_components=3)
 reduced_feature_lists = pca.fit_transform(feature_lists)
+
+np.cumsum(pca.explained_variance_ratio_)
 
 print("Writing to KG-DT...")
 i = 0

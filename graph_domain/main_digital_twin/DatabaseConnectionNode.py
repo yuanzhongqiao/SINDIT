@@ -1,34 +1,34 @@
 from __future__ import annotations
-
 from dataclasses import dataclass
 from enum import Enum
+from typing import List
 
 from dataclasses_json import dataclass_json
 from py2neo.ogm import Property, RelatedTo
+
+from graph_domain.BaseNode import BaseNode
+from graph_domain.main_digital_twin.UnitNode import UnitNode
+from graph_domain.main_digital_twin.factory_graph_types import NodeTypes
 from backend.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
 )
 
-from graph_domain.BaseNode import BaseNode
-from graph_domain.factory_graph_types import NodeTypes
-from graph_domain.UnitNode import UnitNode
-
-LABEL = NodeTypes.RUNTIME_CONNECTION.value
+LABEL = NodeTypes.DATABASE_CONNECTION.value
 
 
-class RuntimeConnectionTypes(Enum):
-    OPC_UA = "OPC_UA"
-    MQTT = "MQTT"
+class DatabaseConnectionTypes(Enum):
+    INFLUX_DB = "INFLUX_DB"
+    S3 = "S3"
 
 
-REALTIME_CONNECTION_TYPES = [con_type.value for con_type in RuntimeConnectionTypes]
+DATABASE_CONNECTION_TYPES = [con_type.value for con_type in DatabaseConnectionTypes]
 
 
 @dataclass
 @dataclass_json
-class RuntimeConnectionNode(BaseNode):
+class DatabaseConnectionNode(BaseNode):
     """
-    Flat runtime connection node without relationships, only containing properties
+    Flat database connection node without relationships, only containing properties
     """
 
     # Identifier for the node-type:
@@ -46,10 +46,12 @@ class RuntimeConnectionNode(BaseNode):
         default=None
     )  # may be None, if no authentication is required
 
-    # Type of connection
+    # Type of database
     type: str = Property()
-
-    # Info: the actual host, port and if required passwords are not provided by the context-graph but via environmental variables instead
+    # For DBMS that allow multiple databases
+    database: str | None = Property()  # may be none
+    # Group / bucket in which the connections lay
+    group: str | None = Property()  # may be none
 
     def validate_metamodel_conformance(self):
         """
@@ -67,7 +69,7 @@ class RuntimeConnectionNode(BaseNode):
         if self.port_environment_variable is None:
             raise GraphNotConformantToMetamodelError(self, f"Missing port.")
 
-        if not self.type in REALTIME_CONNECTION_TYPES:
+        if not self.type in DATABASE_CONNECTION_TYPES:
             raise GraphNotConformantToMetamodelError(
                 self, f"Unrecognized connection type."
             )

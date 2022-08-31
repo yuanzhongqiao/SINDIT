@@ -1,15 +1,18 @@
 import json
 from typing import List
-from graph_domain.DatabaseConnectionNode import DatabaseConnectionNode
+from graph_domain.main_digital_twin.DatabaseConnectionNode import DatabaseConnectionNode
 from py2neo import Node, NodeMatcher, Relationship
 
 
-from graph_domain.AssetNode import AssetNodeFlat, AssetNodeDeep
-from graph_domain.SupplementaryFileNode import (
+from graph_domain.main_digital_twin.AssetNode import AssetNodeFlat, AssetNodeDeep
+from graph_domain.main_digital_twin.SupplementaryFileNode import (
     SupplementaryFileNodeDeep,
     SupplementaryFileNodeFlat,
 )
-from graph_domain.factory_graph_types import NodeTypes, RelationshipTypes
+from graph_domain.main_digital_twin.factory_graph_types import (
+    NodeTypes,
+    RelationshipTypes,
+)
 from backend.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
 )
@@ -19,7 +22,7 @@ from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
 from backend.knowledge_graph.knowledge_graph_metamodel_validator import (
     validate_result_nodes,
 )
-from graph_domain.ExtractedKeywordNode import ExtractedKeywordNode
+from graph_domain.similarities.ExtractedKeywordNode import ExtractedKeywordNode
 
 
 class SupplementaryFileNodesDao(object):

@@ -1,9 +1,12 @@
 from typing import Dict, List
-from graph_domain.RuntimeConnectionNode import (
+from graph_domain.main_digital_twin.RuntimeConnectionNode import (
     RuntimeConnectionNode,
     RuntimeConnectionTypes,
 )
-from graph_domain.TimeseriesNode import TimeseriesNodeDeep, TimeseriesNodeFlat
+from graph_domain.main_digital_twin.TimeseriesNode import (
+    TimeseriesNodeDeep,
+    TimeseriesNodeFlat,
+)
 from backend.runtime_connections.RuntimeConnection import RuntimeConnection
 
 from backend.runtime_connections.TimeseriesInput import TimeseriesInput

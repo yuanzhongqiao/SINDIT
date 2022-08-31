@@ -1,6 +1,6 @@
 import abc
 
-from graph_domain.DatabaseConnectionNode import DatabaseConnectionNode
+from graph_domain.main_digital_twin.DatabaseConnectionNode import DatabaseConnectionNode
 from util.environment_and_configuration import get_environment_variable
 
 

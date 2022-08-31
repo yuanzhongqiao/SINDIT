@@ -1,9 +1,12 @@
 import json
 from typing import List
-from graph_domain.DatabaseConnectionNode import DatabaseConnectionNode
+from graph_domain.main_digital_twin.DatabaseConnectionNode import DatabaseConnectionNode
 
-from graph_domain.AssetNode import AssetNodeFlat, AssetNodeDeep
-from graph_domain.factory_graph_types import NodeTypes, RelationshipTypes
+from graph_domain.main_digital_twin.AssetNode import AssetNodeFlat, AssetNodeDeep
+from graph_domain.main_digital_twin.factory_graph_types import (
+    NodeTypes,
+    RelationshipTypes,
+)
 from backend.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
 )

@@ -5,7 +5,7 @@ from frontend import resources_manager
 from frontend.main_column.factory_graph.factory_graph_layout import (
     CY_GRAPH_STYLE_STATIC,
 )
-from graph_domain.factory_graph_types import (
+from graph_domain.main_digital_twin.factory_graph_types import (
     NODE_TYPE_STRINGS,
     RELATIONSHIP_TYPES_FOR_NODE_TYPE,
     NodeTypes,

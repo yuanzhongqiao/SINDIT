@@ -35,11 +35,11 @@ from frontend.right_sidebar.node_data_tab.file_visualization.visualizer_implemen
     jpg_visualizer,
     cad_visualizer,
 )
-from graph_domain.SupplementaryFileNode import (
+from graph_domain.main_digital_twin.SupplementaryFileNode import (
     SupplementaryFileNodeFlat,
     SupplementaryFileTypes,
 )
-from graph_domain.factory_graph_types import NodeTypes
+from graph_domain.main_digital_twin.factory_graph_types import NodeTypes
 from util.environment_and_configuration import (
     ConfigGroups,
     get_configuration,

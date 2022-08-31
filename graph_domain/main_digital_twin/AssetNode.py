@@ -5,9 +5,14 @@ from dataclasses_json import dataclass_json
 from py2neo.ogm import Model, Property, RelatedTo
 
 from graph_domain.BaseNode import BaseNode
-from graph_domain.SupplementaryFileNode import SupplementaryFileNodeDeep
-from graph_domain.TimeseriesNode import TimeseriesNodeDeep
-from graph_domain.factory_graph_types import NodeTypes, RelationshipTypes
+from graph_domain.main_digital_twin.SupplementaryFileNode import (
+    SupplementaryFileNodeDeep,
+)
+from graph_domain.main_digital_twin.TimeseriesNode import TimeseriesNodeDeep
+from graph_domain.main_digital_twin.factory_graph_types import (
+    NodeTypes,
+    RelationshipTypes,
+)
 
 LABEL = NodeTypes.ASSET.value
 TIMESERIES_RELATIONSHIP = RelationshipTypes.HAS_TIMESERIES.value

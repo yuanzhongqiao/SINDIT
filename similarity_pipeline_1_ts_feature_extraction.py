@@ -9,7 +9,10 @@ from sklearn.cluster import DBSCAN
 from sklearn.decomposition import PCA
 
 import backend.api.python_endpoints.timeseries_endpoints as timeseries_endpoints
-from graph_domain.TimeseriesNode import TimeseriesNodeFlat, TimeseriesValueTypes
+from graph_domain.main_digital_twin.TimeseriesNode import (
+    TimeseriesNodeFlat,
+    TimeseriesValueTypes,
+)
 
 
 # #############################################################################

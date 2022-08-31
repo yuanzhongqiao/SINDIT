@@ -6,7 +6,7 @@ from frontend.right_sidebar.node_data_tab.timeseries_graph import (
 from frontend.right_sidebar.node_data_tab.file_visualization import (
     file_visualization_layout,
 )
-from graph_domain.factory_graph_types import NodeTypes
+from graph_domain.main_digital_twin.factory_graph_types import NodeTypes
 
 
 def get_layout(selected_el):
