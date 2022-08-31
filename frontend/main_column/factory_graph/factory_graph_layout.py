@@ -12,7 +12,7 @@ from graph_domain.main_digital_twin.DatabaseConnectionNode import DatabaseConnec
 from graph_domain.main_digital_twin.AssetNode import AssetNodeDeep
 from graph_domain.main_digital_twin.TimeseriesNode import TimeseriesNodeDeep
 from graph_domain.main_digital_twin.UnitNode import UnitNode
-from graph_domain.main_digital_twin.factory_graph_types import (
+from graph_domain.factory_graph_types import (
     UNSPECIFIED_LABEL,
     NodeTypes,
     RelationshipTypes,

@@ -11,7 +11,7 @@ from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
 from backend.knowledge_graph.knowledge_graph_metamodel_validator import (
     validate_result_nodes,
 )
-from graph_domain.main_digital_twin.factory_graph_types import (
+from graph_domain.factory_graph_types import (
     NodeTypes,
     RelationshipTypes,
 )

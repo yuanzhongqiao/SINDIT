@@ -8,7 +8,7 @@ from py2neo.ogm import Property, RelatedTo
 
 from graph_domain.BaseNode import BaseNode
 from graph_domain.main_digital_twin.UnitNode import UnitNode
-from graph_domain.main_digital_twin.factory_graph_types import NodeTypes
+from graph_domain.factory_graph_types import NodeTypes
 from backend.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
 )

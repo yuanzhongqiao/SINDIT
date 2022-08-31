@@ -39,7 +39,7 @@ from graph_domain.main_digital_twin.SupplementaryFileNode import (
     SupplementaryFileNodeFlat,
     SupplementaryFileTypes,
 )
-from graph_domain.main_digital_twin.factory_graph_types import NodeTypes
+from graph_domain.factory_graph_types import NodeTypes
 from util.environment_and_configuration import (
     ConfigGroups,
     get_configuration,

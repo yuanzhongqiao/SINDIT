@@ -11,7 +11,7 @@ from graph_domain.main_digital_twin.DatabaseConnectionNode import DatabaseConnec
 from graph_domain.main_digital_twin.RuntimeConnectionNode import RuntimeConnectionNode
 from graph_domain.similarities.TimeseriesClusterNode import TimeseriesClusterNode
 from graph_domain.main_digital_twin.UnitNode import UnitNode
-from graph_domain.main_digital_twin.factory_graph_types import (
+from graph_domain.factory_graph_types import (
     NodeTypes,
     RelationshipTypes,
 )

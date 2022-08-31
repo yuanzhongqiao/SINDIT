@@ -5,7 +5,7 @@ from dataclasses_json import dataclass_json
 from py2neo.ogm import Property
 
 from graph_domain.BaseNode import BaseNode
-from graph_domain.main_digital_twin.factory_graph_types import NodeTypes
+from graph_domain.factory_graph_types import NodeTypes
 from backend.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
 )

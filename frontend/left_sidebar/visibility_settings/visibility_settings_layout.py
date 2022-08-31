@@ -1,7 +1,7 @@
 import dash_bootstrap_components as dbc
 from dash import html, dcc
 
-from graph_domain.main_digital_twin.factory_graph_types import (
+from graph_domain.factory_graph_types import (
     NodeTypes,
     PseudoNodeTypes,
 )
@@ -16,7 +16,7 @@ def get_layout():
         [
             dbc.Checklist(
                 options=[
-                    {"label": "Show machines", "value": NodeTypes.ASSET.value},
+                    {"label": "Show assets", "value": NodeTypes.ASSET.value},
                     {
                         "label": "Show timeseries inputs",
                         "value": NodeTypes.TIMESERIES_INPUT.value,
@@ -45,6 +45,22 @@ def get_layout():
                     {
                         "label": "Show asset similarities",
                         "value": PseudoNodeTypes.ASSET_SIMILARITY_PSEUDO_NODE.value,
+                    },
+                    {
+                        "label": "Show annotation definitions",
+                        "value": NodeTypes.ANNOTATION_DEFINITION.value,
+                    },
+                    {
+                        "label": "Show annotation instances",
+                        "value": NodeTypes.ANNOTATION_INSTANCE.value,
+                    },
+                    {
+                        "label": "Show annotation pre-indicators",
+                        "value": NodeTypes.ANNOTATION_PRE_INDICATOR.value,
+                    },
+                    {
+                        "label": "Show annotation timeseries matchers",
+                        "value": NodeTypes.ANNOTATION_TS_MATCHER.value,
                     },
                 ],
                 value=[

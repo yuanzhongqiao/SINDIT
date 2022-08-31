@@ -3,7 +3,7 @@ from typing import List
 
 from py2neo import Node, NodeMatcher, Relationship
 
-from graph_domain.main_digital_twin.factory_graph_types import (
+from graph_domain.factory_graph_types import (
     NodeTypes,
     RelationshipTypes,
 )

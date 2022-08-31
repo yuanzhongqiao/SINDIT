@@ -3,7 +3,7 @@ from typing import List
 from graph_domain.main_digital_twin.DatabaseConnectionNode import DatabaseConnectionNode
 
 from graph_domain.main_digital_twin.AssetNode import AssetNodeFlat, AssetNodeDeep
-from graph_domain.main_digital_twin.factory_graph_types import (
+from graph_domain.factory_graph_types import (
     NodeTypes,
     RelationshipTypes,
 )
