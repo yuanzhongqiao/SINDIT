@@ -16,5 +16,3 @@ RUN ./container-requirements-initializer.sh
 
 EXPOSE 8050
 EXPOSE 8000
-
-# ENTRYPOINT ["python", "/opt/sindit/main.sh" ]
