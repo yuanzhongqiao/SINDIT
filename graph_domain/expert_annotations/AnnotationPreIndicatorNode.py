@@ -22,7 +22,7 @@ from graph_domain.factory_graph_types import (
 from backend.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
 )
-from util.datetime_utils import neo4j_str_to_datetime
+from util.datetime_utils import neo4j_str_or_datetime_to_datetime, neo4j_str_to_datetime
 
 LABEL = NodeTypes.ANNOTATION_PRE_INDICATOR.value
 
@@ -42,13 +42,21 @@ class AnnotationPreIndicatorNodeFlat(BaseNode):
 
     @property
     def creation_date_time(self) -> datetime:
-        if isinstance(self._creation_date_time, datetime):
-            return self._creation_date_time
-        else:
-            return neo4j_str_to_datetime(self._creation_date_time)
+        return neo4j_str_or_datetime_to_datetime(self._creation_date_time)
 
-    indicator_start_date_time: datetime = Property()
-    indicator_end_date_time: datetime = Property()
+    _indicator_start_date_time: str | datetime = Property(
+        key="indicator_start_date_time"
+    )
+
+    @property
+    def indicator_start_date_time(self) -> datetime:
+        return neo4j_str_or_datetime_to_datetime(self._indicator_start_date_time)
+
+    _indicator_end_date_time: str | datetime = Property(key="indicator_end_date_time")
+
+    @property
+    def indicator_end_date_time(self) -> datetime:
+        return neo4j_str_or_datetime_to_datetime(self._indicator_end_date_time)
 
     def validate_metamodel_conformance(self):
         """

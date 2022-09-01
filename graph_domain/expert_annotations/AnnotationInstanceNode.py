@@ -26,6 +26,7 @@ from graph_domain.factory_graph_types import (
 from backend.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
 )
+from util.datetime_utils import neo4j_str_or_datetime_to_datetime, neo4j_str_to_datetime
 
 LABEL = NodeTypes.ANNOTATION_INSTANCE.value
 
@@ -41,9 +42,25 @@ class AnnotationInstanceNodeFlat(BaseNode):
     __primarylabel__ = LABEL
 
     # Additional properties:
-    creation_date_time: datetime = Property()
-    occurance_start_date_time: datetime = Property()
-    occurance_end_date_time: datetime = Property()
+    _creation_date_time: str | datetime = Property(key="creation_date_time")
+
+    @property
+    def creation_date_time(self) -> datetime:
+        return neo4j_str_or_datetime_to_datetime(self._creation_date_time)
+
+    _occurance_start_date_time: str | datetime = Property(
+        key="occurance_start_date_time"
+    )
+
+    @property
+    def occurance_start_date_time(self) -> datetime:
+        return neo4j_str_or_datetime_to_datetime(self._occurance_start_date_time)
+
+    _occurance_end_date_time: str | datetime = Property(key="occurance_end_date_time")
+
+    @property
+    def occurance_end_date_time(self) -> datetime:
+        return neo4j_str_or_datetime_to_datetime(self._occurance_end_date_time)
 
     def validate_metamodel_conformance(self):
         """

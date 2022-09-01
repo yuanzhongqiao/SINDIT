@@ -76,9 +76,7 @@ class SupplementaryFileNodesDao(object):
             '(_)<-[:SECONDARY_FORMAT *0..]-(: SUPPLEMENTARY_FILE {iri: "' + iri + '"}) '
         )
 
-        return [
-            SupplementaryFileNodeFlat.from_json(m.to_json()) for m in suppl_file_matches
-        ]
+        return suppl_file_matches.all()
 
     @validate_result_nodes
     def get_file_nodes_flat(self, exclude_secondary_format_nodes: bool = True):
@@ -98,9 +96,7 @@ class SupplementaryFileNodesDao(object):
             exclude_secondary_format_filter
         )
 
-        files_flat = [m for m in files_flat_matches]
-
-        return files_flat
+        return files_flat_matches.all()
 
     @validate_result_nodes
     def get_file_nodes_deep(self, exclude_secondary_format_nodes: bool = True):
@@ -119,11 +115,7 @@ class SupplementaryFileNodesDao(object):
             exclude_secondary_format_filter
         )
 
-        # Get rid of the 'Match' and 'RelatedObject' types in favor of normal lists automatically
-        # by using the auto-generated json serializer
-        return [
-            SupplementaryFileNodeDeep.from_json(m.to_json()) for m in file_deep_matches
-        ]
+        return file_deep_matches.all()
 
     @validate_result_nodes
     def get_file_nodes_flat_by_type(
@@ -145,9 +137,7 @@ class SupplementaryFileNodesDao(object):
             '_.type="' + type + exclude_secondary_format_filter
         )
 
-        files_flat = [m for m in files_flat_matches]
-
-        return files_flat
+        return files_flat_matches.all()
 
     @validate_result_nodes
     def get_file_nodes_deep_by_type(
@@ -168,11 +158,7 @@ class SupplementaryFileNodesDao(object):
             '_.type="' + type + exclude_secondary_format_filter
         )
 
-        # Get rid of the 'Match' and 'RelatedObject' types in favor of normal lists automatically
-        # by using the auto-generated json serializer
-        return [
-            SupplementaryFileNodeDeep.from_json(m.to_json()) for m in file_deep_matches
-        ]
+        return file_deep_matches.all()
 
     def reset_extracted_keywords(self):
         self.ps.graph.run(

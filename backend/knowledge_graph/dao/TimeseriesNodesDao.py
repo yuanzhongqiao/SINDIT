@@ -56,9 +56,8 @@ class TimeseriesNodesDao(object):
         :raises GraphNotConformantToMetamodelError: If Graph not conformant
         """
         timeseries_flat_matches = self.ps.repo.match(model=TimeseriesNodeFlat)
-        timeseries_flat = [m for m in timeseries_flat_matches]
 
-        return timeseries_flat
+        return timeseries_flat_matches.all()
 
     @validate_result_nodes
     def get_timeseries_deep(self):
@@ -68,12 +67,7 @@ class TimeseriesNodesDao(object):
         :return:
         """
         timeseries_deep_matches = self.ps.repo.match(model=TimeseriesNodeDeep)
-
-        # Get rid of the 'Match' and 'RelatedObject' types in favor of normal lists automatically
-        # by using the auto-generated json serializer
-        return [
-            TimeseriesNodeDeep.from_json(m.to_json()) for m in timeseries_deep_matches
-        ]
+        return timeseries_deep_matches.all()
 
     # validator used manually because result type is json instead of node-list
     def get_timeseries_deep_json(self):
@@ -84,13 +78,7 @@ class TimeseriesNodesDao(object):
         :param self:
         :return:
         """
-        timeseries_deep_matches = self.ps.repo.match(model=TimeseriesNodeDeep)
-
-        # Validate manually:
-        for timeseries in timeseries_deep_matches:
-            timeseries.validate_metamodel_conformance()
-
-        return json.dumps([m.to_json() for m in timeseries_deep_matches])
+        return json.dumps([a.to_json() for a in self.get_timeseries_deep()])
 
     def update_feature_dict(self, iri: str, feature_dict: dict):
         matcher = NodeMatcher(self.ps.graph)

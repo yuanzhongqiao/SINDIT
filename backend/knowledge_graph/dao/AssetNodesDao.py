@@ -49,9 +49,8 @@ class AssetsDao(object):
         :raises GraphNotConformantToMetamodelError: If Graph not conformant
         """
         assets_flat_matches = self.ps.repo.match(model=AssetNodeFlat)
-        assets_flat = [m for m in assets_flat_matches]
 
-        return assets_flat
+        return assets_flat_matches.all()
 
     @validate_result_nodes
     def get_assets_deep(self):
@@ -62,9 +61,7 @@ class AssetsDao(object):
         """
         assets_deep_matches = self.ps.repo.match(model=AssetNodeDeep)
 
-        # Get rid of the 'Match' and 'RelatedObject' types in favor of normal lists automatically
-        # by using the auto-generated json serializer
-        return [AssetNodeDeep.from_json(m.to_json()) for m in assets_deep_matches]
+        return assets_deep_matches.all()
 
     # validator used manually because result type is json instead of node-list
     def get_assets_deep_json(self):
@@ -75,13 +72,7 @@ class AssetsDao(object):
         :param self:
         :return:
         """
-        assets_deep_matches = self.ps.repo.match(model=AssetNodeDeep)
-
-        # Validate manually:
-        for asset in assets_deep_matches:
-            asset.validate_metamodel_conformance()
-
-        return json.dumps([m.to_json() for m in assets_deep_matches])
+        return json.dumps([a.to_json() for a in self.get_assets_deep()])
 
     def add_asset_similarity(
         self,
