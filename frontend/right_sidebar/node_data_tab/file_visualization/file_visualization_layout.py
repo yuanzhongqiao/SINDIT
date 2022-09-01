@@ -21,24 +21,11 @@ def get_layout():
                 is_open=False,
                 duration=5000,
             ),
-            html.Div(id="suppl_file_visualization_container")
+            dcc.Loading(
+                type="dot",
+                color="#446e9b",
+                children=[html.Div(id="suppl_file_visualization_container")],
+            ),
         ]
     )
     return graph
-
-
-# def get_figure():
-#     fig = plotly.subplots.make_subplots(
-#         rows=1,
-#         cols=1,
-#         vertical_spacing=0.2,
-#     )
-#     fig["layout"]["margin"] = {"l": 30, "r": 10, "b": 30, "t": 10}
-#     fig["layout"]["legend"] = {"x": 0, "y": 1, "xanchor": "left"}
-
-#     fig.update_layout(
-#         # Used to disable automatic reset of the zoom etc. at every refresh:
-#         uirevision="no_change",
-#     )
-
-#     return fig

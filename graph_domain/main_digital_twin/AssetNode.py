@@ -75,7 +75,7 @@ class AssetNodeDeep(AssetNodeFlat):
     )
 
     @property
-    def annotations(self) -> List[TimeseriesNodeDeep]:
+    def annotations(self) -> List[AnnotationInstanceNodeDeep]:
         return [annotation for annotation in self._annotations]
 
     _scanned_annotations: List[AnnotationDefinitionNodeDeep] = RelatedTo(
@@ -83,7 +83,7 @@ class AssetNodeDeep(AssetNodeFlat):
     )
 
     @property
-    def scanned_annotations(self) -> List[TimeseriesNodeDeep]:
+    def scanned_annotations(self) -> List[AnnotationDefinitionNodeDeep]:
         return [annotation for annotation in self._scanned_annotations]
 
     def validate_metamodel_conformance(self):
