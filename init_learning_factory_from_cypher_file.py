@@ -8,6 +8,9 @@ from datetime import datetime
 import os
 import sys
 import py2neo
+from graph_domain.expert_annotations.AnnotationPreIndicatorNode import (
+    AnnotationPreIndicatorNodeFlat,
+)
 from util.environment_and_configuration import get_environment_variable
 import boto3
 from botocore.client import Config
@@ -49,6 +52,17 @@ def setup_knowledge_graph():
     with open(LEARNING_FACTORY_CYPHER_FILE, "r") as cypher_file:
         cypher_query = cypher_file.read().strip()
     g.run(cypher_query)
+
+    # # Create node with datetime
+    # node = AnnotationPreIndicatorNodeFlat(
+    #     iri="testiri",
+    #     id_short="test_id_short",
+    #     _creation_date_time=datetime.now(),
+    #     indicator_start_date_time=datetime.now(),
+    #     indicator_end_date_time=datetime.now(),
+    # )
+
+    # g.create(node)
 
     g.commit(tx)
 

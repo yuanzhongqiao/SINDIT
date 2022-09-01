@@ -75,13 +75,13 @@ class AssetsDao(object):
         :param self:
         :return:
         """
-        machines_deep_matches = self.ps.repo.match(model=AssetNodeDeep)
+        assets_deep_matches = self.ps.repo.match(model=AssetNodeDeep)
 
         # Validate manually:
-        for machine in machines_deep_matches:
-            machine.validate_metamodel_conformance()
+        for asset in assets_deep_matches:
+            asset.validate_metamodel_conformance()
 
-        return json.dumps([m.to_json() for m in machines_deep_matches])
+        return json.dumps([m.to_json() for m in assets_deep_matches])
 
     def add_asset_similarity(
         self,

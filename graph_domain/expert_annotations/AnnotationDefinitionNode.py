@@ -4,7 +4,7 @@ import json
 from typing import List
 
 from dataclasses_json import dataclass_json
-from py2neo.ogm import Property, RelatedTo
+from py2neo.ogm import Property, RelatedTo, RelatedFrom
 
 from graph_domain.BaseNode import BaseNode
 from graph_domain.expert_annotations.AnnotationInstanceNode import (
@@ -60,7 +60,7 @@ class AnnotationDefinitionNodeDeep(AnnotationDefinitionNodeFlat):
 
     __primarylabel__ = LABEL
 
-    _instances: List[AnnotationInstanceNodeDeep] = RelatedTo(
+    _instances: List[AnnotationInstanceNodeDeep] = RelatedFrom(
         AnnotationInstanceNodeDeep, RelationshipTypes.INSTANCE_OF.value
     )
 
