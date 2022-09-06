@@ -32,3 +32,7 @@
     background-color: #446e9b;
     background-image: none;
 } */
+
+.sidebar-collapsed {
+    display: none;
+}

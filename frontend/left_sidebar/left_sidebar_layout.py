@@ -11,13 +11,43 @@ def get_layout():
     Layout of the left sidebar. Contains global information and stats as well as some settings
     :return:
     """
-    return dbc.Col(
+    return html.Div(
         children=[
-            visibility_settings_layout.get_layout(),
-            html.Div(style={"height": "30px"}),
             global_information_layout.get_layout(),
-            html.Div(style={"height": "30px"}),
-            datetime_selector_layout.get_layout(),
+            dbc.Accordion(
+                [
+                    dbc.AccordionItem(
+                        [
+                            visibility_settings_layout.get_layout(),
+                        ],
+                        title="Graph visibility settings",
+                    ),
+                    # dbc.AccordionItem(
+                    #     [
+                    #         html.Div(style={"height": "30px"}),
+                    #     ],
+                    #     title=""
+                    # ),
+                    # dbc.AccordionItem(
+                    #     [
+                    #         global_information_layout.get_layout(),
+                    #     ],
+                    #     title=""
+                    # ),
+                    # dbc.AccordionItem(
+                    #     [
+                    #         html.Div(style={"height": "30px"}),
+                    #     ],
+                    #     title=""
+                    # ),
+                    dbc.AccordionItem(
+                        [
+                            datetime_selector_layout.get_layout(),
+                        ],
+                        title="Timeseries date-time selection",
+                    ),
+                ]
+            ),
         ],
-        width=2,
+        style={"flex": "2", "padding": "1rem", "min-width": "250px"},
     )

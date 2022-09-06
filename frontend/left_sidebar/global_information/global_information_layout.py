@@ -1,8 +1,9 @@
 from dash import html
+import dash_bootstrap_components as dbc
 
 
 def get_layout():
-    return html.Div(id='global-information-container')
+    return dbc.Card([html.Div(id="global-information-container")])
 
 
 def get_content():

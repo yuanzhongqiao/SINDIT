@@ -10,23 +10,34 @@ def get_layout():
     Layout of the right sidebar. Contains context details for selected elements of the main graph
     :return:
     """
-    return dbc.Col(
+    return html.Div(
+        id="right-sidebar-collapse-col",
         children=[
-            # Selected node / edge:
-            graph_selector_info_layout.get_layout(),
-            # Tabs:
-            dcc.Tabs(
-                id="tabs-infos",
-                value="tab-node-information",
+            dbc.Collapse(
+                id="right-sidebar-collapse",
                 children=[
-                    dcc.Tab(label="Node information", value="tab-node-information"),
-                    dcc.Tab(label="Node data", value="tab-node-data"),
+                    # Selected node / edge:
+                    graph_selector_info_layout.get_layout(),
+                    # Tabs:
+                    dcc.Tabs(
+                        id="tabs-infos",
+                        value="tab-node-information",
+                        children=[
+                            dcc.Tab(label="Node details", value="tab-node-information"),
+                            dcc.Tab(label="Data visualization", value="tab-node-data"),
+                        ],
+                        persistence=True,
+                        persistence_type="session",
+                    ),
+                    html.Div(id="tabs-content"),
                 ],
-                persistence=True,
-                persistence_type="session",
             ),
-            html.Div(id="tabs-content"),
         ],
-        width=3,
-        style={"min-width": "300px"},
+        # width=3,
+        style={
+            "flex": "3",
+            "min-width": "300px",
+            "padding": "1rem",
+            "transition": "all 2s linear",
+        },
     )

@@ -15,36 +15,54 @@ def get_layout():
     :return:
     """
     return html.Div(
+        style={
+            "max-height": "100vh",
+            "height": "100vh",
+            "display": "flex",
+            "flex-direction": "column",
+        },
         children=[
             # Navbar:
             navbar_layout.get_layout(),
             # Body:
             dbc.Card(
-                dbc.CardBody(
-                    [
-                        dbc.Row(
-                            children=[
-                                # Left sidebar (stats):
-                                left_sidebar_layout.get_layout(),
-                                # Main column (graph):
-                                main_column_layout.get_layout(),
-                                # Right sidebar (context details):
-                                right_sidebar_layout.get_layout(),
-                                # Interval pseudo component for periodic refreshes:
-                                dcc.Interval(
-                                    id="interval-component",
-                                    interval=get_configuration_int(
-                                        ConfigGroups.FRONTEND, "refresh_interval"
+                style={"flex": 1},
+                id="content-card",
+                children=[
+                    dbc.CardBody(
+                        [
+                            html.Div(
+                                children=[
+                                    # Left sidebar (stats):
+                                    left_sidebar_layout.get_layout(),
+                                    # Main column (graph):
+                                    main_column_layout.get_layout(),
+                                    # Right sidebar (context details):
+                                    right_sidebar_layout.get_layout(),
+                                    # Interval pseudo component for periodic refreshes:
+                                    dcc.Interval(
+                                        id="interval-component",
+                                        interval=get_configuration_int(
+                                            ConfigGroups.FRONTEND, "refresh_interval"
+                                        ),
+                                        # interval=cfg.config['frontend']['refresh_interval'],
+                                        # interval=5000,
+                                        n_intervals=0,
                                     ),
-                                    # interval=cfg.config['frontend']['refresh_interval'],
-                                    # interval=5000,
-                                    n_intervals=0,
-                                ),
-                            ],
-                            align="start",
-                        ),
-                    ]
-                )
+                                ],
+                                style={
+                                    "display": "flex",
+                                    "flex-flow": "row",
+                                    "height": "100%",
+                                    "max-height": "100%",
+                                    "width": "100%",
+                                    "max-width": "100%",
+                                },
+                                id="content-rows-container",
+                            ),
+                        ]
+                    )
+                ],
             ),
-        ]
+        ],
     )
