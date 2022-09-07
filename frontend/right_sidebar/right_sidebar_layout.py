@@ -33,11 +33,4 @@ def get_layout():
                 ],
             ),
         ],
-        # width=3,
-        style={
-            "flex": "3",
-            "min-width": "400px",
-            "padding": "1rem",
-            "transition": "all 2s linear",
-        },
     )

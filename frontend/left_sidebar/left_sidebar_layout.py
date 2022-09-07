@@ -12,6 +12,7 @@ def get_layout():
     :return:
     """
     return html.Div(
+        id="left-sidebar-container",
         children=[
             global_information_layout.get_layout(),
             dbc.Accordion(
@@ -52,5 +53,4 @@ def get_layout():
                 id="left-sidebar-accordion",
             ),
         ],
-        style={"flex": "2", "padding": "1rem", "min-width": "320px"},
     )

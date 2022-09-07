@@ -6,7 +6,11 @@ from frontend.navbar import navbar_layout
 from frontend.right_sidebar import right_sidebar_layout
 from frontend.left_sidebar import left_sidebar_layout
 from frontend.main_column import main_column_layout
-from util.environment_and_configuration import ConfigGroups, get_configuration_int
+from util.environment_and_configuration import (
+    ConfigGroups,
+    get_configuration,
+    get_configuration_int,
+)
 
 
 def get_layout():
@@ -15,12 +19,7 @@ def get_layout():
     :return:
     """
     return html.Div(
-        style={
-            "max-height": "100vh",
-            "height": "100vh",
-            "display": "flex",
-            "flex-direction": "column",
-        },
+        id="full-page-container",
         children=[
             # Navbar:
             navbar_layout.get_layout(),
@@ -50,17 +49,66 @@ def get_layout():
                                         n_intervals=0,
                                     ),
                                 ],
-                                style={
-                                    "display": "flex",
-                                    "flex-flow": "row",
-                                    "height": "100%",
-                                    "max-height": "100%",
-                                    "width": "100%",
-                                    "max-width": "100%",
-                                },
                                 id="content-rows-container",
                             ),
-                        ]
+                            html.Div(
+                                id="publication-info-container",
+                                children=[
+                                    html.Div(
+                                        id="publication-date-container",
+                                        className="publication-info-subcontainer",
+                                        children=[
+                                            html.Div(
+                                                "Publication date:",
+                                                className="publication-info-key",
+                                            ),
+                                            html.Div(
+                                                get_configuration(
+                                                    group=ConfigGroups.GENERIC,
+                                                    key="publication_date",
+                                                )
+                                            ),
+                                        ],
+                                    ),
+                                    html.Div(
+                                        id="license-container",
+                                        className="publication-info-subcontainer",
+                                        children=[
+                                            html.Div(
+                                                "License:",
+                                                className="publication-info-key",
+                                            ),
+                                            html.Div(
+                                                id="license-text-container",
+                                                children=[
+                                                    # "This work and the data is restricted by the ",
+                                                    html.A(
+                                                        "Creative Commons Attribition Non Commercial Share Alike 4.0 International license",
+                                                        href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode",
+                                                    ),
+                                                    # ".",
+                                                ],
+                                            ),
+                                        ],
+                                    ),
+                                    html.Div(
+                                        id="github-link-container",
+                                        className="publication-info-subcontainer",
+                                        children=[
+                                            html.Div(
+                                                "Source code:",
+                                                className="publication-info-key",
+                                            ),
+                                            html.A(
+                                                "https://github.com/SINTEF-9012/SINDIT",
+                                                href="https://github.com/SINTEF-9012/SINDIT",
+                                            ),
+                                        ],
+                                    ),
+                                ],
+                            ),
+                        ],
+                        id="main-card-body",
                     )
                 ],
             ),

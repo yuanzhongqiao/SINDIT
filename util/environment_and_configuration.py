@@ -14,6 +14,7 @@ PATH_TO_CONFIG = "environment_and_configuration/sindit_config.cfg"
 
 
 class ConfigGroups(Enum):
+    GENERIC = "generic"
     FRONTEND = "frontend"
     API = "api"
 
