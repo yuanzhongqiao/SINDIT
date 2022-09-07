@@ -26,5 +26,5 @@ def get_layout():
                 href="https://www.sintef.no",
             ),
         ],
-        color="#446e9b",
+        # color="#446e9b",
     )
