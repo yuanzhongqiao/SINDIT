@@ -44,9 +44,12 @@ def get_layout():
                         [
                             datetime_selector_layout.get_layout(),
                         ],
-                        title="Timeseries date-time selection",
+                        title="Time-series range selection",
                     ),
-                ]
+                ],
+                persistence=True,
+                persistence_type="session",
+                id="left-sidebar-accordion",
             ),
         ],
         style={"flex": "2", "padding": "1rem", "min-width": "320px"},

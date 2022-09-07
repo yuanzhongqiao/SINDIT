@@ -40,6 +40,7 @@ def get_layout():
                         id="graph-header-container",
                         children=[
                             dbc.Row(
+                                id="graph-header-row",
                                 children=[
                                     dbc.Col(
                                         html.Div("Factory graph"),
@@ -60,14 +61,15 @@ def get_layout():
                                                             "margin-left": "5px",
                                                         },
                                                     ),
-                                                ]
+                                                ],
+                                                id="reload-button-div",
                                             ),
                                             id="graph-reload-button",
                                             n_clicks=0,
                                             size="sm",
                                             outline=True,
                                         ),
-                                        style={"height": "100%", "max-width": "155px"},
+                                        style={"max-width": "155px"},
                                         align="center",
                                     ),
                                 ],

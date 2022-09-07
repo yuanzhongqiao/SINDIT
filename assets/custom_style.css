@@ -39,6 +39,7 @@
     background-image: none !important;
     padding-left: 1rem;
     padding-right: 1rem;
+    height: 38px;
 }
 
 .sidebar-collapsed {
@@ -46,22 +47,29 @@
 }
 
 .card-header {
-    height: 48px;
+    height: 38px;
     background-color: #EBF2FA;
     font-weight: bold;
 }
 
 .accordion-header {
-    height: 48px;
+    height: 38px;
     background-color: #EBF2FA;
     font-weight: bold;
+    font-size: small;
 }
 
 .accordion-button {
     font-weight: bold;
+    font-size: small;
     color: #777777 !important;
     height: 100%;
+    /* background-color: #EBF2FA; */
 
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: #EBF2FA;
 }
 
 .accordion-button:not(.collapsed)::after {
@@ -69,10 +77,66 @@
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23777'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e") !important;
 }
 
+tbody,
+td,
+tfoot,
+th,
+thead,
 tr {
-    padding-bottom: 5px;
+    /* border-bottom-width: 0px !important;
+    border-top-width: 0 !important;
+    border-left-width: 0 !important;
+    border-right-width: 0 !important; */
+    border-width: 0 !important;
+}
+
+tr {
+    /* padding-bottom: 5px; */
+    border-color: transparent;
+    /* border-width: unset !important; */
+    border-bottom-color: currentColor;
+    border-bottom-width: 0.8px !important;
+}
+
+/* td {
+    border-bottom-width: 1.5px !important;
+} */
+
+table {
+    margin-bottom: 0 !important;
+}
+
+table>:last-child {
+    border-bottom-color: transparent;
 }
 
 .content-td {
     text-align: end;
+    max-width: 120px;
+}
+
+body {
+    font-size: small;
+}
+
+#graph-header-row {
+    height: 100% !important;
+    width: 100%;
+    margin: 0;
+}
+
+#graph-header-container {
+    padding: 0;
+    padding-left: 0.5rem;
+}
+
+#reload-button-div {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+}
+
+
+.datetime-selector-input {
+    width: 65px
 }

@@ -1,9 +1,7 @@
 from frontend.app import app
 from dash.dependencies import Input, Output
 from datetime import timedelta
-from frontend.left_sidebar.datetime_selector.datetime_selector_layout import (
-    transform_value,
-)
+
 
 from frontend.left_sidebar.global_information import global_information_layout
 
@@ -21,7 +19,7 @@ def update_output(realtime_toggle):
     :param realtime_toggle:
     :return:
     """
-    if realtime_toggle:
+    if True in realtime_toggle:
         return True, True
     else:
         return False, False

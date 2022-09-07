@@ -4,72 +4,86 @@ import dash_mantine_components as dmc
 import dash_bootstrap_components as dbc
 import dash_daq as daq
 
-# Use the following function when accessing the value of 'my-slider'
-# in callbacks to transform the output value to logarithmic
-def transform_value(value):
-
-    return timedelta(milliseconds=(10**value))
-
 
 def get_layout():
     return html.Div(
         id="datetime-selector-container",
         children=[
-            html.Div("Select visualize date and time"),
+            html.Div(
+                "Range to be displayed:",
+                style={"font-weight": "bold", "margin-bottom": "5px"},
+            ),
             dbc.Row(
                 children=[
                     daq.NumericInput(
                         id="datetime-selector-range-days",
+                        className="datetime-selector-input",
                         label="Days",
                         min=0,
                         max=365,
                         value=0,
-                        style={"width": 70},
                         persistence=True,
                         persistence_type="session",
                     ),
                     daq.NumericInput(
                         id="datetime-selector-range-hours",
+                        className="datetime-selector-input",
                         label="Hours",
                         min=0,
                         max=24,
                         value=0,
-                        style={"width": 70},
                         persistence=True,
                         persistence_type="session",
                     ),
                     daq.NumericInput(
                         id="datetime-selector-range-min",
+                        className="datetime-selector-input",
                         label="Min.",
                         min=0,
                         max=60,
                         value=0,
-                        style={"width": 70},
                         persistence=True,
                         persistence_type="session",
                     ),
                     daq.NumericInput(
                         id="datetime-selector-range-sec",
+                        className="datetime-selector-input",
                         label="Sec.",
                         value=10.00,
                         min=0,
                         max=60,
-                        style={"width": 65},
                         persistence=True,
                         persistence_type="session",
                     ),
                 ]
             ),
-            dbc.Checkbox(
+            html.Div(
+                "Historic or current data:",
+                style={
+                    "font-weight": "bold",
+                    "margin-bottom": "5px",
+                    "margin-top": "20px",
+                },
+            ),
+            dbc.Checklist(
                 id="realtime-switch-input",
-                label="Show real-time data",
-                value=True,
+                options=[{"label": "Show real-time data", "value": True}],
+                value=[True],
                 persistence=True,
+                switch=True,
                 persistence_type="session",
+            ),
+            html.Div(
+                "Historic date and time:",
+                style={
+                    # "font-weight": "bold",
+                    "margin-bottom": "5px",
+                    # "margin-top": "20px",
+                },
             ),
             dmc.DatePicker(
                 id="datetime-selector-date",
-                label="Observed Date",
+                # label="Historic date",
                 # description="Data visualized up to this date",
                 # value=datetime.now().date(),
                 # style={"width": 250},
@@ -77,10 +91,11 @@ def get_layout():
                 disabled=True,
                 persistence=True,
                 persistence_type="session",
+                style={"margin-bottom": "5px"},
             ),
             dmc.TimeInput(
                 id="datetime-selector-time",
-                label="Observed Time:",
+                # label="Historic time:",
                 # description="Data visualized up to this time",
                 # style={"width": 250},
                 # error="Enter a valid time",
@@ -89,6 +104,7 @@ def get_layout():
                 persistence=True,
                 persistence_type="session",
                 disabled=True,
+                # style={"color": "currentColor"},
             ),
         ],
     )

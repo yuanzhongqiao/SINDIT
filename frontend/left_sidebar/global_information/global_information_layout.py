@@ -30,7 +30,7 @@ def get_layout():
                                 ),
                                 html.Tr(
                                     [
-                                        html.Td("Database connections:"),
+                                        html.Td("DB connections:"),
                                         html.Td(
                                             id="status-db-connections",
                                             children=[],
@@ -40,7 +40,7 @@ def get_layout():
                                 ),
                                 html.Tr(
                                     [
-                                        html.Td("Time-series connections:"),
+                                        html.Td("RT connections:"),
                                         html.Td(
                                             id="status-ts-connections",
                                             children=[],
