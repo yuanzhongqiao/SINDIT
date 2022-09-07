@@ -16,11 +16,60 @@ def get_layout():
                 html.Div(
                     id="global-information-container",
                     children=[
-                        dcc.Loading(
-                            type="dot",
-                            color="#446e9b",
-                            children=[],
-                        )
+                        dbc.Table(
+                            [
+                                html.Tr(
+                                    [
+                                        html.Td("System time:"),
+                                        html.Td(
+                                            id="status-system-time",
+                                            children=[],
+                                            className="content-td",
+                                        ),
+                                    ]
+                                ),
+                                html.Tr(
+                                    [
+                                        html.Td("Database connections:"),
+                                        html.Td(
+                                            id="status-db-connections",
+                                            children=[],
+                                            className="content-td",
+                                        ),
+                                    ]
+                                ),
+                                html.Tr(
+                                    [
+                                        html.Td("Time-series connections:"),
+                                        html.Td(
+                                            id="status-ts-connections",
+                                            children=[],
+                                            className="content-td",
+                                        ),
+                                    ]
+                                ),
+                                html.Tr(
+                                    [
+                                        html.Td("Time-series inputs:"),
+                                        html.Td(
+                                            id="status-ts-inputs",
+                                            children=[],
+                                            className="content-td",
+                                        ),
+                                    ]
+                                ),
+                                html.Tr(
+                                    [
+                                        html.Td("Assets"),
+                                        html.Td(
+                                            id="status-assets-count",
+                                            children=[],
+                                            className="content-td",
+                                        ),
+                                    ]
+                                ),
+                            ]
+                        ),
                     ],
                 )
             ),
@@ -29,7 +78,7 @@ def get_layout():
     )
 
 
-def get_content():
-    return html.Div("Will contain connection status etc...")
-    # TODO: connection status, time, node count, edge count...
-    # Directly load from the API as this will be reloaded frequently
+# def get_content():
+#     return html.Div("Will contain connection status etc...")
+#     # TODO: connection status, time, node count, edge count...
+#     # Directly load from the API as this will be reloaded frequently

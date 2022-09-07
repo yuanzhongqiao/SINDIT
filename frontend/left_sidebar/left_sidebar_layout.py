@@ -49,5 +49,5 @@ def get_layout():
                 ]
             ),
         ],
-        style={"flex": "2", "padding": "1rem", "min-width": "250px"},
+        style={"flex": "2", "padding": "1rem", "min-width": "320px"},
     )
