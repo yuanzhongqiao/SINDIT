@@ -27,6 +27,7 @@ class GraphSelectedElement(object):
     is_node: bool = None
 
     # Only for nodes:
+    caption: str | None = None
     position_x: float = None
     position_y: float = None
 
@@ -71,6 +72,7 @@ class GraphSelectedElement(object):
             iri=tap_node["data"]["iri"],
             type=el_type,
             is_node=True,
+            caption=tap_node["data"]["label"],
             position_x=tap_node["position"]["x"],
             position_y=tap_node["position"]["y"],
         )

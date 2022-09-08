@@ -16,20 +16,40 @@ def get_layout():
             dbc.Collapse(
                 id="right-sidebar-collapse",
                 children=[
-                    # Selected node / edge:
-                    graph_selector_info_layout.get_layout(),
-                    # Tabs:
-                    dcc.Tabs(
-                        id="tabs-infos",
-                        value="tab-node-information",
+                    dbc.Card(
+                        id="right-sidebar-card",
                         children=[
-                            dcc.Tab(label="Node details", value="tab-node-information"),
-                            dcc.Tab(label="Data visualization", value="tab-node-data"),
+                            dbc.CardHeader(
+                                id="right-sidebar-card-header",
+                                children=[html.Div("Selected element")],
+                            ),
+                            dbc.CardBody(
+                                id="right-sidebar-card-body",
+                                children=[
+                                    # Selected node / edge:
+                                    graph_selector_info_layout.get_layout(),
+                                    # Tabs:
+                                    dcc.Tabs(
+                                        id="tabs-infos",
+                                        value="tab-node-information",
+                                        children=[
+                                            dcc.Tab(
+                                                label="Node details",
+                                                value="tab-node-information",
+                                            ),
+                                            dcc.Tab(
+                                                label="Data visualization",
+                                                value="tab-node-data",
+                                            ),
+                                        ],
+                                        persistence=True,
+                                        persistence_type="session",
+                                    ),
+                                    html.Div(id="tabs-content"),
+                                ],
+                            ),
                         ],
-                        persistence=True,
-                        persistence_type="session",
                     ),
-                    html.Div(id="tabs-content"),
                 ],
             ),
         ],

@@ -20,7 +20,7 @@ def get_layout():
                             [
                                 html.Tr(
                                     [
-                                        html.Td("System time:"),
+                                        html.Td("System time:", className="key-td"),
                                         html.Td(
                                             id="status-system-time",
                                             children=[],
@@ -30,7 +30,7 @@ def get_layout():
                                 ),
                                 html.Tr(
                                     [
-                                        html.Td("DB connections:"),
+                                        html.Td("DB connections:", className="key-td"),
                                         html.Td(
                                             id="status-db-connections",
                                             children=[],
@@ -40,7 +40,7 @@ def get_layout():
                                 ),
                                 html.Tr(
                                     [
-                                        html.Td("RT connections:"),
+                                        html.Td("RT connections:", className="key-td"),
                                         html.Td(
                                             id="status-ts-connections",
                                             children=[],
@@ -50,7 +50,9 @@ def get_layout():
                                 ),
                                 html.Tr(
                                     [
-                                        html.Td("Time-series inputs:"),
+                                        html.Td(
+                                            "Time-series inputs:", className="key-td"
+                                        ),
                                         html.Td(
                                             id="status-ts-inputs",
                                             children=[],
@@ -60,7 +62,7 @@ def get_layout():
                                 ),
                                 html.Tr(
                                     [
-                                        html.Td("Assets"),
+                                        html.Td("Assets", className="key-td"),
                                         html.Td(
                                             id="status-assets-count",
                                             children=[],

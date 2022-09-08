@@ -18,6 +18,7 @@
     display: flex;
     flex-flow: column;
     padding-bottom: 10px;
+    padding-top: 0px;
 }
 
 #content-rows-container {
@@ -37,7 +38,9 @@
     min-width: 320px;
     height: 100%;
     max-height: 100%;
-    /* overflow: scroll; */
+    overflow: hidden;
+    display: flex;
+    flex-flow: column;
 }
 
 #main-column-container {
@@ -47,6 +50,14 @@
     height: 100%;
     max-height: 100%;
     overflow: hidden;
+    min-width: 350px;
+}
+
+#right-sidebar-collapse {
+    max-height: 100%;
+    overflow: hidden;
+    display: flex;
+    width: 100%;
 }
 
 #right-sidebar-collapse-col {
@@ -56,7 +67,17 @@
     transition: all 2s linear;
     height: 100%;
     max-height: 100%;
-    overflow: scroll;
+    overflow: hidden;
+}
+
+#right-sidebar-card {
+    max-height: 100%;
+    width: 100%;
+}
+
+#right-sidebar-card-header {
+    color: white;
+    background-color: #446e9b;
 }
 
 .custom-table {
@@ -109,8 +130,14 @@
 
 .card-header {
     height: 38px;
+    max-height: 38px;
+    min-height: 38px;
     background-color: #EBF2FA;
     font-weight: bold;
+}
+
+.card-body {
+    max-height: 100%;
 }
 
 .accordion-header {
@@ -174,6 +201,10 @@ table>:last-child {
 .content-td {
     text-align: end;
     max-width: 120px;
+}
+
+.key-td {
+    font-weight: bold;
 }
 
 body {
