@@ -8,7 +8,6 @@ from dataclasses_json import dataclass_json
 from py2neo.ogm import Property, RelatedTo
 
 from graph_domain.BaseNode import BaseNode
-from graph_domain.main_digital_twin.DatabaseConnectionNode import DatabaseConnectionNode
 from graph_domain.main_digital_twin.TimeseriesNode import TimeseriesNodeDeep
 from graph_domain.similarities.TimeseriesClusterNode import TimeseriesClusterNode
 from graph_domain.main_digital_twin.UnitNode import UnitNode

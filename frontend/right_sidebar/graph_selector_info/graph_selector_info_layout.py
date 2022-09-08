@@ -12,6 +12,7 @@ def get_layout():
     :return:
     """
     return html.Div(
+        id="graph-selector-info-container",
         children=[
             dbc.Table(
                 [
@@ -34,7 +35,8 @@ def get_layout():
                                 children=[],
                                 className="content-td",
                             ),
-                        ]
+                        ],
+                        id="selected-element-id-short-container",
                     ),
                     html.Tr(
                         [
@@ -48,5 +50,5 @@ def get_layout():
                     ),
                 ]
             ),
-        ]
+        ],
     )

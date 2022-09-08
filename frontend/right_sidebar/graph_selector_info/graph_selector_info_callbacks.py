@@ -9,6 +9,7 @@ print("Initializing graph selector callbacks...")
 
 @app.callback(
     Output("selected-element-id-short", "children"),
+    Output("selected-element-id-short-container", "style"),
     Output("selected-element-type", "children"),
     Output("selected-element-label", "children"),
     Output("selected-element-label-container", "style"),
@@ -26,11 +27,14 @@ def display_selected_graph_element_info(selected_el_json):
 
     return (
         selected_el.id_short,
+        {"display": "none"}
+        if selected_el.id_short is None or selected_el.id_short == "NA"
+        else {},
         f"{selected_el.type} ({'NODE' if selected_el.is_node else 'EDGE'})",
         selected_el.caption,
         {"display": "none"}
-        if selected_el.caption is not None
-        and selected_el.caption == selected_el.id_short
-        and selected_el.caption != ""
+        if selected_el.caption is None
+        or selected_el.caption == selected_el.id_short
+        or selected_el.caption == ""
         else {},
     )

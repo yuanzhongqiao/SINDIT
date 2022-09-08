@@ -12,9 +12,11 @@ def get_layout():
     """
     return html.Div(
         id="right-sidebar-collapse-col",
+        className="sidebar-collapsed",
         children=[
             dbc.Collapse(
                 id="right-sidebar-collapse",
+                is_open=False,
                 children=[
                     dbc.Card(
                         id="right-sidebar-card",
@@ -29,17 +31,17 @@ def get_layout():
                                     # Selected node / edge:
                                     graph_selector_info_layout.get_layout(),
                                     # Tabs:
-                                    dcc.Tabs(
+                                    dbc.Tabs(
                                         id="tabs-infos",
-                                        value="tab-node-information",
+                                        active_tab="tab-node-information",
                                         children=[
-                                            dcc.Tab(
+                                            dbc.Tab(
                                                 label="Node details",
-                                                value="tab-node-information",
+                                                tab_id="tab-node-information",
                                             ),
-                                            dcc.Tab(
+                                            dbc.Tab(
                                                 label="Data visualization",
-                                                value="tab-node-data",
+                                                tab_id="tab-node-data",
                                             ),
                                         ],
                                         persistence=True,

@@ -277,3 +277,20 @@ body {
 #kg-container>:first-child {
     height: 100%;
 }
+
+#graph-selector-info-container {
+    margin-bottom: 10px;
+}
+
+.nav-link {
+    color: currentColor;
+}
+
+.nav-link.active {
+    font-weight: bold;
+    color: currentColor !important;
+}
+
+.keyword {
+    font-weight: bold;
+}
