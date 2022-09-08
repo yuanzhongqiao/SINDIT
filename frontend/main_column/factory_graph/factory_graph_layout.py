@@ -29,13 +29,15 @@ CY_GRAPH_STYLE_STATIC = resources_manager.load_json("cytoscape-graph-style.json"
 
 def get_layout():
     return html.Div(
-        [
+        id="factory-graph-container",
+        children=[
             # Storage for accessing the selected element
             dcc.Store(id="selected-graph-element-store", storage_type="session"),
             # Timestamp for the selected element storage
             dcc.Store(id="selected-graph-element-timestamp", storage_type="session"),
             dbc.Card(
-                [
+                id="factory-graph-card",
+                children=[
                     dbc.CardHeader(
                         id="graph-header-container",
                         children=[
@@ -84,18 +86,18 @@ def get_layout():
                             id="kg-container",
                             children=[
                                 dcc.Loading(
-                                    # type="graph",
-                                    # type="circle",
+                                    className="kg-loading-indicator-container",
                                     type="dot",
                                     color="#446e9b",
                                     children=[
                                         cyto.Cytoscape(
                                             id="cytoscape-graph",
                                             layout={"name": "preset"},
-                                            style={"width": "100%", "height": "75vh"},
+                                            style={"width": "100%", "height": "100%"},
+                                            responsive=True,
                                             stylesheet=CY_GRAPH_STYLE_STATIC,
                                             className="factory-graph",
-                                        )
+                                        ),
                                     ],
                                 )
                             ],
@@ -131,9 +133,9 @@ def get_layout():
                             )
                         ],
                     ),
-                ]
+                ],
             ),
-        ]
+        ],
     )
 
 

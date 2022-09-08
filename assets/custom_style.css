@@ -40,13 +40,13 @@
     /* overflow: scroll; */
 }
 
-#main-sidebar-container {
+#main-column-container {
     flex: 5;
     padding: 1rem;
     width: 400px;
     height: 100%;
     max-height: 100%;
-    overflow: scroll;
+    overflow: hidden;
 }
 
 #right-sidebar-collapse-col {
@@ -189,12 +189,15 @@ body {
 #graph-header-container {
     padding: 0;
     padding-left: 0.5rem;
+    height: 38px !important;
+    min-height: 38px !important;
 }
 
 #reload-button-div {
     align-items: center;
     display: flex;
     flex-direction: row;
+    width: 120px;
 }
 
 
@@ -225,4 +228,21 @@ body {
 
 .publication-info-subcontainer {
     display: flex;
+}
+
+#factory-graph-container {
+    height: 100%;
+}
+
+#factory-graph-card {
+    height: 100%;
+    overflow: hidden;
+}
+
+#kg-container {
+    height: 100%;
+}
+
+#kg-container>:first-child {
+    height: 100%;
 }

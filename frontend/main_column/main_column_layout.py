@@ -12,7 +12,7 @@ def get_layout():
     """
 
     return html.Div(
-        id="main-sidebar-container",
+        id="main-column-container",
         children=[
             factory_graph_layout.get_layout(),
         ],
