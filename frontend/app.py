@@ -7,10 +7,10 @@ Separated from presentation.py to avoid circular dependencies with callback file
 """
 
 # Build App
-external_stylesheets = [dbc.themes.SPACELAB]
+external_stylesheets = [dbc.themes.SPACELAB, dbc.icons.BOOTSTRAP]
 app = dash.Dash(
     __name__,
     external_stylesheets=external_stylesheets,
     suppress_callback_exceptions=True,
-    assets_folder="../assets"
+    assets_folder="../assets",
 )

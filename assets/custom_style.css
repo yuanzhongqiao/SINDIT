@@ -167,12 +167,6 @@
     padding: 0;
 }
 
-/* .navbar {
-    border: none;
-    background-color: #446e9b;
-    background-image: none;
-} */
-
 .navbar {
     background-color: #446e9b !important;
     border: none !important;
@@ -180,6 +174,8 @@
     padding-left: 1rem;
     padding-right: 1rem;
     height: 38px;
+    display: flex;
+    justify-content: space-between;
 }
 
 .sidebar-collapsed {

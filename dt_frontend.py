@@ -4,6 +4,9 @@ from frontend import page_layout
 # Import callback files (indirectly used through annotation)
 
 # noinspection PyUnresolvedReferences
+from frontend.navbar import navbar_callbacks
+
+# noinspection PyUnresolvedReferences
 from frontend.left_sidebar.visibility_settings import visibility_settings_callbacks
 
 # noinspection PyUnresolvedReferences

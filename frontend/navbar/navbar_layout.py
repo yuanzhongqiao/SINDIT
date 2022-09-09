@@ -25,6 +25,34 @@ def get_layout():
                 ),
                 href="https://www.sintef.no",
             ),
+            dbc.Button(
+                [html.I(className="bi bi-info-circle-fill me-2"), "Help"],
+                id="help-button",
+                n_clicks=0,
+                color="primary",
+                size="sm",
+                style={"border": "none"},
+            ),
+            dbc.Offcanvas(
+                [
+                    html.P(
+                        [
+                            html.Div(
+                                "Graph and Interaction:", style={"font-weight": "bold"}
+                            ),
+                            html.Div(
+                                "Click on an element to select it. A side panel will open and display more detailed information and live data.",
+                                style={"padding-bottom": "5px"},
+                            ),
+                            html.Div(
+                                "To change the position of a node, move it around via 'drag-and-drop'. Afterwards, click on it. A button will appear below the graph, allowing to persist the new node position."
+                            ),
+                        ]
+                    ),
+                ],
+                id="help-offcanvas",
+                title="SINDIT – Information and Help",
+                is_open=False,
+            ),
         ],
-        # color="#446e9b",
     )
