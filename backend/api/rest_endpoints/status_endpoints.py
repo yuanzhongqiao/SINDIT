@@ -32,11 +32,6 @@ def get_assets_count():
     return RT_CON_DAO.get_rt_connections_count()
 
 
-@app.get("/database_connections/active_count")
-def get_assets_count():
-    return 0  # TODO: implement alive checker
-
-
 @app.get("/runtime_connections/active_count")
 def get_assets_count():
     return RT_CON_CONTAINER.get_active_connections_count()

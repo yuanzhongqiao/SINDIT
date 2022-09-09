@@ -4,6 +4,8 @@ from dash.dependencies import Input, Output
 import pytz
 from frontend import api_client
 
+from dash import html
+
 from frontend.left_sidebar.global_information import global_information_layout
 from util.environment_and_configuration import ConfigGroups, get_configuration
 
@@ -34,10 +36,6 @@ def update_connectivity_information(n):
     )
     system_time_str = system_time.strftime("%H:%M:%S, %d.%m.%Y")
 
-    active_db_connections_count = api_client.get_int(
-        relative_path="/database_connections/active_count",
-    )
-
     configured_db_connections_count = api_client.get_int(
         relative_path="/database_connections/total_count",
     )
@@ -58,10 +56,16 @@ def update_connectivity_information(n):
         relative_path="/timeseries/count",
     )
 
+    rt_con_str = f"{active_rt_connections_count} / {configured_rt_connections_count}"
+
     return (
         system_time_str,
-        f"{active_db_connections_count} / {configured_db_connections_count}",
-        f"{active_rt_connections_count} / {configured_rt_connections_count}",
+        configured_db_connections_count,
+        rt_con_str
+        if active_rt_connections_count == configured_rt_connections_count
+        else html.Div(
+            rt_con_str, style={"font-weight": "bold", "color": "red", "padding": "0"}
+        ),
         timeseries_count,
         assets_count,
     )
