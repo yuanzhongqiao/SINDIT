@@ -116,7 +116,7 @@ def update_node_position(n_clicks, selected_el_json):
     )
 
     # Notify the user with an auto-dismissing alert:
-    return f"Node position saved successfully:\n{datetime.now().isoformat()}", True
+    return f"New node position saved!", True
 
 
 @app.callback(

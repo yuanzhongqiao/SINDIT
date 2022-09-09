@@ -117,6 +117,8 @@ def get_layout():
                                             "Save node position",
                                             id="graph-positioning-save-button",
                                             n_clicks=0,
+                                            color="primary",
+                                            size="sm",
                                         ),
                                         style={"height": "100%"},
                                     ),
@@ -127,6 +129,7 @@ def get_layout():
                                                 class_name="inline-alert",
                                                 is_open=False,
                                                 duration=5000,
+                                                style={"padding-top": "8px"},
                                             )
                                         ],
                                         style={"height": "100%"},
