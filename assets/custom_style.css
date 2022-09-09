@@ -361,3 +361,58 @@ body {
     height: 65px;
     min-height: 65px;
 }
+
+#suppl_file_container {
+    height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-flow: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+#suppl_file_container>:first-child {
+    flex: 1;
+    height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-flow: column;
+    overflow: hidden;
+}
+
+#suppl_file_download_button_container {
+    height: 31px;
+    min-height: 31px;
+    display: flex;
+    flex-flow: row-reverse;
+    margin-top: 5px;
+}
+
+#suppl_file_visualization_container {
+    flex: 1;
+    height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-flow: column;
+    overflow: hidden;
+}
+
+#suppl_file_visualization_container>:first-child {
+    flex: 1;
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 100 !important;
+    display: flex;
+    flex-flow: column;
+    overflow: hidden;
+}
+
+#suppl_file_notifier {
+    height: 30px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.btn-primary {
+    background-image: none !important;
+}

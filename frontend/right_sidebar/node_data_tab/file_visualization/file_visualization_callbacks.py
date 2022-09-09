@@ -60,12 +60,22 @@ def delay_notifier(n_clicks):
     if n_clicks is None:
         # Just loading the visualization. Download button not pressed
         return (
-            f"Visualization loading. This can take a while for file types like CAD.",
+            html.Div(
+                [
+                    html.Div("Visualization loading!", style={"font-weight": "bold"}),
+                    "This can take a while for some file types.",
+                ]
+            ),
             True,
         )
     else:
         return (
-            f"Download triggered. This can take a while.",
+            html.Div(
+                [
+                    html.Div("Download triggered!", style={"font-weight": "bold"}),
+                    "This can take a while for some file types.",
+                ]
+            ),
             True,
         )
 
