@@ -416,3 +416,7 @@ body {
 .btn-primary {
     background-image: none !important;
 }
+
+#selected-element-id-short-container {
+    border-bottom-color: transparent !important;
+}

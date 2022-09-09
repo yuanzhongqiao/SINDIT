@@ -13,7 +13,12 @@ def get_visualization(selected_el):
     )
 
     # Create figure
-    fig = go.Figure()
+    fig = go.Figure(
+        layout={
+            "plot_bgcolor": "white",
+            "paper_bgcolor": "white",
+        }
+    )
 
     # Constants
     img_width = 700
