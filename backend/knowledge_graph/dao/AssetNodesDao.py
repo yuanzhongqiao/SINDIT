@@ -116,3 +116,10 @@ class AssetsDao(object):
         ]
 
         return similarities_list
+
+    def get_assets_count(self):
+        assets_count = self.ps.graph.run(
+            f"MATCH (n:{NodeTypes.ASSET.value}) RETURN count(n)"
+        ).to_table()[0][0]
+
+        return assets_count

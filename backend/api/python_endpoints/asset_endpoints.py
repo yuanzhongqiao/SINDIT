@@ -26,3 +26,7 @@ def add_asset_similarity(
 
 def delete_asset_similarities():
     ASSETS_DAO.delete_asset_similarities()
+
+
+def get_assets_count():
+    return ASSETS_DAO.get_assets_count()

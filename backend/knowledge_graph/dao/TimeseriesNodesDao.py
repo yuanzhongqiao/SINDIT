@@ -136,3 +136,10 @@ class TimeseriesNodesDao(object):
         cluster_list = [cluster for cluster in cluster_table]
 
         return cluster_list
+
+    def get_timeseries_count(self):
+        timeseries_count = self.ps.graph.run(
+            f"MATCH (n:{NodeTypes.TIMESERIES_INPUT.value}) RETURN count(n)"
+        ).to_table()[0][0]
+
+        return timeseries_count

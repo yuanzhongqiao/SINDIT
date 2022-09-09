@@ -143,7 +143,11 @@ class RuntimeConnectionContainer:
         """
         inputs = []
         con: RuntimeConnection
-        for con in self.connections.values:
+        for con in self.connections.values():
             inputs.extend(con.timeseries_inputs)
 
         return inputs
+
+    def get_active_connections_count(self) -> int:
+
+        return len([True for con in self.connections.values() if con.is_active()])

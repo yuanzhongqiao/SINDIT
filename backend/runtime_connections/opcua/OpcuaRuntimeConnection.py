@@ -85,6 +85,8 @@ class OpcuaRuntimeConnection(RuntimeConnection):
                     f"Host: {self.host}, port: {self.port}. Subscribing to nodes..."
                 )
 
+                self.active = True
+
                 # Continuously test the connection. Otherwise, lost connections do not seem to lead to an exception
                 while True:
                     time.sleep(CONNECTION_CHECK_INTERVAL)
@@ -94,6 +96,7 @@ class OpcuaRuntimeConnection(RuntimeConnection):
                     # self.__nodes[0].read_data_value()
 
             except asyncio.exceptions.TimeoutError:
+                self.active = False
                 print(
                     "OPCUA connection timeout."
                     f"Host: {self.host}, port: {self.port}. Trying to reconnect in {RECONNECT_DURATION} s ..."
@@ -139,6 +142,8 @@ class OpcuaRuntimeConnection(RuntimeConnection):
                         val = node.read_value()
                         data = node.read_data_value()
 
+                        self.active = True
+
                         timeseries_input: OpcuaTimeseriesInput
                         for timeseries_input in self.timeseries_inputs:
                             timeseries_input.handle_reading_if_belonging(
@@ -150,12 +155,14 @@ class OpcuaRuntimeConnection(RuntimeConnection):
                     time.sleep(self.sampling_rate / 1000)
 
             except asyncio.exceptions.TimeoutError:
+                self.active = False
                 print(
                     "OPCUA connection timeout."
                     f"Host: {self.host}, port: {self.port}. Trying to reconnect in {RECONNECT_DURATION} s ..."
                 )
                 time.sleep(RECONNECT_DURATION)
             except OSError:
+                self.active = False
                 print(
                     "OPCUA connection: OSError. "
                     f"Host: {self.host}, port: {self.port}. Trying to reconnect in {RECONNECT_DURATION} s ..."
@@ -202,6 +209,7 @@ class OpcuaRuntimeConnection(RuntimeConnection):
         This method will be called when the Client received a data change message from the Server.
         Class instance with event methods (see `SubHandler` base class for details).
         """
+        self.active = True
         # Handle, if subscriptions are actually used (datachange-mode):
         if ONLY_CHANGES:
 

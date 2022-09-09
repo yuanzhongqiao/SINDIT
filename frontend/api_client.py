@@ -75,5 +75,23 @@ def get_str(relative_path: str, **kwargs):
     return requests.get(API_URI + relative_path, params=kwargs).text
 
 
+def get_int(relative_path: str, **kwargs):
+    """
+    Get request to the specified api endpoint
+    :param relative_path:
+    :return: the response as int number
+    """
+    return int(requests.get(API_URI + relative_path, params=kwargs).text)
+
+
+def get_float(relative_path: str, **kwargs):
+    """
+    Get request to the specified api endpoint
+    :param relative_path:
+    :return: the response as float number
+    """
+    return float(requests.get(API_URI + relative_path, params=kwargs).text)
+
+
 def patch(relative_path: str, **kwargs):
     requests.patch(API_URI + relative_path, params=kwargs)

@@ -19,3 +19,8 @@ def get_assets_deep(deep: bool = True):
 @app.get("/assets/similarities")
 def get_asset_similarities():
     return json.dumps(python_asset_endpoints.get_asset_similarities())
+
+
+@app.get("/assets/count")
+def get_assets_count():
+    return python_asset_endpoints.get_assets_count()

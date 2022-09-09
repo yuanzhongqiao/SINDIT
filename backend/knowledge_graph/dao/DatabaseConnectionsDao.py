@@ -73,3 +73,10 @@ class DatabaseConnectionsDao(object):
         model = DatabaseConnectionNode.wrap(node)
 
         return model
+
+    def get_db_connections_count(self):
+        db_connections_count = self.ps.graph.run(
+            f"MATCH (n:{NodeTypes.DATABASE_CONNECTION.value}) RETURN count(n)"
+        ).to_table()[0][0]
+
+        return db_connections_count

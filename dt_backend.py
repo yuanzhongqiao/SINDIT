@@ -20,6 +20,10 @@ from backend.specialized_databases.timeseries.influx_db.InfluxDbPersistenceServi
 
 # Import endpoint files (indirectly used through annotation)
 
+
+# noinspection PyUnresolvedReferences
+from backend.api.rest_endpoints import status_endpoints
+
 # noinspection PyUnresolvedReferences
 from backend.api.rest_endpoints import timeseries_endpoints
 

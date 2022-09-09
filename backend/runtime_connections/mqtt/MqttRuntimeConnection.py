@@ -51,12 +51,14 @@ class MqttRuntimeConnection(RuntimeConnection):
             self.mqtt_client.subscribe(timeseries_input.connection_topic, 0)
 
     def __on_connect_fail(self, client, userdata):
+        self.active = False
         print(
             f"MQTT connection could not be established: "
             f"Host: {self.host}, port: {self.port}"
         )
 
     def __on_disconnect(self, client, userdata, reason_code):
+        self.active = False
         if reason_code != 0:
             print(
                 f"Unexpected MQTT disconnection. "
@@ -71,7 +73,7 @@ class MqttRuntimeConnection(RuntimeConnection):
         :param msg:
         :return:
         """
-        # print(msg.topic + " " + str(msg.payload))
+        self.active = True
         timeseries_input: MqttTimeseriesInput
         for timeseries_input in self.timeseries_inputs:
             if msg.topic == timeseries_input.connection_topic:

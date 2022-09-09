@@ -25,6 +25,8 @@ class RuntimeConnection(abc.ABC):
     ) -> None:
         super().__init__()
 
+        self.active = False
+
         self.iri = iri
 
         self.host = get_environment_variable(
@@ -68,3 +70,6 @@ class RuntimeConnection(abc.ABC):
     @abc.abstractmethod
     def start_connection(self):
         pass
+
+    def is_active(self) -> bool:
+        return self.active
