@@ -7,6 +7,7 @@ import dash_bootstrap_components as dbc
 
 def get_layout():
     graph = html.Div(
+        className="tab-content-inner-container",
         children=[
             html.Td("Supplementary file"),
             html.Div(
@@ -26,6 +27,6 @@ def get_layout():
                 color="#446e9b",
                 children=[html.Div(id="suppl_file_visualization_container")],
             ),
-        ]
+        ],
     )
     return graph

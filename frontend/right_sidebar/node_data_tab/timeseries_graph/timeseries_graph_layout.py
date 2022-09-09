@@ -6,13 +6,20 @@ import plotly.graph_objects as go
 
 def get_layout():
     graph = html.Div(
+        className="tab-content-inner-container",
         children=[
-            html.Td("Current timeseries data, if connected:"),
             dcc.Graph(id="timeseries-graph"),
-            html.Div(id="timeseries-graph-update-interval-passthrough", hidden=True),
-            html.Div(id="timeseries-graph-result-count-info", children=""),
-            html.Div(id="timeseries-graph-aggregate-info", children=""),
-        ]
+            html.Div(
+                id="timeseries-count-info-container",
+                children=[
+                    html.Div(
+                        id="timeseries-graph-update-interval-passthrough", hidden=True
+                    ),
+                    html.Div(id="timeseries-graph-result-count-info", children=""),
+                    html.Div(id="timeseries-graph-aggregate-info", children=""),
+                ],
+            ),
+        ],
     )
     return graph
 

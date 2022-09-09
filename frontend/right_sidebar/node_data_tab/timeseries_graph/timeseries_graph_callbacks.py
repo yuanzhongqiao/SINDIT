@@ -4,6 +4,7 @@ import pandas as pd
 from dateutil import tz
 from dash.exceptions import PreventUpdate
 
+from dash import html
 from frontend import api_client
 from frontend.app import app
 from frontend.main_column.factory_graph.GraphSelectedElement import GraphSelectedElement
@@ -176,9 +177,15 @@ def update_timeseries_graph(
     fig.update_traces(marker_size=8, marker_line=None, mode="markers")
 
     # Aggregate info
-    result_count_str = f"Total count of entries for given time-frame: {readings_count}."
+    result_count_str = f"Entries for given range:\t{readings_count}"
     aggregate_info_str = (
-        f"Only displaying the first reading each per {timedelta(milliseconds=aggregation_window_ms)} (d:min:sec)."
+        html.Div(
+            [
+                html.Div("Aggregated view! ", style={"font-weight": "bold"}),
+                f"Only showing first readings per {timedelta(milliseconds=aggregation_window_ms)} (h:m:s).",
+            ],
+            style={"padding-top": "5px"},
+        )
         if aggregation_window_ms is not None
         else ""
     )

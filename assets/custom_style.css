@@ -23,14 +23,41 @@
 
 #content-rows-container {
     flex: 1;
-    overflow: hidden;
+    overflow-y: hidden;
+    overflow-x: scroll;
     display: flex;
     flex-flow: row;
     height: 100%;
     max-height: 100%;
     width: 100%;
     max-width: 100%;
+    -ms-overflow-style: auto;
+    scrollbar-color: #446e9b transparent;
+    scrollbar-width: thin;
 }
+
+#content-rows-container::-webkit-scrollbar-thumb {
+    background-color: #446e9b;
+}
+
+#content-rows-container::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+#content-rows-container::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
+
+#content-rows-container::-webkit-scrollbar {
+    width: 0.5rem;
+    height: 0.5rem;
+}
+
+/* .scrollable {
+  -ms-overflow-style: auto;
+  scrollbar-color: rebeccapurple green;
+  scrollbar-width: thin;
+} */
 
 #left-sidebar-container {
     flex: 2;
@@ -55,6 +82,7 @@
 
 #right-sidebar-collapse {
     max-height: 100%;
+    height: 100%;
     overflow: hidden;
     display: flex;
     width: 100%;
@@ -72,12 +100,23 @@
 
 #right-sidebar-card {
     max-height: 100%;
+    height: 100%;
     width: 100%;
+    overflow: hidden;
 }
 
 #right-sidebar-card-header {
     color: white;
     background-color: #446e9b;
+}
+
+#right-sidebar-card-body {
+
+    height: 100%;
+    display: flex;
+    flex-flow: column;
+    overflow: hidden;
+
 }
 
 .custom-table {
@@ -93,6 +132,25 @@
 
 .tab-content-container {
     padding-top: 20px;
+    display: flex;
+    flex-flow: column;
+    overflow: hidden;
+    height: 100%;
+}
+
+.tab-content-inner-container {
+    display: flex;
+    flex-flow: column;
+    overflow: hidden;
+    height: 100%;
+    max-height: 100%;
+}
+
+#tabs-content {
+    height: 100%;
+    display: flex;
+    flex-flow: column;
+    overflow: hidden;
 }
 
 .inline-alert {
@@ -293,4 +351,12 @@ body {
 
 .keyword {
     font-weight: bold;
+}
+
+#timeseries-graph {
+    flex: 1;
+}
+
+#timeseries-count-info-container {
+    height: 65px;
 }

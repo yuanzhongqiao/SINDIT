@@ -1,5 +1,6 @@
 from dash.dependencies import Input, Output
 
+from dash.exceptions import PreventUpdate
 from frontend.app import app
 from frontend.main_column.factory_graph.GraphSelectedElement import GraphSelectedElement
 from frontend.right_sidebar.graph_selector_info import graph_selector_info_layout
@@ -23,6 +24,9 @@ def display_selected_graph_element_info(selected_el_json):
     :param selected_el:
     :return:
     """
+    if selected_el_json is None:
+        raise PreventUpdate()
+
     selected_el: GraphSelectedElement = GraphSelectedElement.from_json(selected_el_json)
 
     return (
