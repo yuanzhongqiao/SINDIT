@@ -1,4 +1,5 @@
 import dash_bootstrap_components as dbc
+import dash_core_components as dcc
 from dash import html
 
 from frontend.left_sidebar.global_information import global_information_layout
@@ -14,6 +15,8 @@ def get_layout():
     return html.Div(
         id="left-sidebar-container",
         children=[
+            # Storage for accessing the selected element
+            dcc.Store(id="left-sidebar-collapsable-store", storage_type="session"),
             html.Div(
                 id="left-side-extension-buttons-container",
                 children=[
@@ -65,6 +68,7 @@ def get_layout():
                                         [
                                             dbc.CardHeader(
                                                 id="similarity-pipeline-container-card",
+                                                class_name="tertiary-color",
                                                 children=[
                                                     html.Div("Similarity Pipeline"),
                                                 ],
@@ -74,7 +78,8 @@ def get_layout():
                                                     "TEST 2",
                                                 )
                                             ),
-                                        ]
+                                        ],
+                                        class_name="left-sidebar-full-height-card",
                                     )
                                 ],
                             )
@@ -91,6 +96,7 @@ def get_layout():
                                         [
                                             dbc.CardHeader(
                                                 id="annotations-container-card",
+                                                class_name="quaternary-color",
                                                 children=[
                                                     html.Div("Annotation Detection"),
                                                 ],
@@ -100,7 +106,8 @@ def get_layout():
                                                     "TEST",
                                                 )
                                             ),
-                                        ]
+                                        ],
+                                        class_name="left-sidebar-full-height-card",
                                     )
                                 ],
                             )
