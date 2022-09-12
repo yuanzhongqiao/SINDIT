@@ -11,48 +11,53 @@ def get_layout():
     :return:
     """
     return html.Div(
-        id="right-sidebar-collapse-col",
+        # id="right-sidebar-container",
+        # children=[
+        #     html.Div(
+        id="right-sidebar-collapse",
         className="sidebar-collapsed",
         children=[
-            dbc.Collapse(
-                id="right-sidebar-collapse",
-                is_open=False,
+            # dbc.Collapse(
+            #     id="right-sidebar-collapse",
+            #     is_open=False,
+            #     children=[
+            dbc.Card(
+                id="right-sidebar-card",
                 children=[
-                    dbc.Card(
-                        id="right-sidebar-card",
+                    dbc.CardHeader(
+                        id="right-sidebar-card-header",
+                        children=[html.Div("Selected element")],
+                    ),
+                    dbc.CardBody(
+                        id="right-sidebar-card-body",
                         children=[
-                            dbc.CardHeader(
-                                id="right-sidebar-card-header",
-                                children=[html.Div("Selected element")],
-                            ),
-                            dbc.CardBody(
-                                id="right-sidebar-card-body",
+                            # Selected node / edge:
+                            graph_selector_info_layout.get_layout(),
+                            # Tabs:
+                            dbc.Tabs(
+                                id="tabs-infos",
+                                active_tab="tab-node-information",
                                 children=[
-                                    # Selected node / edge:
-                                    graph_selector_info_layout.get_layout(),
-                                    # Tabs:
-                                    dbc.Tabs(
-                                        id="tabs-infos",
-                                        active_tab="tab-node-information",
-                                        children=[
-                                            dbc.Tab(
-                                                label="Node details",
-                                                tab_id="tab-node-information",
-                                            ),
-                                            dbc.Tab(
-                                                label="Data visualization",
-                                                tab_id="tab-node-data",
-                                            ),
-                                        ],
-                                        persistence=True,
-                                        persistence_type="session",
+                                    dbc.Tab(
+                                        label="Node details",
+                                        tab_id="tab-node-information",
                                     ),
-                                    html.Div(id="tabs-content"),
+                                    dbc.Tab(
+                                        label="Data visualization",
+                                        tab_id="tab-node-data",
+                                    ),
                                 ],
+                                persistence=True,
+                                persistence_type="session",
                             ),
+                            html.Div(id="tabs-content"),
                         ],
                     ),
                 ],
             ),
+            #     ],
+            # ),
+            #     ],
+            # )
         ],
     )

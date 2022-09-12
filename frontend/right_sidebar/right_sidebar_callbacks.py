@@ -10,8 +10,8 @@ print("Initializing navigation callbacks...")
 
 
 @app.callback(
-    Output("right-sidebar-collapse", "is_open"),
-    Output("right-sidebar-collapse-col", "className"),
+    # Output("right-sidebar-collapse", "is_open"),
+    Output("right-sidebar-collapse", "className"),
     Input("selected-graph-element-store", "data"),
 )
 def show_selected_element_sidebar(selected_el_json):
@@ -22,9 +22,11 @@ def show_selected_element_sidebar(selected_el_json):
     """
     return (
         # ({"min-width": "300px"})
-        (True, "")
+        # (True, "")
+        ""
         if selected_el_json is not None
-        else (False, "sidebar-collapsed")
+        else "sidebar-collapsed"
+        # (False, "sidebar-collapsed")
         # else ({"display": "none"})
     )
     # return selected_el_json is not None
