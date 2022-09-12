@@ -522,3 +522,17 @@ body {
     display: flex;
     justify-content: end;
 }
+
+.collapsable-horizontal {
+    transition: width .35s ease;
+    width: 100%;
+    overflow: hidden;
+}
+
+.collapsed-horizontal {
+    width: 0;
+}
+
+#left-sidebar-collapse-main-content {
+    width: 320px;
+}

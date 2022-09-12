@@ -9,6 +9,13 @@ from frontend.right_sidebar.node_information_tab import node_information_layout
 print("Initializing extension collapsable callbacks...")
 
 
+def show_horizontal_collapsable(n_clicks):
+    if n_clicks % 2 == 0:
+        return "collapsable-horizontal"
+    else:
+        return "collapsable-horizontal collapsed-horizontal"
+
+
 def show_left_collaps_button(n_clicks):
     if n_clicks % 2 == 0:
         return "vertical-button-left-collapse-icon"
@@ -17,6 +24,7 @@ def show_left_collaps_button(n_clicks):
 
 
 @app.callback(
+    Output("left-sidebar-collapse-main", "className"),
     Output("similarity-pipeline-button-icon", "className"),
     Input("similarity-pipeline-collapse-button", "n_clicks"),
     prevent_initial_call=True,
@@ -28,7 +36,10 @@ def show_similarity_pipeline_sidebar(n_clicks):
     :return:
     """
 
-    return show_left_collaps_button(n_clicks)
+    return (
+        show_horizontal_collapsable(n_clicks),
+        show_left_collaps_button(n_clicks),
+    )
 
 
 @app.callback(

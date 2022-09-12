@@ -54,25 +54,36 @@ def get_layout():
             html.Div(
                 id="left-sidebar-main-elements-container",
                 children=[
-                    global_information_layout.get_layout(),
-                    dbc.Accordion(
-                        [
-                            dbc.AccordionItem(
-                                [
-                                    visibility_settings_layout.get_layout(),
+                    html.Div(
+                        id="left-sidebar-collapse-main",
+                        className="collapsable-horizontal",
+                        children=[
+                            html.Div(
+                                id="left-sidebar-collapse-main-content",
+                                children=[
+                                    global_information_layout.get_layout(),
+                                    dbc.Accordion(
+                                        [
+                                            dbc.AccordionItem(
+                                                [
+                                                    visibility_settings_layout.get_layout(),
+                                                ],
+                                                title="Graph visibility settings",
+                                            ),
+                                            dbc.AccordionItem(
+                                                [
+                                                    datetime_selector_layout.get_layout(),
+                                                ],
+                                                title="Time-series range selection",
+                                            ),
+                                        ],
+                                        persistence=True,
+                                        persistence_type="session",
+                                        id="left-sidebar-accordion",
+                                    ),
                                 ],
-                                title="Graph visibility settings",
-                            ),
-                            dbc.AccordionItem(
-                                [
-                                    datetime_selector_layout.get_layout(),
-                                ],
-                                title="Time-series range selection",
-                            ),
+                            )
                         ],
-                        persistence=True,
-                        persistence_type="session",
-                        id="left-sidebar-accordion",
                     ),
                 ],
             ),
