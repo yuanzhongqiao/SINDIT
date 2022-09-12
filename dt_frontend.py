@@ -7,6 +7,9 @@ from frontend import page_layout
 from frontend.navbar import navbar_callbacks
 
 # noinspection PyUnresolvedReferences
+from frontend.left_sidebar import left_sidebar_callbacks
+
+# noinspection PyUnresolvedReferences
 from frontend.left_sidebar.visibility_settings import visibility_settings_callbacks
 
 # noinspection PyUnresolvedReferences

@@ -14,43 +14,67 @@ def get_layout():
     return html.Div(
         id="left-sidebar-container",
         children=[
-            global_information_layout.get_layout(),
-            dbc.Accordion(
-                [
-                    dbc.AccordionItem(
+            html.Div(
+                id="left-side-extension-buttons-container",
+                children=[
+                    dbc.Button(
                         [
-                            visibility_settings_layout.get_layout(),
+                            html.Div(
+                                id="similarity-pipeline-button-icon",
+                                className="vertical-button-left-collapse-icon",
+                            ),
+                            html.Div(
+                                "Similarity Pipeline",
+                                className="vertical-button-left-text",
+                            ),
                         ],
-                        title="Graph visibility settings",
+                        id="similarity-pipeline-collapse-button",
+                        color="primary",
+                        size="sm",
+                        class_name=["vertical-button-left", "tertiary-color"],
                     ),
-                    # dbc.AccordionItem(
-                    #     [
-                    #         html.Div(style={"height": "30px"}),
-                    #     ],
-                    #     title=""
-                    # ),
-                    # dbc.AccordionItem(
-                    #     [
-                    #         global_information_layout.get_layout(),
-                    #     ],
-                    #     title=""
-                    # ),
-                    # dbc.AccordionItem(
-                    #     [
-                    #         html.Div(style={"height": "30px"}),
-                    #     ],
-                    #     title=""
-                    # ),
-                    dbc.AccordionItem(
+                    dbc.Button(
                         [
-                            datetime_selector_layout.get_layout(),
+                            html.Div(
+                                id="annotation-detection-button-icon",
+                                className="vertical-button-left-collapse-icon",
+                            ),
+                            html.Div(
+                                "Annotation Detection",
+                                className="vertical-button-left-text",
+                            ),
                         ],
-                        title="Time-series range selection",
+                        id="annotation-detection-collapse-button",
+                        color="primary",
+                        size="sm",
+                        class_name=["vertical-button-left", "quaternary-color"],
                     ),
                 ],
-                persistence=True,
-                persistence_type="session",
-                id="left-sidebar-accordion",
+            ),
+            html.Div(
+                id="left-sidebar-main-elements-container",
+                children=[
+                    global_information_layout.get_layout(),
+                    dbc.Accordion(
+                        [
+                            dbc.AccordionItem(
+                                [
+                                    visibility_settings_layout.get_layout(),
+                                ],
+                                title="Graph visibility settings",
+                            ),
+                            dbc.AccordionItem(
+                                [
+                                    datetime_selector_layout.get_layout(),
+                                ],
+                                title="Time-series range selection",
+                            ),
+                        ],
+                        persistence=True,
+                        persistence_type="session",
+                        id="left-sidebar-accordion",
+                    ),
+                ],
             ),
         ],
     )
