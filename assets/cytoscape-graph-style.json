@@ -142,5 +142,11 @@
             "background-color": "#679436",
             "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/more/wght500/48px.svg"
         }
+    },
+    {
+        "selector": ":selected",
+        "style": {
+            "background-color": "#449b87"
+        }
     }
 ]

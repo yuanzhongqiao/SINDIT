@@ -97,7 +97,7 @@ def get_layout():
                                             minZoom=0.4,
                                             maxZoom=5,
                                             zoom=2,
-                                            responsive=True,
+                                            responsive=False,
                                             stylesheet=CY_GRAPH_STYLE_STATIC,
                                             className="factory-graph",
                                         ),
@@ -133,6 +133,7 @@ def get_layout():
                                             )
                                         ],
                                         style={"height": "100%"},
+                                        id="graph-positioning-alert-row",
                                     ),
                                 ],
                                 style={"height": "40px"},

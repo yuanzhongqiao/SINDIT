@@ -107,7 +107,7 @@
 
 #right-sidebar-card-header {
     color: white;
-    background-color: #446e9b;
+    background-color: #449b87;
 }
 
 #right-sidebar-card-body {
@@ -427,4 +427,9 @@ body {
 
 #selected-element-id-short-container {
     border-bottom-color: transparent !important;
+}
+
+#graph-positioning-alert-row {
+    display: flex;
+    justify-content: end;
 }
