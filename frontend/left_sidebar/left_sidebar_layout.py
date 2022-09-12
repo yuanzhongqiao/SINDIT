@@ -55,6 +55,58 @@ def get_layout():
                 id="left-sidebar-main-elements-container",
                 children=[
                     html.Div(
+                        id="left-sidebar-collapse-similarity-pipeline",
+                        className="collapsable-horizontal collapsed-horizontal",
+                        children=[
+                            html.Div(
+                                id="left-sidebar-collapse-similarity-pipeline-content",
+                                children=[
+                                    dbc.Card(
+                                        [
+                                            dbc.CardHeader(
+                                                id="similarity-pipeline-container-card",
+                                                children=[
+                                                    html.Div("Similarity Pipeline"),
+                                                ],
+                                            ),
+                                            dbc.CardBody(
+                                                html.Div(
+                                                    "TEST 2",
+                                                )
+                                            ),
+                                        ]
+                                    )
+                                ],
+                            )
+                        ],
+                    ),
+                    html.Div(
+                        id="left-sidebar-collapse-annotations",
+                        className="collapsable-horizontal collapsed-horizontal",
+                        children=[
+                            html.Div(
+                                id="left-sidebar-collapse-annotations-content",
+                                children=[
+                                    dbc.Card(
+                                        [
+                                            dbc.CardHeader(
+                                                id="annotations-container-card",
+                                                children=[
+                                                    html.Div("Annotation Detection"),
+                                                ],
+                                            ),
+                                            dbc.CardBody(
+                                                html.Div(
+                                                    "TEST",
+                                                )
+                                            ),
+                                        ]
+                                    )
+                                ],
+                            )
+                        ],
+                    ),
+                    html.Div(
                         id="left-sidebar-collapse-main",
                         className="collapsable-horizontal",
                         children=[

@@ -24,6 +24,7 @@ def show_left_collaps_button(n_clicks):
 
 
 @app.callback(
+    Output("left-sidebar-collapse-similarity-pipeline", "className"),
     Output("left-sidebar-collapse-main", "className"),
     Output("similarity-pipeline-button-icon", "className"),
     Input("similarity-pipeline-collapse-button", "n_clicks"),
@@ -37,6 +38,7 @@ def show_similarity_pipeline_sidebar(n_clicks):
     """
 
     return (
+        show_horizontal_collapsable(n_clicks + 1),
         show_horizontal_collapsable(n_clicks),
         show_left_collaps_button(n_clicks),
     )
