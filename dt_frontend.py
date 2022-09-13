@@ -10,6 +10,16 @@ from frontend.navbar import navbar_callbacks
 from frontend.left_sidebar import left_sidebar_callbacks
 
 # noinspection PyUnresolvedReferences
+from frontend.left_sidebar.extensions.similarity_pipeline_extension import (
+    pipeline_extension_callbacks,
+)
+
+# noinspection PyUnresolvedReferences
+from frontend.left_sidebar.extensions.annotation_detection_extension import (
+    annotation_extension_callbacks,
+)
+
+# noinspection PyUnresolvedReferences
 from frontend.left_sidebar.visibility_settings import visibility_settings_callbacks
 
 # noinspection PyUnresolvedReferences

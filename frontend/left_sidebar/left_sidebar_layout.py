@@ -5,6 +5,12 @@ from dash import html
 from frontend.left_sidebar.global_information import global_information_layout
 from frontend.left_sidebar.visibility_settings import visibility_settings_layout
 from frontend.left_sidebar.datetime_selector import datetime_selector_layout
+from frontend.left_sidebar.extensions.annotation_detection_extension import (
+    annotation_extension_layout,
+)
+from frontend.left_sidebar.extensions.similarity_pipeline_extension import (
+    pipeline_extension_layout,
+)
 
 
 def get_layout():
@@ -63,25 +69,7 @@ def get_layout():
                         children=[
                             html.Div(
                                 id="left-sidebar-collapse-similarity-pipeline-content",
-                                children=[
-                                    dbc.Card(
-                                        [
-                                            dbc.CardHeader(
-                                                id="similarity-pipeline-container-card",
-                                                class_name="tertiary-color",
-                                                children=[
-                                                    html.Div("Similarity Pipeline"),
-                                                ],
-                                            ),
-                                            dbc.CardBody(
-                                                html.Div(
-                                                    "TEST 2",
-                                                )
-                                            ),
-                                        ],
-                                        class_name="left-sidebar-full-height-card",
-                                    )
-                                ],
+                                children=[pipeline_extension_layout.get_layout()],
                             )
                         ],
                     ),
@@ -91,25 +79,7 @@ def get_layout():
                         children=[
                             html.Div(
                                 id="left-sidebar-collapse-annotations-content",
-                                children=[
-                                    dbc.Card(
-                                        [
-                                            dbc.CardHeader(
-                                                id="annotations-container-card",
-                                                class_name="quaternary-color",
-                                                children=[
-                                                    html.Div("Annotation Detection"),
-                                                ],
-                                            ),
-                                            dbc.CardBody(
-                                                html.Div(
-                                                    "TEST",
-                                                )
-                                            ),
-                                        ],
-                                        class_name="left-sidebar-full-height-card",
-                                    )
-                                ],
+                                children=[annotation_extension_layout.get_layout()],
                             )
                         ],
                     ),
