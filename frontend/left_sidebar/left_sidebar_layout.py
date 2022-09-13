@@ -1,6 +1,5 @@
 import dash_bootstrap_components as dbc
-import dash_core_components as dcc
-from dash import html
+from dash import html, dcc
 
 from frontend.left_sidebar.global_information import global_information_layout
 from frontend.left_sidebar.visibility_settings import visibility_settings_layout

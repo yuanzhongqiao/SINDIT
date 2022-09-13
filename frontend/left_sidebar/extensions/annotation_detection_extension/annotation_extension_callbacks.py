@@ -1,5 +1,7 @@
 from datetime import datetime
 from enum import Enum
+import json
+from typing import List
 from frontend.app import app
 from dash.dependencies import Input, Output, State
 import pytz
@@ -24,7 +26,8 @@ LIST_RESULT_PREFIX = "↪ "
 class CreationSteps(Enum):
     ASSET_SELECTION = 1
     DEFINITION_SELECTION = 2
-    FINISHED = 3
+    TS_SELECTION = 3
+    FINISHED = 4
 
 
 ##########################################
@@ -98,6 +101,58 @@ def annotation_select_definition(selected_el_json, current_step):
         raise PreventUpdate()
 
 
+@app.callback(
+    Output("annotation-creation-store-selected-ts", "data"),
+    Input("selected-graph-element-store", "data"),
+    State("annotation-creation-store-step", "data"),
+    prevent_initial_call=True,
+)
+def annotation_select_ts(selected_el_json, current_step):
+    if (
+        selected_el_json is None
+        or current_step is None
+        or current_step != CreationSteps.TS_SELECTION.value
+    ):
+        raise PreventUpdate()
+
+    selected_el: GraphSelectedElement = GraphSelectedElement.from_json(selected_el_json)
+
+    if selected_el.type == NodeTypes.TIMESERIES_INPUT.value:
+        return selected_el.to_json()
+    else:
+        raise PreventUpdate()
+
+
+@app.callback(
+    Output("annotation-creation-store-ts-list", "data"),
+    State("annotation-creation-store-ts-list", "data"),
+    State("annotation-creation-store-selected-ts", "data"),
+    Input("annotation-remove-ts-button", "n_clicks"),
+    Input("annotation-add-ts-button", "n_clicks"),
+    Input("annotation-creation-store-step", "data"),
+    prevent_initial_call=True,
+)
+def annotation_select_ts_list(ts_list_json, selected_ts_json, remove, add, step):
+    trigger = ctx.triggered_id
+
+    if step is None:
+        return None
+
+    if ts_list_json is not None:
+        ts_jsons_list: List = json.loads(ts_list_json)
+    else:
+        ts_jsons_list: List = []
+
+    if trigger == "annotation-remove-ts-button" and len(ts_jsons_list) > 0:
+        ts_jsons_list.pop()
+        return json.dumps(ts_jsons_list)
+    elif trigger == "annotation-add-ts-button" and selected_ts_json is not None:
+        ts_jsons_list.append(selected_ts_json)
+        return json.dumps(ts_jsons_list)
+    else:
+        raise PreventUpdate()
+
+
 ##########################################
 # Step-management:
 ##########################################
@@ -153,22 +208,43 @@ def annotation_create_button_replacal(current_step):
     Input("annotation-creation-store-step", "data"),
     Input("annotation-creation-store-asset", "data"),
     Input("annotation-creation-store-definition", "data"),
+    Input("annotation-creation-store-ts-list", "data"),
     prevent_initial_call=False,
 )
 def annotation_next_step_button_activate(
-    current_step, selected_asset, selected_definition
+    current_step, selected_asset, selected_definition, selected_ts_list
 ):
 
     if (
-        current_step == CreationSteps.ASSET_SELECTION.value
-        and selected_asset is not None
-    ) or (
-        current_step == CreationSteps.DEFINITION_SELECTION.value
-        and selected_definition is not None
+        (
+            current_step == CreationSteps.ASSET_SELECTION.value
+            and selected_asset is not None
+        )
+        or (
+            current_step == CreationSteps.DEFINITION_SELECTION.value
+            and selected_definition is not None
+        )
+        or (
+            current_step == CreationSteps.TS_SELECTION.value
+            and selected_ts_list is not None
+        )
     ):
         return False
 
     return True
+
+
+@app.callback(
+    Output("annotation-creation-step-3-ts-form", "className"),
+    Input("annotation-creation-store-step", "data"),
+    prevent_initial_call=False,
+)
+def annotation_ts_form_hide(current_step):
+
+    if current_step == CreationSteps.TS_SELECTION.value:
+        return SHOW
+    else:
+        return HIDE
 
 
 @app.callback(
@@ -233,5 +309,27 @@ def annotation_result_visualization_definition(current_step, definition_json):
     ):
         definition = GraphSelectedElement.from_json(definition_json)
         return LIST_RESULT_PREFIX + definition.caption
+    else:
+        return ""
+
+
+@app.callback(
+    Output("annotation-creation-step-list-3-ts-result", "children"),
+    Input("annotation-creation-store-step", "data"),
+    Input("annotation-creation-store-ts-list", "data"),
+    prevent_initial_call=False,
+)
+def annotation_result_visualization_ts(current_step, ts_list_json):
+
+    if (
+        current_step is not None
+        and current_step >= CreationSteps.TS_SELECTION.value
+        and ts_list_json is not None
+    ):
+        ts_list = [
+            GraphSelectedElement.from_json(ts_json)
+            for ts_json in json.loads(ts_list_json)
+        ]
+        return LIST_RESULT_PREFIX + ", ".join([ts.caption for ts in ts_list])
     else:
         return ""

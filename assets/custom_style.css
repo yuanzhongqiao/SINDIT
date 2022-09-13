@@ -636,7 +636,7 @@ body {
 }
 
 .hide-content {
-    display: none;
+    display: none !important;
 }
 
 .annotation-creation-step-list-result {
@@ -646,4 +646,22 @@ body {
 
 .list-group-item {
     color: currentColor !important
+}
+
+#visibility-settings-ignored-info {
+    font-weight: bold;
+    padding-bottom: 5px;
+}
+
+#annotation-creation-step-3-ts-form {
+    width: 100%;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 20px;
+}
+
+#annotations-creation-ts-form-buttons-container {
+    margin-top: 10px;
 }

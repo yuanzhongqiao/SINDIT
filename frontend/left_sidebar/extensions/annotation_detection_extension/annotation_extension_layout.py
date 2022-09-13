@@ -91,7 +91,11 @@ def get_layout():
                                         storage_type="memory",
                                     ),
                                     dcc.Store(
-                                        id="annotation-creation-store-ts-ids",
+                                        id="annotation-creation-store-selected-ts",
+                                        storage_type="memory",
+                                    ),
+                                    dcc.Store(
+                                        id="annotation-creation-store-ts-list",
                                         storage_type="memory",
                                     ),
                                     dbc.ListGroup(
@@ -158,6 +162,38 @@ def get_layout():
                                             ),
                                         ],
                                         flush=True,
+                                    ),
+                                    html.Div(
+                                        id="annotation-creation-step-3-ts-form",
+                                        className="hide-content",
+                                        children=[
+                                            html.Div(
+                                                "Only timeseries belonging to that asset!",
+                                                style={"width": "fit-content"},
+                                            ),
+                                            html.Div(
+                                                id="annotations-creation-ts-form-buttons-container",
+                                                children=[
+                                                    dbc.Button(
+                                                        "Remove Timeseries",
+                                                        id="annotation-remove-ts-button",
+                                                        color="secondary",
+                                                        size="sm",
+                                                        style={
+                                                            "margin-right": "5px",
+                                                            "width": "145px",
+                                                        },
+                                                    ),
+                                                    dbc.Button(
+                                                        "Add Timeseries",
+                                                        id="annotation-add-ts-button",
+                                                        color="primary",
+                                                        size="sm",
+                                                        style={"width": "145px"},
+                                                    ),
+                                                ],
+                                            ),
+                                        ],
                                     ),
                                 ],
                             ),

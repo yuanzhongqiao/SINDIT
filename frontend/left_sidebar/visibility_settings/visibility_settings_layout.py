@@ -14,6 +14,11 @@ def get_layout():
     """
     return html.Div(
         [
+            html.Div(
+                "Creating annotation: Settings ignored!",
+                className="hide-content",
+                id="visibility-settings-ignored-info",
+            ),
             dbc.Checklist(
                 options=[
                     {"label": "Assets", "value": NodeTypes.ASSET.value},
@@ -72,6 +77,6 @@ def get_layout():
                 switch=True,
                 persistence=True,
                 persistence_type="session",
-            )
+            ),
         ]
     )
