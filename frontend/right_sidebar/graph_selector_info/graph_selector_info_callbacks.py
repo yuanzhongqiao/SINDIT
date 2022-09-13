@@ -4,6 +4,7 @@ from dash.exceptions import PreventUpdate
 from frontend.app import app
 from frontend.main_column.factory_graph.GraphSelectedElement import GraphSelectedElement
 from frontend.right_sidebar.graph_selector_info import graph_selector_info_layout
+from graph_domain.factory_graph_types import NodeTypes
 
 print("Initializing graph selector callbacks...")
 

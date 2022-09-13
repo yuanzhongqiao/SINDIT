@@ -634,3 +634,12 @@ body {
     display: flex;
     flex-flow: column;
 }
+
+.hide-content {
+    display: none;
+}
+
+.annotation-creation-step-list-result {
+    padding-left: 10px;
+    font-weight: bold;
+}

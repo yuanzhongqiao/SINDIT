@@ -24,12 +24,12 @@ class GraphSelectedElement(object):
     iri: str = None
 
     type: str = UNSPECIFIED_LABEL
-    is_node: bool = None
+    is_node: bool | None = None
 
     # Only for nodes:
     caption: str | None = None
-    position_x: float = None
-    position_y: float = None
+    position_x: float | None = None
+    position_y: float | None = None
 
     @classmethod
     def from_tap_edge(cls, tap_edge):

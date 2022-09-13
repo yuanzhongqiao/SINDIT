@@ -58,7 +58,111 @@ def get_layout():
                                 id="annotations-create-container",
                                 className="annotations-extension-main-container",
                                 children=[
-                                    "Create annotation...",
+                                    dcc.Store(
+                                        id="annotation-creation-store-step",
+                                        storage_type="session",
+                                    ),
+                                    dcc.Store(
+                                        id="annotation-creation-store-data",
+                                        storage_type="session",
+                                    ),
+                                    dcc.Store(
+                                        id="annotation-creation-store-asset",
+                                        storage_type="session",
+                                    ),
+                                    dcc.Store(
+                                        id="annotation-creation-store-selected-definition",
+                                        storage_type="session",
+                                    ),
+                                    dcc.Store(
+                                        id="annotation-creation-store-new-definition-description",
+                                        storage_type="session",
+                                    ),
+                                    dcc.Store(
+                                        id="annotation-creation-store-new-definition-id-short",
+                                        storage_type="session",
+                                    ),
+                                    dcc.Store(
+                                        id="annotation-creation-store-new-definition-caption",
+                                        storage_type="session",
+                                    ),
+                                    dcc.Store(
+                                        id="annotation-creation-store-caption",
+                                        storage_type="session",
+                                    ),
+                                    dcc.Store(
+                                        id="annotation-creation-store-description",
+                                        storage_type="session",
+                                    ),
+                                    dcc.Store(
+                                        id="annotation-creation-store-ts-ids",
+                                        storage_type="session",
+                                    ),
+                                    dbc.ListGroup(
+                                        [
+                                            dbc.ListGroupItem(
+                                                [
+                                                    "1. Select an asset",
+                                                    html.Div(
+                                                        id="annotation-creation-step-list-1-asset-result",
+                                                        className="annotation-creation-step-list-result",
+                                                    ),
+                                                ],
+                                                id="annotation-creation-step-list-1-asset",
+                                            ),
+                                            dbc.ListGroupItem(
+                                                [
+                                                    "2. Select an annotation type (definition)",
+                                                    html.Div(
+                                                        id="annotation-creation-step-list-2-type-result",
+                                                        className="annotation-creation-step-list-result",
+                                                    ),
+                                                ],
+                                                id="annotation-creation-step-list-2-type",
+                                            ),
+                                            dbc.ListGroupItem(
+                                                [
+                                                    "3. Select the timeseries nodes used for detecting the annotation",
+                                                    html.Div(
+                                                        id="annotation-creation-step-list-3-ts-result",
+                                                        className="annotation-creation-step-list-result",
+                                                    ),
+                                                ],
+                                                id="annotation-creation-step-list-3-ts",
+                                            ),
+                                            dbc.ListGroupItem(
+                                                [
+                                                    "4. Select the time-range, when the situation was detectable",
+                                                    html.Div(
+                                                        id="annotation-creation-step-list-4-range-result",
+                                                        className="annotation-creation-step-list-result",
+                                                    ),
+                                                ],
+                                                id="annotation-creation-step-list-4-range",
+                                            ),
+                                            dbc.ListGroupItem(
+                                                [
+                                                    "5. Give the annotation a caption",
+                                                    html.Div(
+                                                        id="annotation-creation-step-list-5-caption-result",
+                                                        className="annotation-creation-step-list-result",
+                                                    ),
+                                                ],
+                                                id="annotation-creation-step-list-5-caption",
+                                            ),
+                                            dbc.ListGroupItem(
+                                                [
+                                                    "6. Describe the situation",
+                                                    html.Div(
+                                                        id="annotation-creation-step-list-6-description-result",
+                                                        className="annotation-creation-step-list-result",
+                                                    ),
+                                                ],
+                                                id="annotation-creation-step-list-6-description",
+                                            ),
+                                        ],
+                                        flush=True,
+                                    ),
                                 ],
                             ),
                             html.Div(
