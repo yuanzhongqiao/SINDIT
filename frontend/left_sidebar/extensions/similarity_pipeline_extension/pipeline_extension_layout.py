@@ -15,7 +15,7 @@ def get_layout():
             ),
             dbc.CardBody(
                 html.Div(
-                    "TEST 2",
+                    "Pipeline status info (and control?) coming soon...",
                 )
             ),
         ],

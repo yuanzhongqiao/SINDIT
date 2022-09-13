@@ -206,7 +206,7 @@
     display: flex;
     width: 100%;
     flex: 3;
-    /* min-width: 400px; */
+    min-width: 400px;
     padding-top: 1rem;
     padding-bottom: 1rem;
     padding-left: 0px;
@@ -224,8 +224,8 @@
 }
 
 .sidebar-collapsed {
-    /* width: 0px !important;
-    min-width: 0 !important; */
+    /* width: 0px !important; */
+    min-width: 0 !important;
     max-width: 0 !important;
 }
 
@@ -545,7 +545,7 @@ body {
     margin-bottom: 20px;
 }
 
-.btn-primary {
+.btn {
     background-image: none !important;
 }
 
@@ -613,4 +613,24 @@ body {
     display: flex;
     flex-flow: row;
     width: 100%;
+}
+
+.annotations-bottom-buttons {
+    display: flex;
+    justify-content: end;
+    flex-flow: row;
+}
+
+.annotations-extension-main-container {
+    height: 100%;
+    display: flex;
+    flex-flow: column;
+    width: 100%;
+}
+
+.annotations-extension-vertical-collapse {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-flow: column;
 }

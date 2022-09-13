@@ -11,16 +11,9 @@ def get_layout():
     :return:
     """
     return html.Div(
-        # id="right-sidebar-container",
-        # children=[
-        #     html.Div(
         id="right-sidebar-collapse",
         className="sidebar-collapsed",
         children=[
-            # dbc.Collapse(
-            #     id="right-sidebar-collapse",
-            #     is_open=False,
-            #     children=[
             dbc.Card(
                 id="right-sidebar-card",
                 children=[
@@ -43,9 +36,14 @@ def get_layout():
                                         tab_id="tab-node-information",
                                     ),
                                     dbc.Tab(
-                                        label="Data visualization",
+                                        label="Data",
                                         tab_id="tab-node-data",
                                     ),
+                                    # TODO: implement tabs for annotations and similarities
+                                    # dbc.Tab(
+                                    #     label="Annotations",
+                                    #     tab_id="tab-annotations",
+                                    # ),
                                 ],
                                 persistence=True,
                                 persistence_type="session",
@@ -55,9 +53,5 @@ def get_layout():
                     ),
                 ],
             ),
-            #     ],
-            # ),
-            #     ],
-            # )
         ],
     )
