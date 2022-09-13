@@ -76,6 +76,28 @@ def annotation_select_asset(selected_el_json, current_step):
         raise PreventUpdate()
 
 
+@app.callback(
+    Output("annotation-creation-store-definition", "data"),
+    Input("selected-graph-element-store", "data"),
+    State("annotation-creation-store-step", "data"),
+    prevent_initial_call=True,
+)
+def annotation_select_definition(selected_el_json, current_step):
+    if (
+        selected_el_json is None
+        or current_step is None
+        or current_step != CreationSteps.DEFINITION_SELECTION.value
+    ):
+        raise PreventUpdate()
+
+    selected_el: GraphSelectedElement = GraphSelectedElement.from_json(selected_el_json)
+
+    if selected_el.type == NodeTypes.ANNOTATION_DEFINITION.value:
+        return selected_el.to_json()
+    else:
+        raise PreventUpdate()
+
+
 ##########################################
 # Step-management:
 ##########################################
@@ -104,10 +126,7 @@ def annotation_create_step_update(current_step, contin, cancel, start):
         raise PreventUpdate()
 
     # Walk through steps:
-    if (
-        current_step == CreationSteps.ASSET_SELECTION.value
-        and trigger == "continue-create-annotation-button"
-    ):
+    if trigger == "continue-create-annotation-button":
         return current_step + 1
 
 
@@ -133,13 +152,19 @@ def annotation_create_button_replacal(current_step):
     Output("continue-create-annotation-button", "disabled"),
     Input("annotation-creation-store-step", "data"),
     Input("annotation-creation-store-asset", "data"),
+    Input("annotation-creation-store-definition", "data"),
     prevent_initial_call=False,
 )
-def annotation_next_step_button_activate(current_step, selected_asset):
+def annotation_next_step_button_activate(
+    current_step, selected_asset, selected_definition
+):
 
     if (
         current_step == CreationSteps.ASSET_SELECTION.value
         and selected_asset is not None
+    ) or (
+        current_step == CreationSteps.DEFINITION_SELECTION.value
+        and selected_definition is not None
     ):
         return False
 
@@ -148,7 +173,7 @@ def annotation_next_step_button_activate(current_step, selected_asset):
 
 @app.callback(
     Output("annotation-creation-step-list-1-asset", "className"),
-    Output("annotation-creation-step-list-2-type", "className"),
+    Output("annotation-creation-step-list-2-definition", "className"),
     Output("annotation-creation-step-list-3-ts", "className"),
     Output("annotation-creation-step-list-4-range", "className"),
     Output("annotation-creation-step-list-5-caption", "className"),
@@ -180,7 +205,7 @@ def annotation_create_visualizations(current_step):
     Input("annotation-creation-store-asset", "data"),
     prevent_initial_call=False,
 )
-def annotation_create_visualizations(current_step, asset_json):
+def annotation_result_visualization_asset(current_step, asset_json):
 
     if (
         current_step is not None
@@ -189,5 +214,24 @@ def annotation_create_visualizations(current_step, asset_json):
     ):
         asset = GraphSelectedElement.from_json(asset_json)
         return LIST_RESULT_PREFIX + asset.caption
+    else:
+        return ""
+
+
+@app.callback(
+    Output("annotation-creation-step-list-2-definition-result", "children"),
+    Input("annotation-creation-store-step", "data"),
+    Input("annotation-creation-store-definition", "data"),
+    prevent_initial_call=False,
+)
+def annotation_result_visualization_definition(current_step, definition_json):
+
+    if (
+        current_step is not None
+        and current_step >= CreationSteps.DEFINITION_SELECTION.value
+        and definition_json is not None
+    ):
+        definition = GraphSelectedElement.from_json(definition_json)
+        return LIST_RESULT_PREFIX + definition.caption
     else:
         return ""

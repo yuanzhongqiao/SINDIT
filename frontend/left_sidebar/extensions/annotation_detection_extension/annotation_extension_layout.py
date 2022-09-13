@@ -63,15 +63,11 @@ def get_layout():
                                         storage_type="memory",
                                     ),
                                     dcc.Store(
-                                        id="annotation-creation-store-data",
-                                        storage_type="memory",
-                                    ),
-                                    dcc.Store(
                                         id="annotation-creation-store-asset",
                                         storage_type="memory",
                                     ),
                                     dcc.Store(
-                                        id="annotation-creation-store-selected-definition",
+                                        id="annotation-creation-store-definition",
                                         storage_type="memory",
                                     ),
                                     dcc.Store(
@@ -114,11 +110,11 @@ def get_layout():
                                                 [
                                                     "2. Select an annotation type (definition)",
                                                     html.Div(
-                                                        id="annotation-creation-step-list-2-type-result",
+                                                        id="annotation-creation-step-list-2-definition-result",
                                                         className="annotation-creation-step-list-result",
                                                     ),
                                                 ],
-                                                id="annotation-creation-step-list-2-type",
+                                                id="annotation-creation-step-list-2-definition",
                                             ),
                                             dbc.ListGroupItem(
                                                 [
