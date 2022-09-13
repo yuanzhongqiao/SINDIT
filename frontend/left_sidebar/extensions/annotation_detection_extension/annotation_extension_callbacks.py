@@ -24,6 +24,7 @@ LIST_RESULT_PREFIX = "↪ "
 class CreationSteps(Enum):
     ASSET_SELECTION = 1
     DEFINITION_SELECTION = 2
+    FINISHED = 3
 
 
 ##########################################
@@ -83,12 +84,13 @@ def annotation_select_asset(selected_el_json, current_step):
 @app.callback(
     Output("annotation-creation-store-step", "data"),
     State("annotation-creation-store-step", "data"),
-    Input("annotation-creation-store-asset", "data"),
+    # Input("annotation-creation-store-asset", "data"),
+    Input("continue-create-annotation-button", "n_clicks"),
     Input("cancel-create-annotation-button", "n_clicks"),
     Input("create-annotation-button", "n_clicks"),
     prevent_initial_call=True,
 )
-def annotation_create_step_update(current_step, asset, cancel, start):
+def annotation_create_step_update(current_step, contin, cancel, start):
     trigger = ctx.triggered_id
 
     if trigger == "cancel-create-annotation-button":
@@ -104,13 +106,44 @@ def annotation_create_step_update(current_step, asset, cancel, start):
     # Walk through steps:
     if (
         current_step == CreationSteps.ASSET_SELECTION.value
-    ) and trigger == "annotation-creation-store-asset":
-        return CreationSteps.DEFINITION_SELECTION.value
+        and trigger == "continue-create-annotation-button"
+    ):
+        return current_step + 1
 
 
 ##########################################
 # Visual outputs:
 ##########################################
+
+
+@app.callback(
+    Output("save-create-annotation-button", "className"),
+    Output("continue-create-annotation-button", "className"),
+    Input("annotation-creation-store-step", "data"),
+    prevent_initial_call=False,
+)
+def annotation_create_button_replacal(current_step):
+    if current_step is None or current_step < CreationSteps.FINISHED.value:
+        return HIDE, SHOW
+    else:
+        return SHOW, HIDE
+
+
+@app.callback(
+    Output("continue-create-annotation-button", "disabled"),
+    Input("annotation-creation-store-step", "data"),
+    Input("annotation-creation-store-asset", "data"),
+    prevent_initial_call=False,
+)
+def annotation_next_step_button_activate(current_step, selected_asset):
+
+    if (
+        current_step == CreationSteps.ASSET_SELECTION.value
+        and selected_asset is not None
+    ):
+        return False
+
+    return True
 
 
 @app.callback(
@@ -143,13 +176,17 @@ def annotation_create_visualizations(current_step):
 
 @app.callback(
     Output("annotation-creation-step-list-1-asset-result", "children"),
-    State("annotation-creation-store-asset", "data"),
     Input("annotation-creation-store-step", "data"),
+    Input("annotation-creation-store-asset", "data"),
     prevent_initial_call=False,
 )
-def annotation_create_visualizations(asset_json, current_step):
+def annotation_create_visualizations(current_step, asset_json):
 
-    if current_step is not None and current_step > CreationSteps.ASSET_SELECTION.value:
+    if (
+        current_step is not None
+        and current_step >= CreationSteps.ASSET_SELECTION.value
+        and asset_json is not None
+    ):
         asset = GraphSelectedElement.from_json(asset_json)
         return LIST_RESULT_PREFIX + asset.caption
     else:

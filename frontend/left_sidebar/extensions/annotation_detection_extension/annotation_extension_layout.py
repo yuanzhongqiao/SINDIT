@@ -60,43 +60,43 @@ def get_layout():
                                 children=[
                                     dcc.Store(
                                         id="annotation-creation-store-step",
-                                        storage_type="session",
+                                        storage_type="memory",
                                     ),
                                     dcc.Store(
                                         id="annotation-creation-store-data",
-                                        storage_type="session",
+                                        storage_type="memory",
                                     ),
                                     dcc.Store(
                                         id="annotation-creation-store-asset",
-                                        storage_type="session",
+                                        storage_type="memory",
                                     ),
                                     dcc.Store(
                                         id="annotation-creation-store-selected-definition",
-                                        storage_type="session",
+                                        storage_type="memory",
                                     ),
                                     dcc.Store(
                                         id="annotation-creation-store-new-definition-description",
-                                        storage_type="session",
+                                        storage_type="memory",
                                     ),
                                     dcc.Store(
                                         id="annotation-creation-store-new-definition-id-short",
-                                        storage_type="session",
+                                        storage_type="memory",
                                     ),
                                     dcc.Store(
                                         id="annotation-creation-store-new-definition-caption",
-                                        storage_type="session",
+                                        storage_type="memory",
                                     ),
                                     dcc.Store(
                                         id="annotation-creation-store-caption",
-                                        storage_type="session",
+                                        storage_type="memory",
                                     ),
                                     dcc.Store(
                                         id="annotation-creation-store-description",
-                                        storage_type="session",
+                                        storage_type="memory",
                                     ),
                                     dcc.Store(
                                         id="annotation-creation-store-ts-ids",
-                                        storage_type="session",
+                                        storage_type="memory",
                                     ),
                                     dbc.ListGroup(
                                         [
@@ -170,18 +170,25 @@ def get_layout():
                                 className="annotations-bottom-buttons",
                                 children=[
                                     dbc.Button(
-                                        "Cancel",
+                                        "Abort",
                                         id="cancel-create-annotation-button",
                                         color="secondary",
                                         size="sm",
                                         style={"margin-right": "5px"},
                                     ),
                                     dbc.Button(
-                                        "Save Annotation",
-                                        id="save-create-annotation-button",
+                                        "Next Step",
+                                        id="continue-create-annotation-button",
                                         color="primary",
                                         size="sm",
                                         disabled=True,
+                                    ),
+                                    dbc.Button(
+                                        "Save Annotation",
+                                        className="hide-content",
+                                        id="save-create-annotation-button",
+                                        color="primary",
+                                        size="sm",
                                     ),
                                 ],
                             ),

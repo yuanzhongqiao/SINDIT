@@ -643,3 +643,7 @@ body {
     padding-left: 10px;
     font-weight: bold;
 }
+
+.list-group-item {
+    color: currentColor !important
+}
