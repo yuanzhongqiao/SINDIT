@@ -686,3 +686,7 @@ body {
     margin-bottom: 0px !important;
     min-height: 21.2px !important;
 }
+
+#graph-positioning-save-button {
+    min-width: 150px;
+}

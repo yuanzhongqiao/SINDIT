@@ -40,17 +40,29 @@ class CreationSteps(Enum):
     Output("annotation-information-collapse", "is_open"),
     Output("annotation-create-collapse", "is_open"),
     Input("create-annotation-button", "n_clicks"),
-    Input("cancel-create-annotation-button", "n_clicks"),
+    Input("confirm-cancel-annotation-creation", "submit_n_clicks"),
     Input("save-create-annotation-button", "n_clicks"),
-    prevent_initial_call=True,
+    State("annotation-creation-store-step", "data"),
+    prevent_initial_call=False,
 )
-def annotation_create_collapse(n_clicks_create, n_clicks_cancel, n_clicks_save):
+def annotation_create_collapse(n_clicks_create, n_clicks_cancel, n_clicks_save, step):
+    if step is not None:
+        return False, True
 
     button_clicked = ctx.triggered_id
     if button_clicked == "create-annotation-button":
         return False, True
     else:
         return True, False
+
+
+@app.callback(
+    Output("confirm-cancel-annotation-creation", "displayed"),
+    Input("cancel-create-annotation-button", "n_clicks"),
+    prevent_initial_call=True,
+)
+def display_confirm(n):
+    return True
 
 
 ##########################################
@@ -164,7 +176,7 @@ def annotation_select_ts_list(ts_list_json, selected_ts_json, remove, add, step)
     State("annotation-creation-store-step", "data"),
     # Input("annotation-creation-store-asset", "data"),
     Input("continue-create-annotation-button", "n_clicks"),
-    Input("cancel-create-annotation-button", "n_clicks"),
+    Input("confirm-cancel-annotation-creation", "submit_n_clicks"),
     Input("create-annotation-button", "n_clicks"),
     prevent_initial_call=True,
 )

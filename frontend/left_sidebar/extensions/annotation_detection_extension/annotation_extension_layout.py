@@ -60,43 +60,43 @@ def get_layout():
                                 children=[
                                     dcc.Store(
                                         id="annotation-creation-store-step",
-                                        storage_type="memory",
+                                        storage_type="session",
                                     ),
                                     dcc.Store(
                                         id="annotation-creation-store-asset",
-                                        storage_type="memory",
+                                        storage_type="session",
                                     ),
                                     dcc.Store(
                                         id="annotation-creation-store-definition",
-                                        storage_type="memory",
+                                        storage_type="session",
                                     ),
                                     dcc.Store(
                                         id="annotation-creation-store-new-definition-description",
-                                        storage_type="memory",
+                                        storage_type="session",
                                     ),
                                     dcc.Store(
                                         id="annotation-creation-store-new-definition-id-short",
-                                        storage_type="memory",
+                                        storage_type="session",
                                     ),
                                     dcc.Store(
                                         id="annotation-creation-store-new-definition-caption",
-                                        storage_type="memory",
+                                        storage_type="session",
                                     ),
                                     dcc.Store(
                                         id="annotation-creation-store-caption",
-                                        storage_type="memory",
+                                        storage_type="session",
                                     ),
                                     dcc.Store(
                                         id="annotation-creation-store-description",
-                                        storage_type="memory",
+                                        storage_type="session",
                                     ),
                                     dcc.Store(
                                         id="annotation-creation-store-selected-ts",
-                                        storage_type="memory",
+                                        storage_type="session",
                                     ),
                                     dcc.Store(
                                         id="annotation-creation-store-ts-list",
-                                        storage_type="memory",
+                                        storage_type="session",
                                     ),
                                     dbc.ListGroup(
                                         [
@@ -201,8 +201,12 @@ def get_layout():
                                 id="annotations-create_buttons-container",
                                 className="annotations-bottom-buttons",
                                 children=[
+                                    dcc.ConfirmDialog(
+                                        id="confirm-cancel-annotation-creation",
+                                        message="Are you sure you want to discard the annotation?",
+                                    ),
                                     dbc.Button(
-                                        "Abort",
+                                        "Cancel",
                                         id="cancel-create-annotation-button",
                                         color="secondary",
                                         size="sm",
