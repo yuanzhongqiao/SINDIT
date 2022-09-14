@@ -98,7 +98,7 @@ def update_timeseries_graph(
     overridden_duration = None
     if (
         annotation_creation_step is not None
-        and annotation_creation_step == CreationSteps.RANGE_SELECTION.value
+        and annotation_creation_step >= CreationSteps.RANGE_SELECTION.value
         and annotation_selected_start_date is not None
         and annotation_selected_start_time is not None
         and annotation_selected_end_date is not None
