@@ -1,11 +1,18 @@
 from datetime import datetime
+from random import randint
+from time import sleep
 
+from dash.exceptions import PreventUpdate
 import pytz
 from dash.dependencies import Input, Output, State
-
+from util.environment_and_configuration import (
+    ConfigGroups,
+    get_configuration_int,
+)
 from frontend import api_client
 from frontend.app import app
 from frontend.main_column.factory_graph import factory_graph_layout
+from frontend.main_column.factory_graph import factory_graph_cytoscape_converter
 from frontend.main_column.factory_graph.GraphSelectedElement import GraphSelectedElement
 from graph_domain.main_digital_twin.AssetNode import AssetNodeDeep
 
@@ -13,24 +20,112 @@ from graph_domain.main_digital_twin.AssetNode import AssetNodeDeep
 print("Initializing factory graph callbacks...")
 
 
+def _get_graph_age_seconds(timestamp):
+    if timestamp is not None:
+        return (
+            datetime.now() - datetime.fromtimestamp(timestamp / 1000.0)
+        ).total_seconds()
+    else:
+        return (
+            get_configuration_int(group=ConfigGroups.FRONTEND, key="max_graph_age") + 1
+        )
+
+
 @app.callback(
-    Output("cytoscape-graph", "elements"), Input("graph-reload-button", "n_clicks")
+    Output("cytoscape-graph", "elements"),
+    Output("cytoscape-graph-store", "data"),
+    Output("factory-graph-loading-state", "data"),
+    Input("graph-reload-button", "n_clicks"),
+    State("cytoscape-graph-store", "data"),
+    State("cytoscape-graph-store", "modified_timestamp"),
+    prevent_initial_call=True,
 )
-def update_factory_graph(n):
+def update_factory_graph(n_clicks, stored_graph, local_timestamp):
     """
-    Updates the main graph: Loads the nodes and edges from Neo4J
+    Updates the main graph: Loads the nodes and edges from Neo4J or local storage
     :param n:
     :return:
     """
-    assets_deep_json = api_client.get_json("/assets")
-    assets_deep = [AssetNodeDeep.from_json(m) for m in assets_deep_json]
-    asset_similarities = api_client.get_json("/assets/similarities")
 
-    cygraph_elements = factory_graph_layout.get_cytoscape_elements(
-        assets_deep=assets_deep, asset_similarities=asset_similarities
-    )
+    # Reload from backend when button manually clicked (n > 1), no graph is stored locally, or the stored one is older than the configured max age
+    if (
+        n_clicks > 1
+        or stored_graph is None
+        or _get_graph_age_seconds(local_timestamp)
+        > get_configuration_int(group=ConfigGroups.FRONTEND, key="max_graph_age")
+    ):
+        print("Loading graph from backend")
+        assets_deep_json = api_client.get_json("/assets")
+        assets_deep = [AssetNodeDeep.from_json(m) for m in assets_deep_json]
+        asset_similarities = api_client.get_json("/assets/similarities")
 
-    return cygraph_elements
+        cygraph_elements = factory_graph_cytoscape_converter.get_cytoscape_elements(
+            assets_deep=assets_deep, asset_similarities=asset_similarities
+        )
+    else:
+        cygraph_elements = stored_graph
+        print("Using cached graph")
+
+    return cygraph_elements, cygraph_elements, True
+
+
+@app.callback(
+    Output("graph-reload-button", "n_clicks"),
+    Input("interval-component-factory-graph", "n_intervals"),
+    Input("graph-reload-button", "n_clicks"),
+    Input("interval-component-factory-graph-initial-loading", "n_intervals"),
+    # State("cytoscape-graph", "elements"),
+    State("cytoscape-graph-store", "modified_timestamp"),
+    State("factory-graph-loading-state", "data"),
+    prevent_initial_call=True,
+)
+def factory_graph_update_trigger(
+    n, n_clicks, n_init_intervall, local_timestamp, graph_loaded
+):
+    # if elements is None or len(elements) == 0:
+    #     print("Graph empty! Reloading...")
+    #     return -100  # randint(-999999, 0) # <1 because >1 is
+    if graph_loaded is None and n_init_intervall == 1:
+        # First loading after opening / reloading whole page
+        print("Initial graph loading...")
+        return 1
+    elif graph_loaded is None and n_init_intervall < 4:
+        print("Waiting for graph to load...")
+        raise PreventUpdate()
+    elif graph_loaded is None and n_init_intervall == 4:
+        print(
+            "Graph not loaded after first intervall. Checking if reloading from backend or local storage..."
+        )
+        if _get_graph_age_seconds(local_timestamp) > get_configuration_int(
+            group=ConfigGroups.FRONTEND, key="max_graph_age"
+        ):
+            print("Loading from backend. Giving it more time...")
+            raise PreventUpdate()
+        else:
+            print(
+                "Loading from local storage. Should be already finished. Reloading as fallback..."
+            )
+            return 1
+    elif _get_graph_age_seconds(local_timestamp) > get_configuration_int(
+        group=ConfigGroups.FRONTEND, key="max_graph_age"
+    ):
+        print("Graph to old! Reloading graph from backend...")
+        return 2
+    else:
+        print("Graph okay")
+        raise PreventUpdate()
+
+    # if n_clicks == 0 or graph_loaded is None:
+    #     print("Initial graph loading...")
+    #     return 1
+    # elif _get_graph_age_seconds(local_timestamp) > get_configuration_int(
+    #     group=ConfigGroups.FRONTEND, key="max_graph_age"
+    # ):
+    #     print("Graph to old! Reloading graph from backend...")
+    #     return 2
+    # else:
+    #     print("Graph okay")
+    #     raise PreventUpdate()
 
 
 @app.callback(

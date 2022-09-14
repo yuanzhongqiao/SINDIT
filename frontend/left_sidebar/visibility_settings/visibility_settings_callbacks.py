@@ -67,13 +67,18 @@ def change_graph_visibility_options(active_switches, annotation_creation_step):
     for inactive_switch in deactivated_switches:
         # Hide nodes from that type:
         invisibility_styles.append(
-            {"selector": f".{inactive_switch}", "style": {"visibility": "hidden"}}
+            {"selector": f".{inactive_switch}", "style": {"display": "none"}}
         )
-        # Hide connected relationships:
-        for relationship_type in RELATIONSHIP_TYPES_FOR_NODE_TYPE.get(inactive_switch):
-            invisibility_styles.append(
-                {"selector": f".{relationship_type}", "style": {"visibility": "hidden"}}
-            )
+
+    # Asset-based selector:
+    shown_asset_iris = [
+        "www.sintef.no/aas_identifiers/learning_factory/machines/dps",
+        "www.sintef.no/aas_identifiers/learning_factory/machines/hbw",
+    ]
+    selectors = [f"node[associated_assets !*= '{iri}']" for iri in shown_asset_iris]
+    invisibility_styles.append(
+        {"selector": "".join(selectors), "style": {"display": "none"}}
+    )
 
     return CY_GRAPH_STYLE_STATIC + invisibility_styles
 

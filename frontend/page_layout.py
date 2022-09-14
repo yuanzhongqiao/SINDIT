@@ -44,9 +44,21 @@ def get_layout():
                                         interval=get_configuration_int(
                                             ConfigGroups.FRONTEND, "refresh_interval"
                                         ),
-                                        # interval=cfg.config['frontend']['refresh_interval'],
-                                        # interval=5000,
                                         n_intervals=0,
+                                    ),
+                                    dcc.Interval(
+                                        id="interval-component-factory-graph",
+                                        interval=get_configuration_int(
+                                            ConfigGroups.FRONTEND,
+                                            "refresh_interval_factory_graph",
+                                        ),
+                                        n_intervals=0,
+                                    ),
+                                    dcc.Interval(
+                                        id="interval-component-factory-graph-initial-loading",
+                                        interval=2000,
+                                        n_intervals=0,
+                                        max_intervals=4,
                                     ),
                                 ],
                                 id="content-rows-container",

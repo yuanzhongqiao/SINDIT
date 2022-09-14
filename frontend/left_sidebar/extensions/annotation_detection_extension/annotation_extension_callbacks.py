@@ -120,7 +120,7 @@ def annotation_select_ts(selected_el_json, current_step):
     if selected_el.type == NodeTypes.TIMESERIES_INPUT.value:
         return selected_el.to_json()
     else:
-        raise PreventUpdate()
+        return None
 
 
 @app.callback(
