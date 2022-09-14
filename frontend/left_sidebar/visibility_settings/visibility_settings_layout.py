@@ -1,10 +1,14 @@
+from typing import List
 import dash_bootstrap_components as dbc
 from dash import html, dcc
 
+from requests.exceptions import RequestException
+from frontend import api_client
 from graph_domain.factory_graph_types import (
     NodeTypes,
     PseudoNodeTypes,
 )
+from graph_domain.main_digital_twin.AssetNode import AssetNodeFlat
 
 
 def get_layout():
@@ -12,12 +16,36 @@ def get_layout():
     Layout of the visibility settings
     :return:
     """
+    try:
+        assets_flat_json = api_client.get_json("/assets", deep=False)
+        assets_flat: List[AssetNodeFlat] = [
+            AssetNodeFlat.from_json(m) for m in assets_flat_json
+        ]
+    except RequestException as err:
+        print("API not available when loading layout!")
+        assets_flat: List[AssetNodeFlat] = []
     return html.Div(
         [
             html.Div(
                 "Creating annotation: Settings ignored!",
                 className="hide-content",
                 id="visibility-settings-ignored-info",
+            ),
+            html.Div(
+                "Select asset(s) to only show related nodes:",
+                id="asset-multi-select-dropdown-info",
+            ),
+            dcc.Dropdown(
+                [{"label": asset.caption, "value": asset.iri} for asset in assets_flat],
+                [],
+                multi=True,
+                id="asset-multi-select-dropdown",
+                persistence=True,
+                persistence_type="session",
+            ),
+            html.Div(
+                "Show or hide types of nodes:",
+                id="visibility-checklist-info",
             ),
             dbc.Checklist(
                 options=[

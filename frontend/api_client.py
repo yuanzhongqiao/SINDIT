@@ -2,6 +2,7 @@ from datetime import datetime
 import requests
 import json
 import pandas as pd
+from requests.exceptions import RequestException
 
 from util.environment_and_configuration import (
     ConfigGroups,
@@ -22,13 +23,17 @@ def get_json(relative_path: str, **kwargs):
     :param relative_path:
     :return: the response json as dict
     """
-    resp_dict = requests.get(API_URI + relative_path, params=kwargs).json()
+    try:
+        resp_dict = requests.get(API_URI + relative_path, params=kwargs).json()
 
-    if isinstance(resp_dict, str):
-        # Sometimes, the json is still represented as string instead of dict
-        resp_dict = json.loads(resp_dict)
+        if isinstance(resp_dict, str):
+            # Sometimes, the json is still represented as string instead of dict
+            resp_dict = json.loads(resp_dict)
 
-    return resp_dict
+        return resp_dict
+    except RequestException as err:
+        print("API not availlable!")
+        return ""
 
 
 def get_dataframe(relative_path: str, **kwargs):
@@ -63,7 +68,11 @@ def get_raw(relative_path: str, **kwargs):
     :param relative_path:
     :return: the raw response
     """
-    return requests.get(API_URI + relative_path, params=kwargs).content
+    try:
+        return requests.get(API_URI + relative_path, params=kwargs).content
+    except RequestException as err:
+        print("API not availlable!")
+        return None
 
 
 def get_str(relative_path: str, **kwargs):
@@ -72,7 +81,11 @@ def get_str(relative_path: str, **kwargs):
     :param relative_path:
     :return: the response as string
     """
-    return requests.get(API_URI + relative_path, params=kwargs).text
+    try:
+        return requests.get(API_URI + relative_path, params=kwargs).text
+    except RequestException as err:
+        print("API not availlable!")
+        return ""
 
 
 def get_int(relative_path: str, **kwargs):
@@ -81,7 +94,11 @@ def get_int(relative_path: str, **kwargs):
     :param relative_path:
     :return: the response as int number
     """
-    return int(requests.get(API_URI + relative_path, params=kwargs).text)
+    try:
+        return int(requests.get(API_URI + relative_path, params=kwargs).text)
+    except RequestException as err:
+        print("API not availlable!")
+        return None
 
 
 def get_float(relative_path: str, **kwargs):
@@ -90,8 +107,15 @@ def get_float(relative_path: str, **kwargs):
     :param relative_path:
     :return: the response as float number
     """
-    return float(requests.get(API_URI + relative_path, params=kwargs).text)
+    try:
+        return float(requests.get(API_URI + relative_path, params=kwargs).text)
+    except RequestException as err:
+        print("API not availlable!")
+        return None
 
 
 def patch(relative_path: str, **kwargs):
-    requests.patch(API_URI + relative_path, params=kwargs)
+    try:
+        requests.patch(API_URI + relative_path, params=kwargs)
+    except RequestException as err:
+        print("API not availlable!")

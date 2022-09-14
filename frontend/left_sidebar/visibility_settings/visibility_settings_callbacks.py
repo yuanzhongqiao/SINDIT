@@ -1,6 +1,11 @@
 from frontend.app import app
 from dash.dependencies import Input, Output
 
+from typing import List
+from frontend import api_client
+from graph_domain.main_digital_twin.AssetNode import AssetNodeFlat
+from requests.exceptions import RequestException
+from dash.exceptions import PreventUpdate
 from frontend import resources_manager
 from frontend.left_sidebar.extensions.annotation_detection_extension.annotation_extension_callbacks import (
     CreationSteps,
@@ -21,8 +26,11 @@ print("Initializing visibility settings callbacks...")
     Output("cytoscape-graph", "stylesheet"),
     Input("visibility-switches-input", "value"),
     Input("annotation-creation-store-step", "data"),
+    Input("asset-multi-select-dropdown", "value"),
 )
-def change_graph_visibility_options(active_switches, annotation_creation_step):
+def change_graph_visibility_options(
+    active_switches, annotation_creation_step, selected_assets
+):
     """
     Toggles the visibility of element types in the main graph
     :param value:
@@ -71,14 +79,12 @@ def change_graph_visibility_options(active_switches, annotation_creation_step):
         )
 
     # Asset-based selector:
-    shown_asset_iris = [
-        "www.sintef.no/aas_identifiers/learning_factory/machines/dps",
-        "www.sintef.no/aas_identifiers/learning_factory/machines/hbw",
-    ]
-    selectors = [f"node[associated_assets !*= '{iri}']" for iri in shown_asset_iris]
-    invisibility_styles.append(
-        {"selector": "".join(selectors), "style": {"display": "none"}}
-    )
+
+    if selected_assets is not None and len(selected_assets) > 0:
+        selectors = [f"node[associated_assets !*= '{iri}']" for iri in selected_assets]
+        invisibility_styles.append(
+            {"selector": "".join(selectors), "style": {"display": "none"}}
+        )
 
     return CY_GRAPH_STYLE_STATIC + invisibility_styles
 
@@ -97,3 +103,28 @@ def change_graph_visibility_options(annotation_creation_step):
         return ""
     else:
         return "hide-content"
+
+
+@app.callback(
+    Output("asset-multi-select-dropdown", "options"),
+    Input("interval-component-factory-graph-initial-loading", "n_intervals"),
+)
+def update_asset_multi_options(n):
+    if n == 3:
+        try:
+            assets_flat_json = api_client.get_json("/assets", deep=False)
+            assets_flat: List[AssetNodeFlat] = [
+                AssetNodeFlat.from_json(m) for m in assets_flat_json
+            ]
+        except RequestException as err:
+            print("API not available when loading layout!")
+            assets_flat: List[AssetNodeFlat] = []
+
+        return [{"label": asset.caption, "value": asset.iri} for asset in assets_flat]
+        return [
+            {"label": "New York Citya", "value": "NYCa"},
+            {"label": "Montreala", "value": "MTLa"},
+            {"label": "San Franciscoa", "value": "SFa"},
+        ]
+    else:
+        raise PreventUpdate

@@ -64,6 +64,9 @@ class AssetsDao(object):
         return assets_deep_matches.all()
 
     # validator used manually because result type is json instead of node-list
+    def get_assets_flat_json(self):
+        return json.dumps([a.to_json() for a in self.get_assets_flat()])
+
     def get_assets_deep_json(self):
         """
         Queries all asset nodes. Follows relationships to build nested objects for related nodes (e.g. sensors)

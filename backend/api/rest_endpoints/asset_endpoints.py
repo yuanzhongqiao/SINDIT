@@ -13,7 +13,7 @@ def get_assets_deep(deep: bool = True):
     if deep:
         return ASSETS_DAO.get_assets_deep_json()
     else:
-        return ASSETS_DAO.get_assets_flat()
+        return ASSETS_DAO.get_assets_flat_json()
 
 
 @app.get("/assets/similarities")

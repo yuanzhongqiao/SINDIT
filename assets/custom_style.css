@@ -665,3 +665,24 @@ body {
 #annotations-creation-ts-form-buttons-container {
     margin-top: 10px;
 }
+
+.Select-control .Select-value {
+    color: currentColor !important
+}
+
+#asset-multi-select-dropdown {
+    margin-bottom: 5px;
+}
+
+#visibility-checklist-info {
+    padding-bottom: 3px;
+}
+
+#asset-multi-select-dropdown-info {
+    padding-bottom: 3px;
+}
+
+#visibility-switches-input>.form-switch {
+    margin-bottom: 0px !important;
+    min-height: 21.2px !important;
+}
