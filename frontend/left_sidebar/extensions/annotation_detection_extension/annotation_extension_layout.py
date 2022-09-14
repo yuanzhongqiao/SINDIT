@@ -168,7 +168,7 @@ def get_layout():
                                         className="hide-content",
                                         children=[
                                             html.Div(
-                                                "Only timeseries belonging to that asset!",
+                                                "Select in the graph and add here.",
                                                 style={"width": "fit-content"},
                                             ),
                                             html.Div(

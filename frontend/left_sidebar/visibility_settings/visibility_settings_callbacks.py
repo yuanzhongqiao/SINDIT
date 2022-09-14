@@ -1,6 +1,7 @@
 from frontend.app import app
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 
+from frontend.main_column.factory_graph.GraphSelectedElement import GraphSelectedElement
 from typing import List
 from frontend import api_client
 from graph_domain.main_digital_twin.AssetNode import AssetNodeFlat
@@ -27,9 +28,13 @@ print("Initializing visibility settings callbacks...")
     Input("visibility-switches-input", "value"),
     Input("annotation-creation-store-step", "data"),
     Input("asset-multi-select-dropdown", "value"),
+    State("annotation-creation-store-asset", "data"),
 )
 def change_graph_visibility_options(
-    active_switches, annotation_creation_step, selected_assets
+    active_switches,
+    annotation_creation_step,
+    selected_assets,
+    annotation_creation_asset_json,
 ):
     """
     Toggles the visibility of element types in the main graph
@@ -44,6 +49,8 @@ def change_graph_visibility_options(
         deactivated_switches = [
             switch for switch in NODE_TYPE_STRINGS if switch != NodeTypes.ASSET.value
         ]
+        # All assets:
+        selected_assets = []
     elif (
         annotation_creation_step is not None
         and annotation_creation_step == CreationSteps.DEFINITION_SELECTION.value
@@ -54,6 +61,8 @@ def change_graph_visibility_options(
             for switch in NODE_TYPE_STRINGS
             if switch != NodeTypes.ANNOTATION_DEFINITION.value
         ]
+        # Annotation definitions from all assets:
+        selected_assets = []
     elif (
         annotation_creation_step is not None
         and annotation_creation_step == CreationSteps.TS_SELECTION.value
@@ -64,6 +73,11 @@ def change_graph_visibility_options(
             for switch in NODE_TYPE_STRINGS
             if switch not in [NodeTypes.TIMESERIES_INPUT.value, NodeTypes.ASSET.value]
         ]
+        # Only ts from the current asset:
+        selected_asset: GraphSelectedElement = GraphSelectedElement.from_json(
+            annotation_creation_asset_json
+        )
+        selected_assets = [selected_asset.iri]
     else:
         # Use regular user-based visibility settings:
         deactivated_switches = [
@@ -79,7 +93,6 @@ def change_graph_visibility_options(
         )
 
     # Asset-based selector:
-
     if selected_assets is not None and len(selected_assets) > 0:
         selectors = [f"node[associated_assets !*= '{iri}']" for iri in selected_assets]
         invisibility_styles.append(

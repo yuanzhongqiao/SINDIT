@@ -1,3 +1,4 @@
+from ast import Set
 from datetime import datetime
 from enum import Enum
 import json
@@ -139,16 +140,16 @@ def annotation_select_ts_list(ts_list_json, selected_ts_json, remove, add, step)
         return None
 
     if ts_list_json is not None:
-        ts_jsons_list: List = json.loads(ts_list_json)
+        ts_jsons_set: Set = set(json.loads(ts_list_json))
     else:
-        ts_jsons_list: List = []
+        ts_jsons_set: Set = set()
 
-    if trigger == "annotation-remove-ts-button" and len(ts_jsons_list) > 0:
-        ts_jsons_list.pop()
-        return json.dumps(ts_jsons_list)
+    if trigger == "annotation-remove-ts-button" and len(ts_jsons_set) > 0:
+        ts_jsons_set.pop()
+        return json.dumps(list(ts_jsons_set))
     elif trigger == "annotation-add-ts-button" and selected_ts_json is not None:
-        ts_jsons_list.append(selected_ts_json)
-        return json.dumps(ts_jsons_list)
+        ts_jsons_set.add(selected_ts_json)
+        return json.dumps(list(ts_jsons_set))
     else:
         raise PreventUpdate()
 
