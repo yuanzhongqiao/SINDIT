@@ -1,6 +1,10 @@
+from datetime import datetime
 from dash import html
 import dash_bootstrap_components as dbc
 from dash import html, dcc
+
+import dash_mantine_components as dmc
+import dash_daq as daq
 
 
 def get_layout():
@@ -98,6 +102,14 @@ def get_layout():
                                         id="annotation-creation-store-ts-list",
                                         storage_type="session",
                                     ),
+                                    # dcc.Store(
+                                    #     id="annotation-creation-store-range-start",
+                                    #     storage_type="session",
+                                    # ),
+                                    # dcc.Store(
+                                    #     id="annotation-creation-store-range-end",
+                                    #     storage_type="session",
+                                    # ),
                                     dbc.ListGroup(
                                         [
                                             dbc.ListGroupItem(
@@ -168,7 +180,7 @@ def get_layout():
                                         className="hide-content",
                                         children=[
                                             html.Div(
-                                                "Select in the graph and add here.",
+                                                "Hint: You can collapse the annotations-card ",
                                                 style={"width": "fit-content"},
                                             ),
                                             html.Div(
@@ -195,6 +207,66 @@ def get_layout():
                                             ),
                                         ],
                                     ),
+                                    html.Div(
+                                        id="annotation-creation-step-4-range-form",
+                                        className="hide-content",
+                                        children=[
+                                            html.Div(
+                                                "Hint: Open the data-tab of some time-series to view the selected range.",
+                                                style={"width": "300px"},
+                                            ),
+                                            html.Div(
+                                                "Begin of the situation:",
+                                                style={
+                                                    "font-weight": "bold",
+                                                    "margin-bottom": "5px",
+                                                    "margin-top": "20px",
+                                                },
+                                            ),
+                                            html.Div(
+                                                [
+                                                    dmc.DatePicker(
+                                                        id="annotation-creation-date-selector-start",
+                                                        persistence=True,
+                                                        persistence_type="session",
+                                                        style={"margin-right": "5px"},
+                                                    ),
+                                                    dmc.TimeInput(
+                                                        id="annotation-creation-time-selector-start",
+                                                        withSeconds=True,
+                                                        persistence=True,
+                                                        persistence_type="session",
+                                                    ),
+                                                ],
+                                                className="annotation-creation-datetime-pair",
+                                            ),
+                                            html.Div(
+                                                "End of the situation:",
+                                                style={
+                                                    "font-weight": "bold",
+                                                    "margin-bottom": "5px",
+                                                    "margin-top": "10px",
+                                                },
+                                            ),
+                                            html.Div(
+                                                [
+                                                    dmc.DatePicker(
+                                                        id="annotation-creation-date-selector-end",
+                                                        persistence=True,
+                                                        persistence_type="session",
+                                                        style={"margin-right": "5px"},
+                                                    ),
+                                                    dmc.TimeInput(
+                                                        id="annotation-creation-time-selector-end",
+                                                        withSeconds=True,
+                                                        persistence=True,
+                                                        persistence_type="session",
+                                                    ),
+                                                ],
+                                                className="annotation-creation-datetime-pair",
+                                            ),
+                                        ],
+                                    ),
                                 ],
                             ),
                             html.Div(
@@ -210,6 +282,14 @@ def get_layout():
                                         id="cancel-create-annotation-button",
                                         color="secondary",
                                         size="sm",
+                                        style={"margin-right": "5px"},
+                                    ),
+                                    dbc.Button(
+                                        "Previous Step",
+                                        id="back-create-annotation-button",
+                                        color="primary",
+                                        size="sm",
+                                        disabled=True,
                                         style={"margin-right": "5px"},
                                     ),
                                     dbc.Button(

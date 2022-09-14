@@ -11,6 +11,7 @@ from frontend import api_client
 from dash.exceptions import PreventUpdate
 from dash import html, ctx
 
+from dateutil import tz
 from frontend.left_sidebar.global_information import global_information_layout
 from frontend.main_column.factory_graph.GraphSelectedElement import GraphSelectedElement
 from graph_domain.factory_graph_types import NodeTypes
@@ -28,7 +29,8 @@ class CreationSteps(Enum):
     ASSET_SELECTION = 1
     DEFINITION_SELECTION = 2
     TS_SELECTION = 3
-    FINISHED = 4
+    RANGE_SELECTION = 4
+    FINISHED = 5
 
 
 ##########################################
@@ -166,6 +168,24 @@ def annotation_select_ts_list(ts_list_json, selected_ts_json, remove, add, step)
         raise PreventUpdate()
 
 
+# @app.callback(
+#     Output("annotation-creation-store-range-start", "data"),
+#     Input("annotation-creation-date-selector-start", "value"),
+#     Input("annotation-creation-time-selector-start", "value"),
+#     prevent_initial_call=True,
+# )
+# def annotation_select_range_start(selected_date, selected_time):
+
+#     selector_tz = tz.gettz(
+#         get_configuration(group=ConfigGroups.FRONTEND, key="timezone")
+#     )
+#     return datetime.combine(
+#         date=selected_date,
+#         time=selected_time,
+#         tzinfo=selector_tz,
+#     )
+
+
 ##########################################
 # Step-management:
 ##########################################
@@ -178,9 +198,10 @@ def annotation_select_ts_list(ts_list_json, selected_ts_json, remove, add, step)
     Input("continue-create-annotation-button", "n_clicks"),
     Input("confirm-cancel-annotation-creation", "submit_n_clicks"),
     Input("create-annotation-button", "n_clicks"),
+    Input("back-create-annotation-button", "n_clicks"),
     prevent_initial_call=True,
 )
-def annotation_create_step_update(current_step, contin, cancel, start):
+def annotation_create_step_update(current_step, contin, cancel, start, back):
     trigger = ctx.triggered_id
 
     if trigger == "cancel-create-annotation-button":
@@ -189,6 +210,8 @@ def annotation_create_step_update(current_step, contin, cancel, start):
     elif trigger == "create-annotation-button":
         # Start (to step 1):
         return 1
+    elif trigger == "back-create-annotation-button":
+        return current_step - 1
     elif current_step is None:
         # Cancel if not active (step none)
         raise PreventUpdate()
@@ -222,11 +245,43 @@ def annotation_create_button_replacal(current_step):
     Input("annotation-creation-store-asset", "data"),
     Input("annotation-creation-store-definition", "data"),
     Input("annotation-creation-store-ts-list", "data"),
+    Input("annotation-creation-date-selector-start", "value"),
+    Input("annotation-creation-time-selector-start", "value"),
+    Input("annotation-creation-date-selector-end", "value"),
+    Input("annotation-creation-time-selector-end", "value"),
     prevent_initial_call=False,
 )
 def annotation_next_step_button_activate(
-    current_step, selected_asset, selected_definition, selected_ts_list
+    current_step,
+    selected_asset,
+    selected_definition,
+    selected_ts_list,
+    selected_start_date,
+    selected_start_time,
+    selected_end_date,
+    selected_end_time,
 ):
+    selected_start_datetime = None
+    selected_end_datetime = None
+    if (
+        selected_start_date is not None
+        and selected_start_time is not None
+        and selected_end_date is not None
+        and selected_end_time is not None
+    ):
+        selector_tz = tz.gettz(
+            get_configuration(group=ConfigGroups.FRONTEND, key="timezone")
+        )
+        selected_start_datetime = datetime.combine(
+            date=datetime.fromisoformat(selected_start_date).date(),
+            time=datetime.fromisoformat(selected_start_time).time(),
+            tzinfo=selector_tz,
+        )
+        selected_end_datetime = datetime.combine(
+            date=datetime.fromisoformat(selected_end_date).date(),
+            time=datetime.fromisoformat(selected_end_time).time(),
+            tzinfo=selector_tz,
+        )
 
     if (
         (
@@ -241,10 +296,34 @@ def annotation_next_step_button_activate(
             current_step == CreationSteps.TS_SELECTION.value
             and selected_ts_list is not None
         )
+        or (
+            current_step == CreationSteps.RANGE_SELECTION.value
+            and selected_start_datetime is not None
+            and selected_end_datetime is not None
+            and selected_start_datetime < selected_end_datetime
+            and selected_end_datetime
+            < datetime.now().astimezone(
+                pytz.timezone(
+                    get_configuration(group=ConfigGroups.FRONTEND, key="timezone")
+                )
+            )
+        )
     ):
         return False
 
     return True
+
+
+@app.callback(
+    Output("back-create-annotation-button", "disabled"),
+    Input("annotation-creation-store-step", "data"),
+    prevent_initial_call=False,
+)
+def annotation_previous_step_button_activate(current_step):
+    if current_step is not None and current_step > 1:
+        return False
+    else:
+        return True
 
 
 @app.callback(
@@ -255,6 +334,19 @@ def annotation_next_step_button_activate(
 def annotation_ts_form_hide(current_step):
 
     if current_step == CreationSteps.TS_SELECTION.value:
+        return SHOW
+    else:
+        return HIDE
+
+
+@app.callback(
+    Output("annotation-creation-step-4-range-form", "className"),
+    Input("annotation-creation-store-step", "data"),
+    prevent_initial_call=False,
+)
+def annotation_ts_form_hide(current_step):
+
+    if current_step == CreationSteps.RANGE_SELECTION.value:
         return SHOW
     else:
         return HIDE
@@ -344,5 +436,50 @@ def annotation_result_visualization_ts(current_step, ts_list_json):
             for ts_json in json.loads(ts_list_json)
         ]
         return LIST_RESULT_PREFIX + ", ".join([ts.caption for ts in ts_list])
+    else:
+        return ""
+
+
+@app.callback(
+    Output("annotation-creation-step-list-4-range-result", "children"),
+    Input("annotation-creation-store-step", "data"),
+    Input("annotation-creation-date-selector-start", "value"),
+    Input("annotation-creation-time-selector-start", "value"),
+    Input("annotation-creation-date-selector-end", "value"),
+    Input("annotation-creation-time-selector-end", "value"),
+    prevent_initial_call=False,
+)
+def annotation_result_visualization_ts(
+    current_step,
+    selected_start_date,
+    selected_start_time,
+    selected_end_date,
+    selected_end_time,
+):
+
+    if (
+        current_step is not None
+        and current_step >= CreationSteps.RANGE_SELECTION.value
+        and selected_start_date is not None
+        and selected_start_time is not None
+        and selected_end_date is not None
+        and selected_end_time is not None
+    ):
+        selector_tz = tz.gettz(
+            get_configuration(group=ConfigGroups.FRONTEND, key="timezone")
+        )
+        start_datetime = datetime.combine(
+            date=datetime.fromisoformat(selected_start_date).date(),
+            time=datetime.fromisoformat(selected_start_time).time(),
+            tzinfo=selector_tz,
+        )
+        end_datetime = datetime.combine(
+            date=datetime.fromisoformat(selected_end_date).date(),
+            time=datetime.fromisoformat(selected_end_time).time(),
+            tzinfo=selector_tz,
+        )
+
+        return f"{LIST_RESULT_PREFIX}{start_datetime.strftime('%d.%m.%Y, %H:%M:%S')} – {end_datetime.strftime('%d.%m.%Y, %H:%M:%S')}"
+
     else:
         return ""

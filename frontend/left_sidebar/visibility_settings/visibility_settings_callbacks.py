@@ -1,3 +1,4 @@
+import json
 from frontend.app import app
 from dash.dependencies import Input, Output, State
 
@@ -29,18 +30,23 @@ print("Initializing visibility settings callbacks...")
     Input("annotation-creation-store-step", "data"),
     Input("asset-multi-select-dropdown", "value"),
     State("annotation-creation-store-asset", "data"),
+    State("annotation-creation-store-ts-list", "data"),
 )
 def change_graph_visibility_options(
     active_switches,
     annotation_creation_step,
     selected_assets,
     annotation_creation_asset_json,
+    annotation_creation_ts_list_json,
 ):
     """
     Toggles the visibility of element types in the main graph
     :param value:
     :return:
     """
+    invisibility_styles = []
+    iri_filter_list = []
+
     if (
         annotation_creation_step is not None
         and annotation_creation_step == CreationSteps.ASSET_SELECTION.value
@@ -67,7 +73,7 @@ def change_graph_visibility_options(
         annotation_creation_step is not None
         and annotation_creation_step == CreationSteps.TS_SELECTION.value
     ):
-        # Only show annotation definitions:
+        # Only show ts and the asset:
         deactivated_switches = [
             switch
             for switch in NODE_TYPE_STRINGS
@@ -78,13 +84,27 @@ def change_graph_visibility_options(
             annotation_creation_asset_json
         )
         selected_assets = [selected_asset.iri]
+    elif (
+        annotation_creation_step is not None
+        and annotation_creation_step == CreationSteps.RANGE_SELECTION.value
+    ):
+        # Block all. Unblock specified with rule below:
+        deactivated_switches = NODE_TYPE_STRINGS
+        # Only show selected time-series and asset:
+        ts_list = json.loads(annotation_creation_ts_list_json)
+        for ts_json in ts_list:
+            ts = GraphSelectedElement.from_json(ts_json)
+            iri_filter_list.append(ts.iri)
+        selected_asset: GraphSelectedElement = GraphSelectedElement.from_json(
+            annotation_creation_asset_json
+        )
+        iri_filter_list.append(selected_asset.iri)
+
     else:
         # Use regular user-based visibility settings:
         deactivated_switches = [
             switch for switch in NODE_TYPE_STRINGS if switch not in active_switches
         ]
-
-    invisibility_styles = []
 
     for inactive_switch in deactivated_switches:
         # Hide nodes from that type:
@@ -97,6 +117,12 @@ def change_graph_visibility_options(
         selectors = [f"node[associated_assets !*= '{iri}']" for iri in selected_assets]
         invisibility_styles.append(
             {"selector": "".join(selectors), "style": {"display": "none"}}
+        )
+
+    # IRI-based selector (making visible, not invisible):
+    for iri in iri_filter_list:
+        invisibility_styles.append(
+            {"selector": f"node[iri = '{iri}']", "style": {"display": "element"}}
         )
 
     return CY_GRAPH_STYLE_STATIC + invisibility_styles

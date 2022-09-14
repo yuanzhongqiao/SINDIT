@@ -3,10 +3,13 @@ from dash.dependencies import Input, Output, State
 import pandas as pd
 from dateutil import tz
 from dash.exceptions import PreventUpdate
-
+import pytz
 from dash import html
 from frontend import api_client
 from frontend.app import app
+from frontend.left_sidebar.extensions.annotation_detection_extension.annotation_extension_callbacks import (
+    CreationSteps,
+)
 from frontend.main_column.factory_graph.GraphSelectedElement import GraphSelectedElement
 from frontend.right_sidebar.node_data_tab.timeseries_graph import (
     timeseries_graph_layout,
@@ -67,6 +70,11 @@ def timeseries_graph_interval(n, realtime_toggle, pseudo_element_input):
     Input("datetime-selector-range-hours", "value"),
     Input("datetime-selector-range-min", "value"),
     Input("datetime-selector-range-sec", "value"),
+    Input("annotation-creation-store-step", "data"),
+    Input("annotation-creation-date-selector-start", "value"),
+    Input("annotation-creation-time-selector-start", "value"),
+    Input("annotation-creation-date-selector-end", "value"),
+    Input("annotation-creation-time-selector-end", "value"),
 )
 def update_timeseries_graph(
     n,
@@ -78,7 +86,44 @@ def update_timeseries_graph(
     duration_hours,
     duration_mins,
     duration_secs,
+    annotation_creation_step,
+    annotation_selected_start_date,
+    annotation_selected_start_time,
+    annotation_selected_end_date,
+    annotation_selected_end_time,
 ):
+    annotation_selected_start_datetime = None
+    annotation_selected_end_datetime = None
+    overridden_end_datetime = None
+    overridden_duration = None
+    if (
+        annotation_creation_step is not None
+        and annotation_creation_step == CreationSteps.RANGE_SELECTION.value
+        and annotation_selected_start_date is not None
+        and annotation_selected_start_time is not None
+        and annotation_selected_end_date is not None
+        and annotation_selected_end_time is not None
+    ):
+        selector_tz = tz.gettz(
+            get_configuration(group=ConfigGroups.FRONTEND, key="timezone")
+        )
+        annotation_selected_start_datetime = datetime.combine(
+            date=datetime.fromisoformat(annotation_selected_start_date).date(),
+            time=datetime.fromisoformat(annotation_selected_start_time).time(),
+            tzinfo=selector_tz,
+        )
+        annotation_selected_end_datetime = datetime.combine(
+            date=datetime.fromisoformat(annotation_selected_end_date).date(),
+            time=datetime.fromisoformat(annotation_selected_end_time).time(),
+            tzinfo=selector_tz,
+        )
+
+        # Alter displayed time-range:
+        annotation_duration = (
+            annotation_selected_end_datetime - annotation_selected_start_datetime
+        )
+        overridden_end_datetime = annotation_selected_end_datetime + annotation_duration
+        overridden_duration = annotation_duration * 3
 
     fig = timeseries_graph_layout.get_figure()
 
@@ -95,16 +140,21 @@ def update_timeseries_graph(
         print("Trying to visualize timeseries from non-timeseries element...")
         return fig
 
-    duration: timedelta = timedelta(
-        days=duration_days,
-        hours=duration_hours,
-        minutes=duration_mins,
-        seconds=duration_secs,
-    )
+    if overridden_duration is not None:
+        duration = overridden_duration
+    else:
+        duration: timedelta = timedelta(
+            days=duration_days,
+            hours=duration_hours,
+            minutes=duration_mins,
+            seconds=duration_secs,
+        )
 
     # API call for the dataframe
     if realtime_toggle:
         date_time = datetime.now()
+    elif overridden_end_datetime is not None:
+        date_time = overridden_end_datetime
     else:
         if isinstance(selected_time_str, str) and selected_time_str != "":
             selected_time = datetime.fromisoformat(selected_time_str).time()
@@ -173,8 +223,30 @@ def update_timeseries_graph(
         col=1,
     )
 
+    if (
+        annotation_selected_start_datetime is not None
+        and annotation_selected_end_datetime is not None
+    ):
+        selected_points = []
+
+        i = 0
+        for data_point_time in data["time"]:
+            if (
+                data_point_time >= annotation_selected_start_datetime
+                and data_point_time <= annotation_selected_end_datetime
+            ):
+                selected_points.append(i)
+            i += 1
+    else:
+        selected_points = []
+
     # Layouting...
-    fig.update_traces(marker_size=8, marker_line=None, mode="markers")
+    fig.update_traces(
+        marker_size=8,
+        marker_line=None,
+        mode="markers",
+        selectedpoints=selected_points,
+    )
 
     # Aggregate info
     result_count_str = f"Entries for given range:\t{readings_count}"

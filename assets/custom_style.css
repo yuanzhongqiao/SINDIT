@@ -653,7 +653,8 @@ body {
     padding-bottom: 5px;
 }
 
-#annotation-creation-step-3-ts-form {
+#annotation-creation-step-3-ts-form,
+#annotation-creation-step-4-range-form {
     width: 100%;
     display: flex;
     flex-flow: column;
@@ -689,4 +690,10 @@ body {
 
 #graph-positioning-save-button {
     min-width: 150px;
+}
+
+.annotation-creation-datetime-pair {
+    display: flex;
+    flex-flow: row;
+    width: 300px;
 }
