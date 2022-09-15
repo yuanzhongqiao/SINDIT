@@ -102,14 +102,14 @@ def get_layout():
                                         id="annotation-creation-store-ts-list",
                                         storage_type="session",
                                     ),
-                                    # dcc.Store(
-                                    #     id="annotation-creation-store-range-start",
-                                    #     storage_type="session",
-                                    # ),
-                                    # dcc.Store(
-                                    #     id="annotation-creation-store-range-end",
-                                    #     storage_type="session",
-                                    # ),
+                                    dcc.Store(
+                                        id="annotation-creation-store-range-start",
+                                        storage_type="session",
+                                    ),
+                                    dcc.Store(
+                                        id="annotation-creation-store-range-end",
+                                        storage_type="session",
+                                    ),
                                     dbc.ListGroup(
                                         [
                                             dbc.ListGroupItem(

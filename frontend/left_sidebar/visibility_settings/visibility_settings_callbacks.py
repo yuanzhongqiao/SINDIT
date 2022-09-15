@@ -86,7 +86,7 @@ def change_graph_visibility_options(
         selected_assets = [selected_asset.iri]
     elif (
         annotation_creation_step is not None
-        and annotation_creation_step == CreationSteps.RANGE_SELECTION.value
+        and annotation_creation_step >= CreationSteps.RANGE_SELECTION.value
     ):
         # Block all. Unblock specified with rule below:
         deactivated_switches = NODE_TYPE_STRINGS

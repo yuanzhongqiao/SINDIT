@@ -1,8 +1,8 @@
 from datetime import datetime
 from frontend.app import app
 from dash.dependencies import Input, Output
-import pytz
 from frontend import api_client
+from dateutil import tz
 
 from dash import html
 
@@ -32,7 +32,7 @@ def update_connectivity_information(n):
             relative_path="/system_time",
         )[1:-1]
     ).astimezone(
-        pytz.timezone(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+        tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
     )
     system_time_str = system_time.strftime("%H:%M:%S, %d.%m.%Y")
 

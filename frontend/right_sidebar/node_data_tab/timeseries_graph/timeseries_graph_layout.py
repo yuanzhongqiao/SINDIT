@@ -36,6 +36,23 @@ def get_figure():
     fig.update_layout(
         # Used to disable automatic reset of the zoom etc. at every refresh:
         uirevision="no_change",
+        plot_bgcolor="#EBF2FA",
+        paper_bgcolor="white",
+        # colorway=["red"],
+        # Selection:
+        dragmode="select",
+        selectdirection="h",
+        # activeselection={
+        #     "fillcolor": "green",
+        #     "opacity": 1,
+        # },
+        # newselection={"line": {"color": "orange", "dash": "solid", "width": 2}},
+        # activeshape={
+        #     "fillcolor": "green",
+        #     "opacity": 1,
+        # },
+        # newshape={"line": {"color": "orange", "dash": "solid", "width": 2}},
+        # selections={"line": {"color": "orange", "dash": "solid", "width": 2}},
     )
 
     return fig

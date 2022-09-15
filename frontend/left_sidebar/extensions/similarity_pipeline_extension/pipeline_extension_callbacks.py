@@ -1,7 +1,7 @@
 from datetime import datetime
 from frontend.app import app
 from dash.dependencies import Input, Output
-import pytz
+
 from frontend import api_client
 
 from dash import html

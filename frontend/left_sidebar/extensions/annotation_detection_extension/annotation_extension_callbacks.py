@@ -5,8 +5,8 @@ import json
 from typing import List
 from frontend.app import app
 from dash.dependencies import Input, Output, State
-import pytz
 from frontend import api_client
+from dateutil import tz
 
 from dash.exceptions import PreventUpdate
 from dash import html, ctx
@@ -168,6 +168,42 @@ def annotation_select_ts_list(ts_list_json, selected_ts_json, remove, add, step)
         raise PreventUpdate()
 
 
+@app.callback(
+    Output("annotation-creation-store-range-start", "data"),
+    Output("annotation-creation-store-range-end", "data"),
+    Input("timeseries-graph", "selectedData"),
+    State("annotation-creation-store-step", "data"),
+    prevent_initial_call=True,
+)
+def annotation_select_range(selected_range, current_step):
+    if (
+        selected_range is None
+        or current_step is None
+        or current_step != CreationSteps.RANGE_SELECTION.value
+        or len(selected_range["range"]) == 0
+    ):
+        raise PreventUpdate()
+    start_datetime_str = selected_range["range"]["x"][0]
+    end_datetime_str = selected_range["range"]["x"][-1]
+    if len(start_datetime_str) == 24:
+        start_datetime_str = start_datetime_str[0:-1]
+    elif len(start_datetime_str) == 22:
+        start_datetime_str = start_datetime_str + "0"
+    if len(end_datetime_str) == 24:
+        end_datetime_str = end_datetime_str[0:-1]
+    elif len(end_datetime_str) == 22:
+        end_datetime_str = end_datetime_str + "0"
+
+    start_datetime = datetime.fromisoformat(start_datetime_str).replace(
+        tzinfo=tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+    )
+    end_datetime = datetime.fromisoformat(end_datetime_str).replace(
+        tzinfo=tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+    )
+
+    return start_datetime, end_datetime
+
+
 # @app.callback(
 #     Output("annotation-creation-store-range-start", "data"),
 #     Input("annotation-creation-date-selector-start", "value"),
@@ -245,10 +281,8 @@ def annotation_create_button_replacal(current_step):
     Input("annotation-creation-store-asset", "data"),
     Input("annotation-creation-store-definition", "data"),
     Input("annotation-creation-store-ts-list", "data"),
-    Input("annotation-creation-date-selector-start", "value"),
-    Input("annotation-creation-time-selector-start", "value"),
-    Input("annotation-creation-date-selector-end", "value"),
-    Input("annotation-creation-time-selector-end", "value"),
+    Input("annotation-creation-store-range-start", "data"),
+    Input("annotation-creation-store-range-end", "data"),
     prevent_initial_call=False,
 )
 def annotation_next_step_button_activate(
@@ -256,32 +290,20 @@ def annotation_next_step_button_activate(
     selected_asset,
     selected_definition,
     selected_ts_list,
-    selected_start_date,
-    selected_start_time,
-    selected_end_date,
-    selected_end_time,
+    selected_start_datetime_str,
+    selected_end_datetime_str,
 ):
     selected_start_datetime = None
     selected_end_datetime = None
     if (
-        selected_start_date is not None
-        and selected_start_time is not None
-        and selected_end_date is not None
-        and selected_end_time is not None
+        selected_start_datetime_str is not None
+        and selected_end_datetime_str is not None
     ):
         selector_tz = tz.gettz(
             get_configuration(group=ConfigGroups.FRONTEND, key="timezone")
         )
-        selected_start_datetime = datetime.combine(
-            date=datetime.fromisoformat(selected_start_date).date(),
-            time=datetime.fromisoformat(selected_start_time).time(),
-            tzinfo=selector_tz,
-        )
-        selected_end_datetime = datetime.combine(
-            date=datetime.fromisoformat(selected_end_date).date(),
-            time=datetime.fromisoformat(selected_end_time).time(),
-            tzinfo=selector_tz,
-        )
+        selected_start_datetime = datetime.fromisoformat(selected_start_datetime_str)
+        selected_end_datetime = datetime.fromisoformat(selected_end_datetime_str)
 
     if (
         (
@@ -303,9 +325,7 @@ def annotation_next_step_button_activate(
             and selected_start_datetime < selected_end_datetime
             and selected_end_datetime
             < datetime.now().astimezone(
-                pytz.timezone(
-                    get_configuration(group=ConfigGroups.FRONTEND, key="timezone")
-                )
+                tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
             )
         )
     ):
@@ -443,41 +463,27 @@ def annotation_result_visualization_ts(current_step, ts_list_json):
 @app.callback(
     Output("annotation-creation-step-list-4-range-result", "children"),
     Input("annotation-creation-store-step", "data"),
-    Input("annotation-creation-date-selector-start", "value"),
-    Input("annotation-creation-time-selector-start", "value"),
-    Input("annotation-creation-date-selector-end", "value"),
-    Input("annotation-creation-time-selector-end", "value"),
+    Input("annotation-creation-store-range-start", "data"),
+    Input("annotation-creation-store-range-end", "data"),
     prevent_initial_call=False,
 )
 def annotation_result_visualization_ts(
     current_step,
-    selected_start_date,
-    selected_start_time,
-    selected_end_date,
-    selected_end_time,
+    selected_start_datetime_str,
+    selected_end_datetime_str,
 ):
 
     if (
         current_step is not None
         and current_step >= CreationSteps.RANGE_SELECTION.value
-        and selected_start_date is not None
-        and selected_start_time is not None
-        and selected_end_date is not None
-        and selected_end_time is not None
+        and selected_start_datetime_str is not None
+        and selected_end_datetime_str is not None
     ):
         selector_tz = tz.gettz(
             get_configuration(group=ConfigGroups.FRONTEND, key="timezone")
         )
-        start_datetime = datetime.combine(
-            date=datetime.fromisoformat(selected_start_date).date(),
-            time=datetime.fromisoformat(selected_start_time).time(),
-            tzinfo=selector_tz,
-        )
-        end_datetime = datetime.combine(
-            date=datetime.fromisoformat(selected_end_date).date(),
-            time=datetime.fromisoformat(selected_end_time).time(),
-            tzinfo=selector_tz,
-        )
+        start_datetime = datetime.fromisoformat(selected_start_datetime_str)
+        end_datetime = datetime.fromisoformat(selected_end_datetime_str)
 
         return f"{LIST_RESULT_PREFIX}{start_datetime.strftime('%d.%m.%Y, %H:%M:%S')} – {end_datetime.strftime('%d.%m.%Y, %H:%M:%S')}"
 

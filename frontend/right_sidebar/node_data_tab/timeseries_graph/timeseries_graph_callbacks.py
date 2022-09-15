@@ -3,7 +3,6 @@ from dash.dependencies import Input, Output, State
 import pandas as pd
 from dateutil import tz
 from dash.exceptions import PreventUpdate
-import pytz
 from dash import html
 from frontend import api_client
 from frontend.app import app
@@ -75,6 +74,8 @@ def timeseries_graph_interval(n, realtime_toggle, pseudo_element_input):
     Input("annotation-creation-time-selector-start", "value"),
     Input("annotation-creation-date-selector-end", "value"),
     Input("annotation-creation-time-selector-end", "value"),
+    Input("annotation-creation-store-range-start", "data"),
+    Input("annotation-creation-store-range-end", "data"),
 )
 def update_timeseries_graph(
     n,
@@ -91,14 +92,22 @@ def update_timeseries_graph(
     annotation_selected_start_time,
     annotation_selected_end_date,
     annotation_selected_end_time,
+    annotation_selected_range_start_str,
+    annotation_selected_range_end_str,
 ):
-    annotation_selected_start_datetime = None
-    annotation_selected_end_datetime = None
-    overridden_end_datetime = None
-    overridden_duration = None
-    if (
+
+    annotation_mode_range_selected = False
+    annotation_mode_view_defined = False
+    annotation_mode_active = (
         annotation_creation_step is not None
         and annotation_creation_step >= CreationSteps.RANGE_SELECTION.value
+    )
+    annotation_viewer_mode = (
+        annotation_creation_step is not None
+        and annotation_creation_step > CreationSteps.RANGE_SELECTION.value
+    )
+    if (
+        annotation_mode_active
         and annotation_selected_start_date is not None
         and annotation_selected_start_time is not None
         and annotation_selected_end_date is not None
@@ -117,13 +126,93 @@ def update_timeseries_graph(
             time=datetime.fromisoformat(annotation_selected_end_time).time(),
             tzinfo=selector_tz,
         )
+        if (
+            annotation_selected_start_datetime < annotation_selected_end_datetime
+            and annotation_selected_end_datetime
+            < datetime.now().astimezone(
+                tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+            )
+        ):
+            annotation_mode_view_defined = True
 
-        # Alter displayed time-range:
-        annotation_duration = (
-            annotation_selected_end_datetime - annotation_selected_start_datetime
+            # Alter displayed time-range:
+            overridden_duration = (
+                annotation_selected_end_datetime - annotation_selected_start_datetime
+            )
+            overridden_end_datetime = annotation_selected_end_datetime
+
+    if (
+        annotation_mode_active
+        and annotation_selected_range_start_str is not None
+        and annotation_selected_range_end_str is not None
+    ):
+        annotation_mode_range_selected = True
+        selected_range_start = datetime.fromisoformat(
+            annotation_selected_range_start_str
+        ).replace(
+            tzinfo=tz.gettz(
+                get_configuration(group=ConfigGroups.FRONTEND, key="timezone")
+            )
         )
-        overridden_end_datetime = annotation_selected_end_datetime + annotation_duration
-        overridden_duration = annotation_duration * 3
+        selected_range_end = datetime.fromisoformat(
+            annotation_selected_range_end_str
+        ).replace(
+            tzinfo=tz.gettz(
+                get_configuration(group=ConfigGroups.FRONTEND, key="timezone")
+            )
+        )
+
+    if annotation_viewer_mode:
+        # Alter displayed time-range to make the annotation best visible:
+        annotation_duration = selected_range_end - selected_range_start
+        overridden_end_datetime = selected_range_end + (annotation_duration / 4)
+        overridden_duration = annotation_duration * 1.5
+
+    # annotation_selected_start_datetime = None
+    # annotation_selected_end_datetime = None
+    # overridden_end_datetime = None
+    # overridden_duration = None
+    # annotation_mode = False
+    # if (
+    #     annotation_creation_step is not None
+    #     and annotation_creation_step >= CreationSteps.RANGE_SELECTION.value
+    #     and annotation_selected_start_date is not None
+    #     and annotation_selected_start_time is not None
+    #     and annotation_selected_end_date is not None
+    #     and annotation_selected_end_time is not None
+    # ):
+    #     selector_tz = tz.gettz(
+    #         get_configuration(group=ConfigGroups.FRONTEND, key="timezone")
+    #     )
+    #     annotation_selected_start_datetime = datetime.combine(
+    #         date=datetime.fromisoformat(annotation_selected_start_date).date(),
+    #         time=datetime.fromisoformat(annotation_selected_start_time).time(),
+    #         tzinfo=selector_tz,
+    #     )
+    #     annotation_selected_end_datetime = datetime.combine(
+    #         date=datetime.fromisoformat(annotation_selected_end_date).date(),
+    #         time=datetime.fromisoformat(annotation_selected_end_time).time(),
+    #         tzinfo=selector_tz,
+    #     )
+    #     if (
+    #         annotation_selected_start_datetime < annotation_selected_end_datetime
+    #         and annotation_selected_end_datetime
+    #         < datetime.now().astimezone(
+    #             pytz.timezone(
+    #                 get_configuration(group=ConfigGroups.FRONTEND, key="timezone")
+    #             )
+    #         )
+    #     ):
+    #         annotation_mode = True
+
+    #         # Alter displayed time-range:
+    #         annotation_duration = (
+    #             annotation_selected_end_datetime - annotation_selected_start_datetime
+    #         )
+    #         overridden_end_datetime = annotation_selected_end_datetime + (
+    #             annotation_duration / 2
+    #         )
+    #         overridden_duration = annotation_duration * 2
 
     fig = timeseries_graph_layout.get_figure()
 
@@ -140,7 +229,9 @@ def update_timeseries_graph(
         print("Trying to visualize timeseries from non-timeseries element...")
         return fig
 
-    if overridden_duration is not None:
+    if (
+        annotation_mode_active and annotation_mode_view_defined
+    ) or annotation_viewer_mode:
         duration = overridden_duration
     else:
         duration: timedelta = timedelta(
@@ -151,10 +242,12 @@ def update_timeseries_graph(
         )
 
     # API call for the dataframe
-    if realtime_toggle:
-        date_time = datetime.now()
-    elif overridden_end_datetime is not None:
+    if (
+        annotation_mode_active and annotation_mode_view_defined
+    ) or annotation_viewer_mode:
         date_time = overridden_end_datetime
+    elif realtime_toggle:
+        date_time = datetime.now()
     else:
         if isinstance(selected_time_str, str) and selected_time_str != "":
             selected_time = datetime.fromisoformat(selected_time_str).time()
@@ -223,29 +316,32 @@ def update_timeseries_graph(
         col=1,
     )
 
-    if (
-        annotation_selected_start_datetime is not None
-        and annotation_selected_end_datetime is not None
-    ):
-        selected_points = []
+    if annotation_mode_active and annotation_mode_range_selected:
+        # selected_points = []
+        color_array = []
 
         i = 0
         for data_point_time in data["time"]:
             if (
-                data_point_time >= annotation_selected_start_datetime
-                and data_point_time <= annotation_selected_end_datetime
+                data_point_time >= selected_range_start
+                and data_point_time <= selected_range_end
             ):
-                selected_points.append(i)
+                # selected_points.append(i)
+                color_array.append("#9b5c44")
+            else:
+                color_array.append("#81a2c4")
             i += 1
     else:
-        selected_points = []
+        color_array = ["#446e9b" for data in data["time"]]
+        # selected_points = []
 
     # Layouting...
     fig.update_traces(
-        marker_size=8,
         marker_line=None,
         mode="markers",
-        selectedpoints=selected_points,
+        # selectedpoints=selected_points,
+        opacity=1,
+        marker=dict(size=8, color=color_array),
     )
 
     # Aggregate info
