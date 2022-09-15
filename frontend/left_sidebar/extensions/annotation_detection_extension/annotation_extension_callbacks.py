@@ -51,7 +51,12 @@ class CreationSteps(Enum):
     State("annotation-creation-store-range-end", "data"),
     State("annotation-caption-input", "value"),
     State("annotation-description-input", "value"),
-    prevent_initial_call=False,  # TODO: change
+    State("new-annotation-definition-switch-input", "value"),
+    State("annotation-definition-id-short-input", "value"),
+    State("annotation-definition-caption-input", "value"),
+    State("annotation-definition-proposal-input", "value"),
+    State("annotation-definition-description-input", "value"),
+    prevent_initial_call=True,
 )
 def save_annotation(
     save_button,
@@ -63,6 +68,11 @@ def save_annotation(
     selected_end_datetime_str,
     caption,
     description,
+    new_annotation_switch,
+    new_annotation_id_short,
+    new_annotation_caption,
+    new_annotation_proposal,
+    new_annotation_description,
 ):
     if current_step is None or current_step != CreationSteps.FINISHED.value:
         print("Tried to save early")
@@ -84,7 +94,16 @@ def save_annotation(
         GraphSelectedElement.from_json(ts_json)
         for ts_json in json.loads(selected_ts_list_json)
     ]
-
+    if True in new_annotation_switch:
+        api_client.post(
+            "/annotation/definition",
+            json={
+                "id_short": new_annotation_id_short,
+                "solution_proposal": new_annotation_proposal,
+                "caption": new_annotation_caption,
+                "description": new_annotation_description,
+            },
+        )
     api_client.post(
         "/annotation/instance",
         json={
@@ -332,6 +351,25 @@ def annotation_reset_caption_description(save_btn, cancel_btn):
         raise PreventUpdate()
 
 
+@app.callback(
+    Output("annotation-definition-id-short-input", "value"),
+    Output("annotation-definition-caption-input", "value"),
+    Output("annotation-definition-proposal-input", "value"),
+    Output("annotation-definition-description-input", "value"),
+    Input("annotation-creation-saved", "data"),
+    Input("confirm-cancel-annotation-creation", "submit_n_clicks"),
+    prevent_initial_call=True,
+)
+def annotation_reset_definition_form(save_btn, cancel_btn):
+    if ctx.triggered_id in [
+        "annotation-creation-saved",
+        "confirm-cancel-annotation-creation",
+    ]:
+        return None, None, None, None
+    else:
+        raise PreventUpdate()
+
+
 ##########################################
 # Step-management:
 ##########################################
@@ -397,6 +435,10 @@ def annotation_create_button_replacal(current_step):
     Input("annotation-creation-store-range-start", "data"),
     Input("annotation-creation-store-range-end", "data"),
     Input("annotation-caption-input", "value"),
+    Input("new-annotation-definition-switch-input", "value"),
+    Input("annotation-definition-id-short-input", "value"),
+    Input("annotation-definition-caption-input", "value"),
+    Input("annotation-definition-proposal-input", "value"),
     prevent_initial_call=False,
 )
 def annotation_next_step_button_activate(
@@ -407,6 +449,10 @@ def annotation_next_step_button_activate(
     selected_start_datetime_str,
     selected_end_datetime_str,
     caption,
+    new_definition_switch,
+    new_definition_id_short,
+    new_definition_caption,
+    new_definition_proposal,
 ):
     selected_start_datetime = None
     selected_end_datetime = None
@@ -427,7 +473,18 @@ def annotation_next_step_button_activate(
         )
         or (
             current_step == CreationSteps.DEFINITION_SELECTION.value
-            and selected_definition is not None
+            and (
+                (selected_definition is not None and True not in new_definition_switch)
+                or (
+                    True in new_definition_switch
+                    and new_definition_id_short is not None
+                    and new_definition_id_short != ""
+                    and new_definition_caption is not None
+                    and new_definition_caption != ""
+                    and new_definition_proposal is not None
+                    and new_definition_proposal != ""
+                )
+            )
         )
         or (
             current_step == CreationSteps.TS_SELECTION.value
@@ -464,6 +521,34 @@ def annotation_previous_step_button_activate(current_step):
         return False
     else:
         return True
+
+
+@app.callback(
+    Output("annotation-definition-id-short-input", "disabled"),
+    Output("annotation-definition-caption-input", "disabled"),
+    Output("annotation-definition-proposal-input", "disabled"),
+    Output("annotation-definition-description-input", "disabled"),
+    Input("new-annotation-definition-switch-input", "value"),
+    prevent_initial_call=False,
+)
+def annotation_definition_form_activate(switch):
+    if switch is not None and switch == [True]:
+        return False, False, False, False
+    else:
+        return True, True, True, True
+
+
+@app.callback(
+    Output("annotation-creation-step-2-definition-form", "className"),
+    Input("annotation-creation-store-step", "data"),
+    prevent_initial_call=False,
+)
+def annotation_definition_form_hide(current_step):
+
+    if current_step == CreationSteps.DEFINITION_SELECTION.value:
+        return SHOW
+    else:
+        return HIDE
 
 
 @app.callback(
@@ -556,19 +641,30 @@ def annotation_result_visualization_asset(current_step, asset_json):
     Output("annotation-creation-step-list-2-definition-result", "children"),
     Input("annotation-creation-store-step", "data"),
     Input("annotation-creation-store-definition", "data"),
+    Input("new-annotation-definition-switch-input", "value"),
+    Input("annotation-definition-caption-input", "value"),
     prevent_initial_call=False,
 )
-def annotation_result_visualization_definition(current_step, definition_json):
+def annotation_result_visualization_definition(
+    current_step, definition_json, new_definition_switch, new_caption
+):
 
     if (
         current_step is not None
         and current_step >= CreationSteps.DEFINITION_SELECTION.value
         and definition_json is not None
     ):
-        definition = GraphSelectedElement.from_json(definition_json)
-        return LIST_RESULT_PREFIX + definition.caption
-    else:
-        return ""
+        if (
+            True in new_definition_switch
+            and new_caption is not None
+            and new_caption != ""
+        ):
+            return LIST_RESULT_PREFIX + new_caption
+        elif (not True in new_definition_switch) and definition_json is not None:
+            definition = GraphSelectedElement.from_json(definition_json)
+            return LIST_RESULT_PREFIX + definition.caption
+
+    return ""
 
 
 @app.callback(

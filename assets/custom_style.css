@@ -655,7 +655,8 @@ body {
 
 #annotation-creation-step-3-ts-form,
 #annotation-creation-step-4-range-form,
-#annotation-creation-step-5-caption-description-form {
+#annotation-creation-step-5-caption-description-form,
+#annotation-creation-step-2-definition-form {
     width: 100%;
     display: flex;
     flex-flow: column;

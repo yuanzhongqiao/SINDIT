@@ -180,12 +180,113 @@ def get_layout():
                                         flush=True,
                                     ),
                                     html.Div(
+                                        id="annotation-creation-step-2-definition-form",
+                                        className="hide-content",
+                                        children=[
+                                            dbc.Checklist(
+                                                id="new-annotation-definition-switch-input",
+                                                options=[
+                                                    {
+                                                        "label": "Create a new annotation type definition instead",
+                                                        "value": True,
+                                                    }
+                                                ],
+                                                value=[],
+                                                persistence=True,
+                                                switch=True,
+                                                persistence_type="session",
+                                            ),
+                                            html.Div(
+                                                "ID_Short:",
+                                                style={
+                                                    "font-weight": "bold",
+                                                    "margin-bottom": "5px",
+                                                },
+                                            ),
+                                            dbc.Input(
+                                                id="annotation-definition-id-short-input",
+                                                placeholder="Define a short identifier...",
+                                                size="sm",
+                                                style={
+                                                    "margin-right": "5px",
+                                                    "width": "300px",
+                                                },
+                                                persistence=True,
+                                                persistence_type="session",
+                                                disabled=True,
+                                            ),
+                                            html.Div(
+                                                "Caption:",
+                                                style={
+                                                    "font-weight": "bold",
+                                                    "margin-bottom": "5px",
+                                                },
+                                            ),
+                                            dbc.Input(
+                                                id="annotation-definition-caption-input",
+                                                placeholder="Define a short caption...",
+                                                size="sm",
+                                                style={
+                                                    "margin-right": "5px",
+                                                    "width": "300px",
+                                                },
+                                                persistence=True,
+                                                persistence_type="session",
+                                                disabled=True,
+                                            ),
+                                            html.Div(
+                                                "Solution Proposal:",
+                                                style={
+                                                    "font-weight": "bold",
+                                                    "margin-bottom": "5px",
+                                                    "margin-top": "10px",
+                                                },
+                                            ),
+                                            dbc.Textarea(
+                                                id="annotation-definition-proposal-input",
+                                                placeholder="What should be done when this situation occurs...",
+                                                size="sm",
+                                                style={
+                                                    "width": "300px",
+                                                    "height": "100px",
+                                                },
+                                                persistence=True,
+                                                persistence_type="session",
+                                                disabled=True,
+                                            ),
+                                            html.Div(
+                                                "Description (optional):",
+                                                style={
+                                                    "font-weight": "bold",
+                                                    "margin-bottom": "5px",
+                                                    "margin-top": "10px",
+                                                },
+                                            ),
+                                            dbc.Textarea(
+                                                id="annotation-definition-description-input",
+                                                placeholder="Describe the situation...",
+                                                size="sm",
+                                                style={
+                                                    "width": "300px",
+                                                    "height": "100px",
+                                                },
+                                                persistence=True,
+                                                persistence_type="session",
+                                                disabled=True,
+                                            ),
+                                        ],
+                                    ),
+                                    html.Div(
                                         id="annotation-creation-step-3-ts-form",
                                         className="hide-content",
                                         children=[
                                             html.Div(
-                                                "Hint: You can collapse the annotations-card ",
-                                                style={"width": "fit-content"},
+                                                "You can collapse the annotations-card and continue to use the time-series range selection.",
+                                                style={
+                                                    "width": "300px",
+                                                    "margin-bottom": "10px",
+                                                    "text-align": "center",
+                                                },
                                             ),
                                             html.Div(
                                                 id="annotations-creation-ts-form-buttons-container",
