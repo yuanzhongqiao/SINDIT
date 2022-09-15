@@ -34,6 +34,9 @@ from backend.api.rest_endpoints import file_endpoints
 from backend.api.rest_endpoints import asset_endpoints
 
 # noinspection PyUnresolvedReferences
+from backend.api.rest_endpoints import annotation_endpoints
+
+# noinspection PyUnresolvedReferences
 from backend.api.rest_endpoints import graph_endpoints
 from util.environment_and_configuration import (
     get_environment_variable,

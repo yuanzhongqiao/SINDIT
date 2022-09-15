@@ -51,14 +51,14 @@ class CreationSteps(Enum):
     State("annotation-creation-store-range-end", "data"),
     State("annotation-caption-input", "value"),
     State("annotation-description-input", "value"),
-    prevent_initial_call=False,
+    prevent_initial_call=False,  # TODO: change
 )
 def save_annotation(
     save_button,
     current_step,
-    selected_asset,
-    selected_definition,
-    selected_ts_list,
+    selected_asset_json,
+    selected_definition_json,
+    selected_ts_list_json,
     selected_start_datetime_str,
     selected_end_datetime_str,
     caption,
@@ -73,6 +73,30 @@ def save_annotation(
 
     print(
         f"Storing new annotation:\n Caption: {caption}\nid_short: {instance_id_short}\niri: {instance_iri}"
+    )
+
+    asset: GraphSelectedElement = GraphSelectedElement.from_json(selected_asset_json)
+    definition: GraphSelectedElement = GraphSelectedElement.from_json(
+        selected_definition_json
+    )
+
+    ts_list = [
+        GraphSelectedElement.from_json(ts_json)
+        for ts_json in json.loads(selected_ts_list_json)
+    ]
+
+    api_client.post(
+        "/annotation/instance",
+        json={
+            "id_short": instance_id_short,
+            "asset_iri": asset.iri,
+            "definition_iri": definition.iri,
+            "ts_iri_list": [ts.iri for ts in ts_list],
+            "start_datetime": selected_start_datetime_str,
+            "end_datetime": selected_end_datetime_str,
+            "caption": caption,
+            "description": description,
+        },
     )
 
     return datetime.now()

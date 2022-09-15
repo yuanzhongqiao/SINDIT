@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Dict
 import requests
 import json
 import pandas as pd
@@ -117,5 +118,12 @@ def get_float(relative_path: str, **kwargs):
 def patch(relative_path: str, **kwargs):
     try:
         requests.patch(API_URI + relative_path, params=kwargs)
+    except RequestException as err:
+        print("API not availlable!")
+
+
+def post(relative_path: str, data: Dict = None, json: Dict = None, **kwargs):
+    try:
+        requests.post(API_URI + relative_path, params=kwargs, data=data, json=json)
     except RequestException as err:
         print("API not availlable!")

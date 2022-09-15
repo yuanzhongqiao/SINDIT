@@ -134,11 +134,7 @@ def change_graph_visibility_options(
 )
 def change_graph_visibility_options(annotation_creation_step):
 
-    if annotation_creation_step is not None and annotation_creation_step in [
-        CreationSteps.ASSET_SELECTION.value,
-        CreationSteps.DEFINITION_SELECTION.value,
-        CreationSteps.TS_SELECTION.value,
-    ]:
+    if annotation_creation_step is not None:
         return ""
     else:
         return "hide-content"
