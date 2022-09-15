@@ -29,7 +29,7 @@ def get_layout():
                             # Tabs:
                             dbc.Tabs(
                                 id="tabs-infos",
-                                active_tab="tab-node-information",
+                                active_tab="tab-node-data",
                                 children=[
                                     dbc.Tab(
                                         label="Node details",

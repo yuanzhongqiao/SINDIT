@@ -273,7 +273,7 @@ def update_timeseries_graph(
     if (
         annotation_mode_active or annotation_viewer_mode
     ) and annotation_mode_range_selected:
-        # selected_points = []
+
         color_array = []
 
         i = 0
@@ -289,13 +289,12 @@ def update_timeseries_graph(
             i += 1
     else:
         color_array = ["#446e9b" for data in data["time"]]
-        # selected_points = []
-
+    selected_points = [i for i in range(0, len(data["time"]))]
     # Layouting...
     fig.update_traces(
         marker_line=None,
         mode="markers",
-        selectedpoints=None,
+        selectedpoints=selected_points,
         opacity=1,
         marker=dict(size=8, color=color_array),
     )

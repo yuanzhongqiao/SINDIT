@@ -48,11 +48,12 @@ class CreationSteps(Enum):
     prevent_initial_call=False,
 )
 def annotation_create_collapse(n_clicks_create, n_clicks_cancel, n_clicks_save, step):
-    if step is not None:
-        return False, True
-
     button_clicked = ctx.triggered_id
     if button_clicked == "create-annotation-button":
+        return False, True
+    elif button_clicked == "confirm-cancel-annotation-creation":
+        return True, False
+    elif step is not None:
         return False, True
     else:
         return True, False
@@ -65,6 +66,20 @@ def annotation_create_collapse(n_clicks_create, n_clicks_cancel, n_clicks_save, 
 )
 def display_confirm(n):
     return True
+
+
+@app.callback(
+    Output("tabs-infos", "active_tab"),
+    Input("annotation-creation-store-step", "data"),
+)
+def change_navigation_tab(annotation_creation_step):
+    if (
+        annotation_creation_step is not None
+        and annotation_creation_step == CreationSteps.RANGE_SELECTION.value
+    ):
+        return "tab-node-data"
+    else:
+        raise PreventUpdate
 
 
 ##########################################
