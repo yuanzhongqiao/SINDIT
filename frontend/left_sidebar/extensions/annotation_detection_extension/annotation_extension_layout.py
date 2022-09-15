@@ -110,6 +110,10 @@ def get_layout():
                                         id="annotation-creation-store-range-end",
                                         storage_type="session",
                                     ),
+                                    dcc.Store(
+                                        id="annotation-creation-saved",
+                                        storage_type="memory",
+                                    ),
                                     dbc.ListGroup(
                                         [
                                             dbc.ListGroupItem(
@@ -162,16 +166,16 @@ def get_layout():
                                                 ],
                                                 id="annotation-creation-step-list-5-caption-description",
                                             ),
-                                            dbc.ListGroupItem(
-                                                [
-                                                    "6. Describe the situation",
-                                                    html.Div(
-                                                        id="annotation-creation-step-list-6-description-result",
-                                                        className="annotation-creation-step-list-result",
-                                                    ),
-                                                ],
-                                                id="annotation-creation-step-list-6-description",
-                                            ),
+                                            # dbc.ListGroupItem(
+                                            #     [
+                                            #         "6. Describe the situation",
+                                            #         html.Div(
+                                            #             id="annotation-creation-step-list-6-description-result",
+                                            #             className="annotation-creation-step-list-result",
+                                            #         ),
+                                            #     ],
+                                            #     id="annotation-creation-step-list-6-description",
+                                            # ),
                                         ],
                                         flush=True,
                                     ),

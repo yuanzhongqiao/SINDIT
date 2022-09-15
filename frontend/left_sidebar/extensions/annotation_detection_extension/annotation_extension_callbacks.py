@@ -24,6 +24,12 @@ SHOW = ""
 
 LIST_RESULT_PREFIX = "↪ "
 
+IRI_PREFIX_GLOBAL = "www.sintef.no/aas_identifiers/learning_factory/"
+IRI_PREFIX_ANNOTATION_INSTANCE = IRI_PREFIX_GLOBAL + "annotations/instances/"
+IRI_PREFIX_ANNOTATION_DEFINITION = IRI_PREFIX_GLOBAL + "annotations/definitions/"
+IRI_PREFIX_ANNOTATION_TS_MATCHER = IRI_PREFIX_GLOBAL + "annotations/ts_matchers/"
+IRI_PREFIX_ANNOTATION_PRE_INDICATOR = IRI_PREFIX_GLOBAL + "annotations/pre_indicators/"
+
 
 class CreationSteps(Enum):
     ASSET_SELECTION = 1
@@ -32,6 +38,44 @@ class CreationSteps(Enum):
     RANGE_SELECTION = 4
     CAPTION_DESCRIPTION = 5
     FINISHED = 6
+
+
+@app.callback(
+    Output("annotation-creation-saved", "data"),
+    Input("save-create-annotation-button", "n_clicks"),
+    State("annotation-creation-store-step", "data"),
+    State("annotation-creation-store-asset", "data"),
+    State("annotation-creation-store-definition", "data"),
+    State("annotation-creation-store-ts-list", "data"),
+    State("annotation-creation-store-range-start", "data"),
+    State("annotation-creation-store-range-end", "data"),
+    State("annotation-caption-input", "value"),
+    State("annotation-description-input", "value"),
+    prevent_initial_call=False,
+)
+def save_annotation(
+    save_button,
+    current_step,
+    selected_asset,
+    selected_definition,
+    selected_ts_list,
+    selected_start_datetime_str,
+    selected_end_datetime_str,
+    caption,
+    description,
+):
+    if current_step is None or current_step != CreationSteps.FINISHED.value:
+        print("Tried to save early")
+        raise PreventUpdate
+
+    instance_id_short = "123"  # TODO
+    instance_iri = IRI_PREFIX_ANNOTATION_INSTANCE + instance_id_short
+
+    print(
+        f"Storing new annotation:\n Caption: {caption}\nid_short: {instance_id_short}\niri: {instance_iri}"
+    )
+
+    return datetime.now()
 
 
 ##########################################
@@ -44,7 +88,7 @@ class CreationSteps(Enum):
     Output("annotation-create-collapse", "is_open"),
     Input("create-annotation-button", "n_clicks"),
     Input("confirm-cancel-annotation-creation", "submit_n_clicks"),
-    Input("save-create-annotation-button", "n_clicks"),
+    Input("annotation-creation-saved", "data"),
     State("annotation-creation-store-step", "data"),
     prevent_initial_call=False,
 )
@@ -52,7 +96,10 @@ def annotation_create_collapse(n_clicks_create, n_clicks_cancel, n_clicks_save, 
     button_clicked = ctx.triggered_id
     if button_clicked == "create-annotation-button":
         return False, True
-    elif button_clicked == "confirm-cancel-annotation-creation":
+    elif button_clicked in [
+        "confirm-cancel-annotation-creation",
+        "annotation-creation-saved",
+    ]:
         return True, False
     elif step is not None:
         return False, True
@@ -92,9 +139,17 @@ def change_navigation_tab(annotation_creation_step):
     Output("annotation-creation-store-asset", "data"),
     Input("selected-graph-element-store", "data"),
     State("annotation-creation-store-step", "data"),
+    Input("annotation-creation-saved", "data"),
+    Input("confirm-cancel-annotation-creation", "submit_n_clicks"),
     prevent_initial_call=True,
 )
-def annotation_select_asset(selected_el_json, current_step):
+def annotation_select_asset(selected_el_json, current_step, save_btn, cancel_btn):
+    if ctx.triggered_id in [
+        "annotation-creation-saved",
+        "confirm-cancel-annotation-creation",
+    ]:
+        return None
+
     if (
         selected_el_json is None
         or current_step is None
@@ -114,9 +169,17 @@ def annotation_select_asset(selected_el_json, current_step):
     Output("annotation-creation-store-definition", "data"),
     Input("selected-graph-element-store", "data"),
     State("annotation-creation-store-step", "data"),
+    Input("annotation-creation-saved", "data"),
+    Input("confirm-cancel-annotation-creation", "submit_n_clicks"),
     prevent_initial_call=True,
 )
-def annotation_select_definition(selected_el_json, current_step):
+def annotation_select_definition(selected_el_json, current_step, save_btn, cancel_btn):
+    if ctx.triggered_id in [
+        "annotation-creation-saved",
+        "confirm-cancel-annotation-creation",
+    ]:
+        return None
+
     if (
         selected_el_json is None
         or current_step is None
@@ -189,9 +252,17 @@ def annotation_select_ts_list(ts_list_json, selected_ts_json, remove, add, step)
     Output("annotation-creation-store-range-end", "data"),
     Input("timeseries-graph", "selectedData"),
     State("annotation-creation-store-step", "data"),
+    Input("annotation-creation-saved", "data"),
+    Input("confirm-cancel-annotation-creation", "submit_n_clicks"),
     prevent_initial_call=True,
 )
-def annotation_select_range(selected_range, current_step):
+def annotation_select_range(selected_range, current_step, save_btn, cancel_btn):
+    if ctx.triggered_id in [
+        "annotation-creation-saved",
+        "confirm-cancel-annotation-creation",
+    ]:
+        return None, None
+
     if (
         selected_range is None
         or current_step is None
@@ -220,6 +291,23 @@ def annotation_select_range(selected_range, current_step):
     return start_datetime, end_datetime
 
 
+@app.callback(
+    Output("annotation-caption-input", "value"),
+    Output("annotation-description-input", "value"),
+    Input("annotation-creation-saved", "data"),
+    Input("confirm-cancel-annotation-creation", "submit_n_clicks"),
+    prevent_initial_call=True,
+)
+def annotation_reset_caption_description(save_btn, cancel_btn):
+    if ctx.triggered_id in [
+        "annotation-creation-saved",
+        "confirm-cancel-annotation-creation",
+    ]:
+        return None, None
+    else:
+        raise PreventUpdate()
+
+
 ##########################################
 # Step-management:
 ##########################################
@@ -228,18 +316,21 @@ def annotation_select_range(selected_range, current_step):
 @app.callback(
     Output("annotation-creation-store-step", "data"),
     State("annotation-creation-store-step", "data"),
-    # Input("annotation-creation-store-asset", "data"),
     Input("continue-create-annotation-button", "n_clicks"),
     Input("confirm-cancel-annotation-creation", "submit_n_clicks"),
     Input("create-annotation-button", "n_clicks"),
     Input("back-create-annotation-button", "n_clicks"),
+    Input("annotation-creation-saved", "data"),
     prevent_initial_call=True,
 )
-def annotation_create_step_update(current_step, contin, cancel, start, back):
+def annotation_create_step_update(current_step, contin, cancel, start, back, save):
     trigger = ctx.triggered_id
 
-    if trigger == "cancel-create-annotation-button":
+    if trigger == "confirm-cancel-annotation-creation":
         # Start (reset to None):
+        return None
+    elif trigger == "save-create-annotation-button":
+        # Reset creation state:
         return None
     elif trigger == "create-annotation-button":
         # Start (to step 1):
@@ -396,26 +487,26 @@ def annotation_caption_description_form_hide(current_step):
     Output("annotation-creation-step-list-3-ts", "className"),
     Output("annotation-creation-step-list-4-range", "className"),
     Output("annotation-creation-step-list-5-caption-description", "className"),
-    Output("annotation-creation-step-list-6-description", "className"),
+    # Output("annotation-creation-step-list-6-description", "className"),
     Input("annotation-creation-store-step", "data"),
     prevent_initial_call=False,
 )
 def annotation_create_visualizations(current_step):
 
     if current_step is None:
-        return HIDE, HIDE, HIDE, HIDE, HIDE, HIDE
+        return HIDE, HIDE, HIDE, HIDE, HIDE  # , HIDE
     elif current_step == 1:
-        return SHOW, HIDE, HIDE, HIDE, HIDE, HIDE
+        return SHOW, HIDE, HIDE, HIDE, HIDE  # , HIDE
     elif current_step == 2:
-        return SHOW, SHOW, HIDE, HIDE, HIDE, HIDE
+        return SHOW, SHOW, HIDE, HIDE, HIDE  # , HIDE
     elif current_step == 3:
-        return SHOW, SHOW, SHOW, HIDE, HIDE, HIDE
+        return SHOW, SHOW, SHOW, HIDE, HIDE  # , HIDE
     elif current_step == 4:
-        return SHOW, SHOW, SHOW, SHOW, HIDE, HIDE
+        return SHOW, SHOW, SHOW, SHOW, HIDE  # , HIDE
     elif current_step == 5:
-        return SHOW, SHOW, SHOW, SHOW, SHOW, HIDE
+        return SHOW, SHOW, SHOW, SHOW, SHOW  # , HIDE
     elif current_step == 6:
-        return SHOW, SHOW, SHOW, SHOW, SHOW, SHOW
+        return SHOW, SHOW, SHOW, SHOW, SHOW  # , SHOW
 
 
 @app.callback(
