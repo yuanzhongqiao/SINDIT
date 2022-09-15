@@ -212,11 +212,15 @@ def get_layout():
                                         className="hide-content",
                                         children=[
                                             html.Div(
-                                                "Hint: Open the data-tab of some time-series to view the selected range.",
-                                                style={"width": "300px"},
+                                                "Select a range by opening the data-tab of a time-series input and drawing an area in the graph with the mouse.",
+                                                style={
+                                                    "width": "300px",
+                                                    "font-weight": "bold",
+                                                    "text-align": "center",
+                                                },
                                             ),
                                             html.Div(
-                                                "Begin of the situation:",
+                                                "Begin of the visible range:",
                                                 style={
                                                     "font-weight": "bold",
                                                     "margin-bottom": "5px",
@@ -241,7 +245,7 @@ def get_layout():
                                                 className="annotation-creation-datetime-pair",
                                             ),
                                             html.Div(
-                                                "End of the situation:",
+                                                "End of the visible range:",
                                                 style={
                                                     "font-weight": "bold",
                                                     "margin-bottom": "5px",

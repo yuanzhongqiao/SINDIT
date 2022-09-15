@@ -100,7 +100,7 @@ def update_timeseries_graph(
     annotation_mode_view_defined = False
     annotation_mode_active = (
         annotation_creation_step is not None
-        and annotation_creation_step >= CreationSteps.RANGE_SELECTION.value
+        and annotation_creation_step == CreationSteps.RANGE_SELECTION.value
     )
     annotation_viewer_mode = (
         annotation_creation_step is not None
@@ -142,7 +142,7 @@ def update_timeseries_graph(
             overridden_end_datetime = annotation_selected_end_datetime
 
     if (
-        annotation_mode_active
+        (annotation_mode_active or annotation_viewer_mode)
         and annotation_selected_range_start_str is not None
         and annotation_selected_range_end_str is not None
     ):
@@ -167,52 +167,6 @@ def update_timeseries_graph(
         annotation_duration = selected_range_end - selected_range_start
         overridden_end_datetime = selected_range_end + (annotation_duration / 4)
         overridden_duration = annotation_duration * 1.5
-
-    # annotation_selected_start_datetime = None
-    # annotation_selected_end_datetime = None
-    # overridden_end_datetime = None
-    # overridden_duration = None
-    # annotation_mode = False
-    # if (
-    #     annotation_creation_step is not None
-    #     and annotation_creation_step >= CreationSteps.RANGE_SELECTION.value
-    #     and annotation_selected_start_date is not None
-    #     and annotation_selected_start_time is not None
-    #     and annotation_selected_end_date is not None
-    #     and annotation_selected_end_time is not None
-    # ):
-    #     selector_tz = tz.gettz(
-    #         get_configuration(group=ConfigGroups.FRONTEND, key="timezone")
-    #     )
-    #     annotation_selected_start_datetime = datetime.combine(
-    #         date=datetime.fromisoformat(annotation_selected_start_date).date(),
-    #         time=datetime.fromisoformat(annotation_selected_start_time).time(),
-    #         tzinfo=selector_tz,
-    #     )
-    #     annotation_selected_end_datetime = datetime.combine(
-    #         date=datetime.fromisoformat(annotation_selected_end_date).date(),
-    #         time=datetime.fromisoformat(annotation_selected_end_time).time(),
-    #         tzinfo=selector_tz,
-    #     )
-    #     if (
-    #         annotation_selected_start_datetime < annotation_selected_end_datetime
-    #         and annotation_selected_end_datetime
-    #         < datetime.now().astimezone(
-    #             pytz.timezone(
-    #                 get_configuration(group=ConfigGroups.FRONTEND, key="timezone")
-    #             )
-    #         )
-    #     ):
-    #         annotation_mode = True
-
-    #         # Alter displayed time-range:
-    #         annotation_duration = (
-    #             annotation_selected_end_datetime - annotation_selected_start_datetime
-    #         )
-    #         overridden_end_datetime = annotation_selected_end_datetime + (
-    #             annotation_duration / 2
-    #         )
-    #         overridden_duration = annotation_duration * 2
 
     fig = timeseries_graph_layout.get_figure()
 
@@ -316,7 +270,9 @@ def update_timeseries_graph(
         col=1,
     )
 
-    if annotation_mode_active and annotation_mode_range_selected:
+    if (
+        annotation_mode_active or annotation_viewer_mode
+    ) and annotation_mode_range_selected:
         # selected_points = []
         color_array = []
 
@@ -339,7 +295,7 @@ def update_timeseries_graph(
     fig.update_traces(
         marker_line=None,
         mode="markers",
-        # selectedpoints=selected_points,
+        selectedpoints=None,
         opacity=1,
         marker=dict(size=8, color=color_array),
     )
@@ -357,5 +313,12 @@ def update_timeseries_graph(
         if aggregation_window_ms is not None
         else ""
     )
+
+    if annotation_mode_active:
+        # Activate selection mode
+        fig.update_layout(
+            dragmode="select",
+            selectdirection="h",
+        )
 
     return fig, result_count_str, aggregate_info_str

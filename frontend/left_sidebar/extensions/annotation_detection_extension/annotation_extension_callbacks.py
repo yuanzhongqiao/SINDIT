@@ -1,5 +1,5 @@
 from ast import Set
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 import json
 from typing import List
@@ -202,24 +202,6 @@ def annotation_select_range(selected_range, current_step):
     )
 
     return start_datetime, end_datetime
-
-
-# @app.callback(
-#     Output("annotation-creation-store-range-start", "data"),
-#     Input("annotation-creation-date-selector-start", "value"),
-#     Input("annotation-creation-time-selector-start", "value"),
-#     prevent_initial_call=True,
-# )
-# def annotation_select_range_start(selected_date, selected_time):
-
-#     selector_tz = tz.gettz(
-#         get_configuration(group=ConfigGroups.FRONTEND, key="timezone")
-#     )
-#     return datetime.combine(
-#         date=selected_date,
-#         time=selected_time,
-#         tzinfo=selector_tz,
-#     )
 
 
 ##########################################
@@ -489,3 +471,30 @@ def annotation_result_visualization_ts(
 
     else:
         return ""
+
+
+@app.callback(
+    Output("annotation-creation-date-selector-start", "value"),
+    Output("annotation-creation-time-selector-start", "value"),
+    Output("annotation-creation-date-selector-end", "value"),
+    Output("annotation-creation-time-selector-end", "value"),
+    Input("annotation-creation-store-step", "data"),
+    State("annotation-creation-date-selector-end", "value"),
+)
+def init_date_time_pickers(current_step, selected_end_time):
+    if (
+        current_step is not None
+        and current_step == CreationSteps.RANGE_SELECTION.value
+        and (selected_end_time is None or selected_end_time == "")
+    ):
+        now = (
+            datetime.now()
+            .replace(tzinfo=tz.gettz("UTC"))
+            .astimezone(
+                tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+            )
+        )
+        last_hour = now - timedelta(hours=1)
+        return last_hour, last_hour, now, now
+    else:
+        raise PreventUpdate
