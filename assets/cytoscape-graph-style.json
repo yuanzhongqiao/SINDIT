@@ -118,28 +118,28 @@
     {
         "selector": ".ANNOTATION_DEFINITION",
         "style": {
-            "background-color": "#679436",
+            "background-color": "#9b5c44",
             "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/bookmarks/wght500/48px.svg"
         }
     },
     {
         "selector": ".ANNOTATION_INSTANCE",
         "style": {
-            "background-color": "#679436",
+            "background-color": "#9b5c44",
             "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/label/wght500/48px.svg"
         }
     },
     {
         "selector": ".ANNOTATION_TS_MATCHER",
         "style": {
-            "background-color": "#679436",
+            "background-color": "#9b5c44",
             "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/join_inner/wght500/48px.svg"
         }
     },
     {
         "selector": ".ANNOTATION_PRE_INDICATOR",
         "style": {
-            "background-color": "#679436",
+            "background-color": "#9b5c44",
             "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/more/wght500/48px.svg"
         }
     },

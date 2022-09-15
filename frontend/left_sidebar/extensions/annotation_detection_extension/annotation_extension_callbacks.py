@@ -30,7 +30,8 @@ class CreationSteps(Enum):
     DEFINITION_SELECTION = 2
     TS_SELECTION = 3
     RANGE_SELECTION = 4
-    FINISHED = 5
+    CAPTION_DESCRIPTION = 5
+    FINISHED = 6
 
 
 ##########################################
@@ -280,6 +281,7 @@ def annotation_create_button_replacal(current_step):
     Input("annotation-creation-store-ts-list", "data"),
     Input("annotation-creation-store-range-start", "data"),
     Input("annotation-creation-store-range-end", "data"),
+    Input("annotation-caption-input", "value"),
     prevent_initial_call=False,
 )
 def annotation_next_step_button_activate(
@@ -289,6 +291,7 @@ def annotation_next_step_button_activate(
     selected_ts_list,
     selected_start_datetime_str,
     selected_end_datetime_str,
+    caption,
 ):
     selected_start_datetime = None
     selected_end_datetime = None
@@ -324,6 +327,11 @@ def annotation_next_step_button_activate(
             < datetime.now().astimezone(
                 tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
             )
+        )
+        or (
+            current_step == CreationSteps.CAPTION_DESCRIPTION.value
+            and caption is not None
+            and caption != ""
         )
     ):
         return False
@@ -370,11 +378,24 @@ def annotation_ts_form_hide(current_step):
 
 
 @app.callback(
+    Output("annotation-creation-step-5-caption-description-form", "className"),
+    Input("annotation-creation-store-step", "data"),
+    prevent_initial_call=False,
+)
+def annotation_caption_description_form_hide(current_step):
+
+    if current_step == CreationSteps.CAPTION_DESCRIPTION.value:
+        return SHOW
+    else:
+        return HIDE
+
+
+@app.callback(
     Output("annotation-creation-step-list-1-asset", "className"),
     Output("annotation-creation-step-list-2-definition", "className"),
     Output("annotation-creation-step-list-3-ts", "className"),
     Output("annotation-creation-step-list-4-range", "className"),
-    Output("annotation-creation-step-list-5-caption", "className"),
+    Output("annotation-creation-step-list-5-caption-description", "className"),
     Output("annotation-creation-step-list-6-description", "className"),
     Input("annotation-creation-store-step", "data"),
     prevent_initial_call=False,
@@ -483,6 +504,27 @@ def annotation_result_visualization_ts(
         end_datetime = datetime.fromisoformat(selected_end_datetime_str)
 
         return f"{LIST_RESULT_PREFIX}{start_datetime.strftime('%d.%m.%Y, %H:%M:%S')} – {end_datetime.strftime('%d.%m.%Y, %H:%M:%S')}"
+
+    else:
+        return ""
+
+
+@app.callback(
+    Output("annotation-creation-step-list-5-caption-description-result", "children"),
+    Input("annotation-creation-store-step", "data"),
+    Input("annotation-caption-input", "value"),
+    prevent_initial_call=False,
+)
+def annotation_result_visualization_caption_description(current_step, caption):
+
+    if (
+        current_step is not None
+        and current_step >= CreationSteps.CAPTION_DESCRIPTION.value
+        and caption is not None
+        and caption != ""
+    ):
+
+        return f"{LIST_RESULT_PREFIX}Caption: {caption}"
 
     else:
         return ""

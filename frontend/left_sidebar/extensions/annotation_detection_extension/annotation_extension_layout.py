@@ -154,13 +154,13 @@ def get_layout():
                                             ),
                                             dbc.ListGroupItem(
                                                 [
-                                                    "5. Give the annotation a caption",
+                                                    "5. Give the annotation a caption and description",
                                                     html.Div(
-                                                        id="annotation-creation-step-list-5-caption-result",
+                                                        id="annotation-creation-step-list-5-caption-description-result",
                                                         className="annotation-creation-step-list-result",
                                                     ),
                                                 ],
-                                                id="annotation-creation-step-list-5-caption",
+                                                id="annotation-creation-step-list-5-caption-description",
                                             ),
                                             dbc.ListGroupItem(
                                                 [
@@ -268,6 +268,49 @@ def get_layout():
                                                     ),
                                                 ],
                                                 className="annotation-creation-datetime-pair",
+                                            ),
+                                        ],
+                                    ),
+                                    html.Div(
+                                        id="annotation-creation-step-5-caption-description-form",
+                                        className="hide-content",
+                                        children=[
+                                            html.Div(
+                                                "Caption:",
+                                                style={
+                                                    "font-weight": "bold",
+                                                    "margin-bottom": "5px",
+                                                },
+                                            ),
+                                            dbc.Input(
+                                                id="annotation-caption-input",
+                                                placeholder="Provide a short caption...",
+                                                size="sm",
+                                                style={
+                                                    "margin-right": "5px",
+                                                    "width": "300px",
+                                                },
+                                                persistence=True,
+                                                persistence_type="session",
+                                            ),
+                                            html.Div(
+                                                "Description (optional):",
+                                                style={
+                                                    "font-weight": "bold",
+                                                    "margin-bottom": "5px",
+                                                    "margin-top": "10px",
+                                                },
+                                            ),
+                                            dbc.Textarea(
+                                                id="annotation-description-input",
+                                                placeholder="Describe the situation...",
+                                                size="sm",
+                                                style={
+                                                    "width": "300px",
+                                                    "height": "120px",
+                                                },
+                                                persistence=True,
+                                                persistence_type="session",
                                             ),
                                         ],
                                     ),
