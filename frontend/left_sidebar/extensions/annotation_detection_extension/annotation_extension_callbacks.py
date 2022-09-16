@@ -821,13 +821,12 @@ def delete_annotation(
     if selected_el.type == NodeTypes.ANNOTATION_INSTANCE.value:
         print(f"Deleting annotation instance: {selected_el.id_short}")
         api_client.delete(
-            f"/annotation/instance/{selected_el.iri}",
+            f"/annotation/instance/",
+            instance_iri=selected_el.iri,
         )
     elif selected_el.type == NodeTypes.ANNOTATION_DEFINITION.value:
         print(f"Deleting annotation definition: {selected_el.id_short}")
-        api_client.delete(
-            f"/annotation/definition/{selected_el.iri}",
-        )
+        api_client.delete(f"/annotation/definition/", definition_iri=selected_el.iri)
     else:
         print("Tried to remove annotation, but different object selected")
         raise PreventUpdate

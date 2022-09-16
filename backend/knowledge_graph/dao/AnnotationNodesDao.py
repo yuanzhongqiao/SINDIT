@@ -211,3 +211,76 @@ class AnnotationNodesDao(object):
                 .first(),
             )
         self.ps.graph.create(match_relationship)
+
+    @validate_result_nodes
+    def get_instances_of_annotation_definition(
+        self, definition_iri: str
+    ) -> List[AnnotationInstanceNodeFlat]:
+        """
+        Queries all available instances for the specified annotation definition node.
+        :param self:
+        :return:
+        :raises GraphNotConformantToMetamodelError: If Graph not conformant
+        """
+        matches = self.ps.repo.match(model=AnnotationInstanceNodeFlat).where(
+            "(_)-[:"
+            + RelationshipTypes.INSTANCE_OF.value
+            + "]->(: "
+            + NodeTypes.ANNOTATION_DEFINITION.value
+            + ' {iri: "'
+            + definition_iri
+            + '"}) '
+        )
+
+        return matches.all()
+
+    @validate_result_nodes
+    def get_ts_matchers_only_used_for(
+        self, instance_iri: str
+    ) -> List[AnnotationTimeseriesMatcherNodeFlat]:
+        """
+        Queries time-series matchers for the specified annotation instance node.
+        Only returns matchers exclusively used by this instance (They could be reused).
+        :param self:
+        :return:
+        :raises GraphNotConformantToMetamodelError: If Graph not conformant
+        """
+        matches = self.ps.repo.match(model=AnnotationTimeseriesMatcherNodeFlat).where(
+            "(_)<-[:"
+            + RelationshipTypes.DETECTABLE_WITH.value
+            + " *..1]-(: "
+            + NodeTypes.ANNOTATION_INSTANCE.value
+            + ") AND (_)<-[:"
+            + RelationshipTypes.DETECTABLE_WITH.value
+            + "]-(:"
+            + NodeTypes.ANNOTATION_INSTANCE.value
+            + ' {iri: "'
+            + instance_iri
+            + '"}) '
+        )
+
+        return matches.all()
+
+    def delete_annotation_definition(self, definition_iri):
+        """Deletes a definition and the attached relationships.
+        Make sure to delete instances before,
+        as they would be missing their definition instead!
+
+        Args:
+            definition_iri (_type_): _description_
+        """
+        self.ps.graph.run(
+            f"MATCH (n:{NodeTypes.ANNOTATION_DEFINITION.value}) WHERE n.iri = '{definition_iri}' DETACH DELETE n"
+        )
+
+    def delete_annotation_ts_matcher(self, ts_matcher_iri):
+        """Deletes a time-series matcher and the attached relationships."""
+        self.ps.graph.run(
+            f"MATCH (n:{NodeTypes.ANNOTATION_TS_MATCHER.value}) WHERE n.iri = '{ts_matcher_iri}' DETACH DELETE n"
+        )
+
+    def delete_annotation_instance(self, instance_iri):
+        """Deletes a annotation instance and the attached relationships."""
+        self.ps.graph.run(
+            f"MATCH (n:{NodeTypes.ANNOTATION_INSTANCE.value}) WHERE n.iri = '{instance_iri}' DETACH DELETE n"
+        )
