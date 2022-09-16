@@ -6,10 +6,11 @@ from backend.knowledge_graph.dao.AnnotationNodesDao import AnnotationNodesDao
 from backend.knowledge_graph.dao.AssetNodesDao import AssetsDao
 from pydantic import BaseModel
 import backend.api.python_endpoints.asset_endpoints as python_asset_endpoints
+from backend.knowledge_graph.dao.TimeseriesNodesDao import TimeseriesNodesDao
 
 
-ASSETS_DAO: AssetsDao = AssetsDao.instance()
 ANNOTATIONS_DAO: AnnotationNodesDao = AnnotationNodesDao.instance()
+TIMESERIES_NODES_DAO: TimeseriesNodesDao = TimeseriesNodesDao.instance()
 
 
 class AnnotationDefinitionArguments(BaseModel):
@@ -22,7 +23,7 @@ class AnnotationDefinitionArguments(BaseModel):
 @app.post("/annotation/definition")
 def post_annotation_definition(definition: AnnotationDefinitionArguments):
     print(f"Creating new annotation definition: {definition.id_short}...")
-    return ANNOTATIONS_DAO.post_annotation_definition(
+    return ANNOTATIONS_DAO.create_annotation_definition(
         id_short=definition.id_short,
         solution_proposal=definition.solution_proposal,
         caption=definition.caption,
@@ -44,15 +45,20 @@ class AnnotationInstanceArguments(BaseModel):
 @app.post("/annotation/instance")
 def post_annotation_definition(instance: AnnotationInstanceArguments):
     print(f"Creating new annotation instance: {instance.id_short}...")
-    # TODO: create instance node
-    instance_iri = ANNOTATIONS_DAO.post_annotation_instance(
+    instance_iri = ANNOTATIONS_DAO.create_annotation_instance(
         id_short=instance.id_short,
         start_datetime=instance.start_datetime,
         end_datetime=instance.end_datetime,
         caption=instance.caption,
         description=instance.description,
     )
-    # TODO: create ts matcher nodes
+    for ts_iri in instance.ts_iri_list:
+        ts_node = TIMESERIES_NODES_DAO.get_timeseries_node_flat(ts_iri)
+
+        ANNOTATIONS_DAO.create_annotation_ts_matcher(
+            id_short=f"ts_matcher_for_{ts_iri}",
+            caption=f"TS-Matcher: {ts_node.caption}",
+        )
     # TODO: create relationships matcher->ts
     # TODO: create relationships instance->matcher
     # TODO: create relationships definition->instance

@@ -92,7 +92,7 @@ def get_timeseries_nodes(deep: bool = True):
     if deep:
         return TIMESERIES_NODES_DAO.get_timeseries_deep_json()
     else:
-        return TIMESERIES_NODES_DAO.get_timeseries_flat()
+        return TIMESERIES_NODES_DAO.get_all_timeseries_nodes_flat()
 
 
 @app.get("/timeseries/count")

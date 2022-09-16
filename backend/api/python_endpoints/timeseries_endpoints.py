@@ -28,6 +28,16 @@ DB_CON_NODE_DAO: DatabaseConnectionsDao = DatabaseConnectionsDao.instance()
 TIMESERIES_NODES_DAO: TimeseriesNodesDao = TimeseriesNodesDao.instance()
 
 
+def get_ts_details_flat(iri: str):
+    """
+    Reads the details (e.g. type and file-name) for a time-series node from the graph
+    :raises IdNotFoundException: If the file is not found
+    :param iri:
+    :return:
+    """
+    return TIMESERIES_NODES_DAO.get_supplementary_file_node_flat(iri)
+
+
 def get_timeseries_current_range(
     iri: str,
     duration: float | None,
@@ -134,9 +144,9 @@ def get_timeseries_entries_count(
 
 def get_timeseries_nodes(deep: bool = True):
     if deep:
-        return TIMESERIES_NODES_DAO.get_timeseries_deep()
+        return TIMESERIES_NODES_DAO.get_all_timeseries_nodes_deep()
     else:
-        return TIMESERIES_NODES_DAO.get_timeseries_flat()
+        return TIMESERIES_NODES_DAO.get_all_timeseries_nodes_flat()
 
 
 def set_ts_feature_dict(iri: str, feature_set: Dict):

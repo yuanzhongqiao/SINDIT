@@ -8,6 +8,9 @@ from graph_domain.expert_annotations.AnnotationDefinitionNode import (
 from graph_domain.expert_annotations.AnnotationInstanceNode import (
     AnnotationInstanceNodeFlat,
 )
+from graph_domain.expert_annotations.AnnotationTimeseriesMatcherNode import (
+    AnnotationTimeseriesMatcherNodeFlat,
+)
 
 from graph_domain.main_digital_twin.AssetNode import AssetNodeFlat, AssetNodeDeep
 from backend.exceptions.GraphNotConformantToMetamodelError import (
@@ -55,7 +58,7 @@ class AnnotationNodesDao(object):
             KnowledgeGraphPersistenceService.instance()
         )
 
-    def post_annotation_definition(
+    def create_annotation_definition(
         self,
         id_short: str,
         solution_proposal: str,
@@ -76,7 +79,7 @@ class AnnotationNodesDao(object):
 
         return iri
 
-    def post_annotation_instance(
+    def create_annotation_instance(
         self,
         id_short: str,
         start_datetime: datetime,
@@ -95,6 +98,17 @@ class AnnotationNodesDao(object):
             creation_date_time=datetime.now(),
             occurance_start_date_time=start_datetime,
             occurance_end_date_time=end_datetime,
+        )
+        self.ps.graph.push(instance)
+
+        return iri
+
+    def create_annotation_ts_matcher(self, id_short: str, caption: str) -> str:
+        """Creates a new annotation instance"""
+        iri = IRI_PREFIX_ANNOTATION_TS_MATCHER + id_short
+
+        instance = AnnotationTimeseriesMatcherNodeFlat(
+            id_short=id_short, iri=iri, caption=caption
         )
         self.ps.graph.push(instance)
 

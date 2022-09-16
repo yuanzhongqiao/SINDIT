@@ -76,7 +76,7 @@ def init_sensors():
         RuntimeConnectionContainer.instance()
     )
 
-    timeseries_deep_nodes = timeseries_nodes_dao.get_timeseries_deep()
+    timeseries_deep_nodes = timeseries_nodes_dao.get_all_timeseries_nodes_deep()
 
     runtime_con_container.initialize_connections_inputs_and_handlers(
         timeseries_deep_nodes

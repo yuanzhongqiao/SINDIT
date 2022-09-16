@@ -48,7 +48,21 @@ class TimeseriesNodesDao(object):
         )
 
     @validate_result_nodes
-    def get_timeseries_flat(self):
+    def get_timeseries_node_flat(self, ts_iri: str) -> TimeseriesNodeFlat:
+        """
+        Queries the specified ts node. Does not follow any relationships
+        :param self:
+        :return:
+        :raises GraphNotConformantToMetamodelError: If Graph not conformant
+        """
+        ts_node_match = self.ps.repo.match(
+            model=TimeseriesNodeFlat, primary_value=ts_iri
+        )
+
+        return ts_node_match.first()
+
+    @validate_result_nodes
+    def get_all_timeseries_nodes_flat(self):
         """
         Queries all timeseries nodes. Does not follow any relationships
         :param self:
@@ -60,7 +74,7 @@ class TimeseriesNodesDao(object):
         return timeseries_flat_matches.all()
 
     @validate_result_nodes
-    def get_timeseries_deep(self):
+    def get_all_timeseries_nodes_deep(self):
         """
         Queries all timeseries nodes. Follows relationships to build nested objects for related nodes (e.g. connections)
         :param self:
@@ -78,7 +92,7 @@ class TimeseriesNodesDao(object):
         :param self:
         :return:
         """
-        return json.dumps([a.to_json() for a in self.get_timeseries_deep()])
+        return json.dumps([a.to_json() for a in self.get_all_timeseries_nodes_deep()])
 
     def update_feature_dict(self, iri: str, feature_dict: dict):
         matcher = NodeMatcher(self.ps.graph)
