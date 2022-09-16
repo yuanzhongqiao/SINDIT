@@ -1,7 +1,7 @@
 from datetime import datetime
 from random import randint
 from time import sleep
-
+from dash import ctx
 from dash.exceptions import PreventUpdate
 import pytz
 from dash.dependencies import Input, Output, State
@@ -84,15 +84,22 @@ def update_factory_graph(
     State("cytoscape-graph-store", "modified_timestamp"),
     State("factory-graph-loading-state", "data"),
     State("graph-force-full-reload-store", "modified_timestamp"),
+    Input("annotation-creation-saved", "modified_timestamp"),
     prevent_initial_call=True,
 )
 def factory_graph_update_trigger(
-    n, n_clicks, n_init_intervall, local_timestamp, graph_loaded, force_reload_timestamp
+    n,
+    n_clicks,
+    n_init_intervall,
+    local_timestamp,
+    graph_loaded,
+    force_reload_timestamp,
+    annotation_created_full_reload,
 ):
-    # if elements is None or len(elements) == 0:
-    #     print("Graph empty! Reloading...")
-    #     return -100  # randint(-999999, 0) # <1 because >1 is
-    if graph_loaded is None and n_init_intervall == 1:
+    if ctx.triggered_id == "annotation-creation-saved":
+        print("Reloading graph from backend after creating a new annotation...")
+        return 2
+    elif graph_loaded is None and n_init_intervall == 1:
         # First loading after opening / reloading whole page
         print("Initial graph loading...")
         return 1
@@ -124,18 +131,6 @@ def factory_graph_update_trigger(
     else:
         print("Graph okay")
         raise PreventUpdate()
-
-    # if n_clicks == 0 or graph_loaded is None:
-    #     print("Initial graph loading...")
-    #     return 1
-    # elif _get_graph_age_seconds(local_timestamp) > get_configuration_int(
-    #     group=ConfigGroups.FRONTEND, key="max_graph_age"
-    # ):
-    #     print("Graph to old! Reloading graph from backend...")
-    #     return 2
-    # else:
-    #     print("Graph okay")
-    #     raise PreventUpdate()
 
 
 @app.callback(

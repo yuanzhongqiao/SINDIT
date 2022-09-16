@@ -73,9 +73,6 @@ def save_annotation(
         raise PreventUpdate
 
     asset: GraphSelectedElement = GraphSelectedElement.from_json(selected_asset_json)
-    definition: GraphSelectedElement = GraphSelectedElement.from_json(
-        selected_definition_json
-    )
 
     ts_list = [
         GraphSelectedElement.from_json(ts_json)
@@ -97,6 +94,9 @@ def save_annotation(
         )
         used_definition_id_short = new_annotation_id_short
     else:
+        definition: GraphSelectedElement = GraphSelectedElement.from_json(
+            selected_definition_json
+        )
         used_definition_iri = definition.iri
         used_definition_id_short = definition.id_short
 
@@ -121,7 +121,7 @@ def save_annotation(
             "description": description,
         },
     )
-    raise PreventUpdate  # TODO: remove
+    print("Finished storing annotation")
     return datetime.now()
 
 
