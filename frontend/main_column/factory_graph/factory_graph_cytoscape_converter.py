@@ -156,9 +156,7 @@ def _get_ts_matchers_with_sub_elements(
     )
 
     # Original TS:
-    cytoscape_elements.extend(
-        _get_ts_with_sub_elements(ts_matcher.original_ts, associated_asset)
-    )
+    cytoscape_elements.extend(_get_ts_with_sub_elements(ts_matcher.original_ts, None))
 
     cytoscape_elements.append(
         _create_cytoscape_relationship(
@@ -170,7 +168,7 @@ def _get_ts_matchers_with_sub_elements(
 
     # Matched TS:
     for ts in ts_matcher.ts_matches:
-        cytoscape_elements.extend(_get_ts_with_sub_elements(ts, associated_asset))
+        cytoscape_elements.extend(_get_ts_with_sub_elements(ts, None))
 
         cytoscape_elements.append(
             _create_cytoscape_relationship(
@@ -409,12 +407,15 @@ def get_cytoscape_elements(
             dict_elem = temporary_elements_dict.get(elem.get("data").get("id"))
             related_asset_iris = dict_elem.get("data").get("associated_assets")
             new_related_asset_iri = elem.get("data").get("associated_assets")
-            if (
-                new_related_asset_iri is not None
-                and new_related_asset_iri not in related_asset_iris
+            if new_related_asset_iri is not None and (
+                related_asset_iris is None
+                or new_related_asset_iri not in related_asset_iris
             ):
+
                 dict_elem["data"]["associated_assets"] = (
-                    related_asset_iris + " " + new_related_asset_iri
+                    (related_asset_iris + " " + new_related_asset_iri)
+                    if related_asset_iris is not None
+                    else new_related_asset_iri
                 )
 
     return list(temporary_elements_dict.values())
