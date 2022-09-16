@@ -24,12 +24,6 @@ SHOW = ""
 
 LIST_RESULT_PREFIX = "↪ "
 
-IRI_PREFIX_GLOBAL = "www.sintef.no/aas_identifiers/learning_factory/"
-IRI_PREFIX_ANNOTATION_INSTANCE = IRI_PREFIX_GLOBAL + "annotations/instances/"
-IRI_PREFIX_ANNOTATION_DEFINITION = IRI_PREFIX_GLOBAL + "annotations/definitions/"
-IRI_PREFIX_ANNOTATION_TS_MATCHER = IRI_PREFIX_GLOBAL + "annotations/ts_matchers/"
-IRI_PREFIX_ANNOTATION_PRE_INDICATOR = IRI_PREFIX_GLOBAL + "annotations/pre_indicators/"
-
 
 class CreationSteps(Enum):
     ASSET_SELECTION = 1
@@ -78,13 +72,6 @@ def save_annotation(
         print("Tried to save early")
         raise PreventUpdate
 
-    instance_id_short = "123"  # TODO
-    instance_iri = IRI_PREFIX_ANNOTATION_INSTANCE + instance_id_short
-
-    print(
-        f"Storing new annotation:\n Caption: {caption}\nid_short: {instance_id_short}\niri: {instance_iri}"
-    )
-
     asset: GraphSelectedElement = GraphSelectedElement.from_json(selected_asset_json)
     definition: GraphSelectedElement = GraphSelectedElement.from_json(
         selected_definition_json
@@ -94,8 +81,12 @@ def save_annotation(
         GraphSelectedElement.from_json(ts_json)
         for ts_json in json.loads(selected_ts_list_json)
     ]
+
     if True in new_annotation_switch:
-        api_client.post(
+        print(
+            f"Storing new annotation definition:\n Caption: {new_annotation_caption}\nid_short: {new_annotation_id_short}"
+        )
+        used_definition_iri = api_client.post(
             "/annotation/definition",
             json={
                 "id_short": new_annotation_id_short,
@@ -104,12 +95,25 @@ def save_annotation(
                 "description": new_annotation_description,
             },
         )
+        used_definition_id_short = new_annotation_id_short
+    else:
+        used_definition_iri = definition.iri
+        used_definition_id_short = definition.id_short
+
+    instance_id_short = (
+        f"{used_definition_id_short}_{asset.id_short}_{datetime.now().isoformat()}"
+    )
+
+    print(
+        f"Storing new annotation:\n Caption: {caption}\nid_short: {instance_id_short}"
+    )
+
     api_client.post(
         "/annotation/instance",
         json={
             "id_short": instance_id_short,
             "asset_iri": asset.iri,
-            "definition_iri": definition.iri,
+            "definition_iri": used_definition_iri,
             "ts_iri_list": [ts.iri for ts in ts_list],
             "start_datetime": selected_start_datetime_str,
             "end_datetime": selected_end_datetime_str,
@@ -652,7 +656,6 @@ def annotation_result_visualization_definition(
     if (
         current_step is not None
         and current_step >= CreationSteps.DEFINITION_SELECTION.value
-        and definition_json is not None
     ):
         if (
             True in new_definition_switch

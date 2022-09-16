@@ -36,6 +36,10 @@ class BaseNode(Model):
         else:
             return self.id_short
 
+    @caption.setter
+    def caption(self, value):
+        self._explizit_caption = value
+
     # Additional properties for visualization (may initially be empty)
     visualization_positioning_x: float | None = Property(default=None)
     visualization_positioning_y: float | None = Property(default=None)

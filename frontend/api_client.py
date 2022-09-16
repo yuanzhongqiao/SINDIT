@@ -123,7 +123,20 @@ def patch(relative_path: str, **kwargs):
 
 
 def post(relative_path: str, data: Dict = None, json: Dict = None, **kwargs):
+    """Post request. Returns the response body text
+
+    Args:
+        relative_path (str): _description_
+        data (Dict, optional): _description_. Defaults to None.
+        json (Dict, optional): _description_. Defaults to None.
+
+    Returns:
+        _type_: _description_
+    """
     try:
-        requests.post(API_URI + relative_path, params=kwargs, data=data, json=json)
+        response = requests.post(
+            API_URI + relative_path, params=kwargs, data=data, json=json
+        )
+        return response.text
     except RequestException as err:
         print("API not availlable!")
