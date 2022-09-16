@@ -1,4 +1,4 @@
-from dash import html
+from dash import html, ctx
 from dash.dependencies import Input, Output, State
 
 from frontend.app import app
@@ -16,23 +16,18 @@ print("Initializing navigation callbacks...")
     # Output("right-sidebar-collapse", "is_open"),
     Output("right-sidebar-collapse", "className"),
     Input("selected-graph-element-store", "data"),
+    Input("annotation-deleted", "modified_timestamp"),
 )
-def show_selected_element_sidebar(selected_el_json):
+def show_selected_element_sidebar(selected_el_json, annotation_deleted_force_close):
     """
     Toggles the visibility of the right sidebar
     :param selected_el:
     :return:
     """
-    return (
-        # ({"min-width": "300px"})
-        # (True, "")
-        ""
-        if selected_el_json is not None
-        else "sidebar-collapsed"
-        # (False, "sidebar-collapsed")
-        # else ({"display": "none"})
-    )
-    # return selected_el_json is not None
+    if ctx.triggered_id == "annotation-deleted":
+        return "sidebar-collapsed"
+
+    return "" if selected_el_json is not None else "sidebar-collapsed"
 
 
 @app.callback(
