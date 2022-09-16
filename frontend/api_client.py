@@ -143,3 +143,23 @@ def post(relative_path: str, data: Dict = None, json: Dict = None, **kwargs):
         return text
     except RequestException as err:
         print("API not availlable!")
+
+
+def delete(relative_path: str, **kwargs):
+    """Delete request. Returns the response body text
+
+    Args:
+        relative_path (str): _description_
+
+
+    Returns:
+        _type_: _description_
+    """
+    try:
+        response = requests.delete(API_URI + relative_path, params=kwargs)
+        text = response.text
+        if text[0] == '"' and text[-1] == '"':
+            text = text[1:-1]
+        return text
+    except RequestException as err:
+        print("API not availlable!")

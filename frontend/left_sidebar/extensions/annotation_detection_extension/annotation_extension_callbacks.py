@@ -483,6 +483,12 @@ def annotation_next_step_button_activate(
                     True in new_definition_switch
                     and new_definition_id_short is not None
                     and new_definition_id_short != ""
+                    and not " " in new_definition_id_short
+                    # Disallow special characters other than - and _ as well as whitespaces
+                    and not any(
+                        (not c.isalnum() and c != "-" and c != "_")
+                        for c in new_definition_id_short
+                    )
                     and new_definition_caption is not None
                     and new_definition_caption != ""
                     and new_definition_proposal is not None
@@ -769,3 +775,61 @@ def init_date_time_pickers(current_step, selected_end_time):
         return last_hour, last_hour, now, now
     else:
         raise PreventUpdate
+
+
+##########################################
+# Deleting:
+##########################################
+
+
+@app.callback(
+    Output("delete-annotation-button", "disabled"),
+    Input("selected-graph-element-store", "data"),
+    Input("annotation-deleted", "modified_timestamp"),
+    prevent_initial_call=False,
+)
+def annotation_previous_step_button_activate(selected_el_json, deleted):
+    if ctx.triggered_id == "annotation-deleted":
+        return True
+
+    selected_el: GraphSelectedElement = (
+        GraphSelectedElement.from_json(selected_el_json)
+        if selected_el_json is not None
+        else None
+    )
+    if selected_el is not None and selected_el.type in [
+        NodeTypes.ANNOTATION_DEFINITION.value,
+        NodeTypes.ANNOTATION_INSTANCE.value,
+    ]:
+        return False
+    else:
+        return True
+
+
+@app.callback(
+    Output("annotation-deleted", "data"),
+    Input("delete-annotation-button-confirm", "submit_n_clicks"),
+    State("selected-graph-element-store", "data"),
+    prevent_initial_call=True,
+)
+def delete_annotation(
+    delete_button,
+    selected_el_json,
+):
+    selected_el: GraphSelectedElement = GraphSelectedElement.from_json(selected_el_json)
+
+    if selected_el.type == NodeTypes.ANNOTATION_INSTANCE.value:
+        print(f"Deleting annotation instance: {selected_el.id_short}")
+        api_client.delete(
+            f"/annotation/instance/{selected_el.iri}",
+        )
+    elif selected_el.type == NodeTypes.ANNOTATION_DEFINITION.value:
+        print(f"Deleting annotation definition: {selected_el.id_short}")
+        api_client.delete(
+            f"/annotation/definition/{selected_el.iri}",
+        )
+    else:
+        print("Tried to remove annotation, but different object selected")
+        raise PreventUpdate
+
+    return datetime.now()

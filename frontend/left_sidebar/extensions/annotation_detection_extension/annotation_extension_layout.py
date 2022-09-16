@@ -35,13 +35,18 @@ def get_layout():
                                 id="annotations-buttons-container",
                                 className="annotations-bottom-buttons",
                                 children=[
-                                    dbc.Button(
-                                        "Delete Annotation",
-                                        id="delete-annotation-button",
-                                        color="dark",
-                                        size="sm",
-                                        disabled=True,
-                                        style={"margin-right": "5px"},
+                                    dcc.ConfirmDialogProvider(
+                                        children=dbc.Button(
+                                            "Delete Annotation",
+                                            id="delete-annotation-button",
+                                            color="dark",
+                                            size="sm",
+                                            disabled=True,
+                                            style={"margin-right": "5px"},
+                                        ),
+                                        id="delete-annotation-button-confirm",
+                                        message="Are you sure you want to delete the selected annotation instance / definition?\n\n"
+                                        "Definitions can only be deleted, if every related instance has been deleted before.",
                                     ),
                                     dbc.Button(
                                         "Create Annotation",
@@ -75,26 +80,6 @@ def get_layout():
                                         storage_type="session",
                                     ),
                                     dcc.Store(
-                                        id="annotation-creation-store-new-definition-description",
-                                        storage_type="session",
-                                    ),
-                                    dcc.Store(
-                                        id="annotation-creation-store-new-definition-id-short",
-                                        storage_type="session",
-                                    ),
-                                    dcc.Store(
-                                        id="annotation-creation-store-new-definition-caption",
-                                        storage_type="session",
-                                    ),
-                                    dcc.Store(
-                                        id="annotation-creation-store-caption",
-                                        storage_type="session",
-                                    ),
-                                    dcc.Store(
-                                        id="annotation-creation-store-description",
-                                        storage_type="session",
-                                    ),
-                                    dcc.Store(
                                         id="annotation-creation-store-selected-ts",
                                         storage_type="session",
                                     ),
@@ -112,6 +97,10 @@ def get_layout():
                                     ),
                                     dcc.Store(
                                         id="annotation-creation-saved",
+                                        storage_type="memory",
+                                    ),
+                                    dcc.Store(
+                                        id="annotation-deleted",
                                         storage_type="memory",
                                     ),
                                     dbc.ListGroup(
@@ -203,6 +192,14 @@ def get_layout():
                                                     "margin-bottom": "5px",
                                                 },
                                             ),
+                                            html.Div(
+                                                "(May not contain spaces or special characters other than '-' or '_')",
+                                                style={
+                                                    "margin-bottom": "5px",
+                                                    "width": "300px",
+                                                    "text-align": "center",
+                                                },
+                                            ),
                                             dbc.Input(
                                                 id="annotation-definition-id-short-input",
                                                 placeholder="Define a short identifier...",
@@ -248,7 +245,7 @@ def get_layout():
                                                 size="sm",
                                                 style={
                                                     "width": "300px",
-                                                    "height": "100px",
+                                                    "height": "80px",
                                                 },
                                                 persistence=True,
                                                 persistence_type="session",
@@ -268,7 +265,7 @@ def get_layout():
                                                 size="sm",
                                                 style={
                                                     "width": "300px",
-                                                    "height": "100px",
+                                                    "height": "80px",
                                                 },
                                                 persistence=True,
                                                 persistence_type="session",

@@ -77,3 +77,15 @@ def post_annotation_definition(instance: AnnotationInstanceArguments):
     )
 
     return instance_iri
+
+
+@app.delete("/annotation/definition/{definition_iri}")
+def delete_annotation_definition(definition_iri: str):
+    print(f"Trying to delete annotation definition: {definition_iri}...")
+    # return ANNOTATIONS_DAO.create_annotation_definition(
+    #     id_short=definition.id_short,
+    #     solution_proposal=definition.solution_proposal,
+    #     caption=definition.caption,
+    #     description=definition.description,
+    # )
+    pass
