@@ -45,6 +45,13 @@ class AnnotationInstanceArguments(BaseModel):
 def post_annotation_definition(instance: AnnotationInstanceArguments):
     print(f"Creating new annotation instance: {instance.id_short}...")
     # TODO: create instance node
+    instance_iri = ANNOTATIONS_DAO.post_annotation_instance(
+        id_short=instance.id_short,
+        start_datetime=instance.start_datetime,
+        end_datetime=instance.end_datetime,
+        caption=instance.caption,
+        description=instance.description,
+    )
     # TODO: create ts matcher nodes
     # TODO: create relationships matcher->ts
     # TODO: create relationships instance->matcher

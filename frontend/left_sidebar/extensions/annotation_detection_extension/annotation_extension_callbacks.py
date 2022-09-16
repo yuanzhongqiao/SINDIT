@@ -121,7 +121,7 @@ def save_annotation(
             "description": description,
         },
     )
-
+    raise PreventUpdate  # TODO: remove
     return datetime.now()
 
 
