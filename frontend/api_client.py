@@ -137,6 +137,9 @@ def post(relative_path: str, data: Dict = None, json: Dict = None, **kwargs):
         response = requests.post(
             API_URI + relative_path, params=kwargs, data=data, json=json
         )
-        return response.text
+        text = response.text
+        if text[0] == '"' and text[-1] == '"':
+            text = text[1:-1]
+        return text
     except RequestException as err:
         print("API not availlable!")

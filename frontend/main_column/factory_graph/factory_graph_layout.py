@@ -31,28 +31,34 @@ def get_layout():
                                         align="center",
                                     ),
                                     dbc.Col(
-                                        dbc.Button(
-                                            html.Div(
-                                                [
-                                                    "Reload graph",
-                                                    html.Img(
-                                                        src="https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/refresh/wght500/48px.svg",
-                                                        height=20,
-                                                        width=20,
-                                                        style={
-                                                            # Color applied to svg as filter. Converter: (https://isotropic.co/tool/hex-color-to-css-filter/)
-                                                            "filter": "invert(40%) sepia(60%) saturate(0%) hue-rotate(175deg) brightness(103%) contrast(89%)",
-                                                            "margin-left": "5px",
-                                                        },
-                                                    ),
-                                                ],
-                                                id="reload-button-div",
+                                        [
+                                            dcc.Store(
+                                                id="graph-force-full-reload-store",
+                                                storage_type="local",
                                             ),
-                                            id="graph-reload-button",
-                                            n_clicks=0,
-                                            size="sm",
-                                            outline=True,
-                                        ),
+                                            dbc.Button(
+                                                html.Div(
+                                                    [
+                                                        "Reload graph",
+                                                        html.Img(
+                                                            src="https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/refresh/wght500/48px.svg",
+                                                            height=20,
+                                                            width=20,
+                                                            style={
+                                                                # Color applied to svg as filter. Converter: (https://isotropic.co/tool/hex-color-to-css-filter/)
+                                                                "filter": "invert(40%) sepia(60%) saturate(0%) hue-rotate(175deg) brightness(103%) contrast(89%)",
+                                                                "margin-left": "5px",
+                                                            },
+                                                        ),
+                                                    ],
+                                                    id="reload-button-div",
+                                                ),
+                                                id="graph-reload-button",
+                                                n_clicks=0,
+                                                size="sm",
+                                                outline=True,
+                                            ),
+                                        ],
                                         style={"max-width": "155px"},
                                         align="center",
                                     ),

@@ -52,6 +52,13 @@ def post_annotation_definition(instance: AnnotationInstanceArguments):
         caption=instance.caption,
         description=instance.description,
     )
+    ANNOTATIONS_DAO.create_annotation_instance_of_definition_relationship(
+        definition_iri=instance.definition_iri, instance_iri=instance_iri
+    )
+    ANNOTATIONS_DAO.create_annotation_instance_asset_relationship(
+        instance_iri=instance_iri, asset_iri=instance.asset_iri
+    )
+
     for ts_iri in instance.ts_iri_list:
         ts_node = TIMESERIES_NODES_DAO.get_timeseries_node_flat(ts_iri)
 
@@ -62,12 +69,11 @@ def post_annotation_definition(instance: AnnotationInstanceArguments):
         ANNOTATIONS_DAO.create_annotation_ts_matcher_instance_relationship(
             ts_matcher_iri=ts_matcher_iri, instance_iri=instance_iri
         )
-    # TODO: create relationships instance->matcher
-    # TODO: create relationships matcher->ts
-    #
-    # TODO: create relationships definition->instance
-    # TODO: create relationships asset->definition
-    # TODO: create relationships asset->instance
+        ANNOTATIONS_DAO.create_annotation_ts_match_relationship(
+            ts_matcher_iri=ts_matcher_iri, ts_iri=ts_iri, original_annotation=True
+        )
+    ANNOTATIONS_DAO.create_annotation_occurance_scan_relationship(
+        definition_iri=instance.definition_iri, asset_iri=instance.asset_iri
+    )
 
-    # TODO: return iri
-    pass
+    return instance_iri

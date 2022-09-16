@@ -114,6 +114,51 @@ class AnnotationNodesDao(object):
 
         return iri
 
+    def create_annotation_instance_of_definition_relationship(
+        self, definition_iri: str, instance_iri: str
+    ) -> str:
+
+        relationship = Relationship(
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ANNOTATION_INSTANCE.value, iri=instance_iri)
+            .first(),
+            RelationshipTypes.INSTANCE_OF.value,
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ANNOTATION_DEFINITION.value, iri=definition_iri)
+            .first(),
+        )
+        self.ps.graph.create(relationship)
+
+    def create_annotation_instance_asset_relationship(
+        self, instance_iri: str, asset_iri: str
+    ) -> str:
+
+        relationship = Relationship(
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ASSET.value, iri=asset_iri)
+            .first(),
+            RelationshipTypes.ANNOTATION.value,
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ANNOTATION_INSTANCE.value, iri=instance_iri)
+            .first(),
+        )
+        self.ps.graph.create(relationship)
+
+    def create_annotation_occurance_scan_relationship(
+        self, definition_iri: str, asset_iri: str
+    ) -> str:
+
+        relationship = Relationship(
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ASSET.value, iri=asset_iri)
+            .first(),
+            RelationshipTypes.OCCURANCE_SCAN.value,
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ANNOTATION_DEFINITION.value, iri=definition_iri)
+            .first(),
+        )
+        self.ps.graph.create(relationship)
+
     def create_annotation_ts_matcher_instance_relationship(
         self, ts_matcher_iri: str, instance_iri: str
     ) -> str:
@@ -128,3 +173,41 @@ class AnnotationNodesDao(object):
             .first(),
         )
         self.ps.graph.create(relationship)
+
+    def create_annotation_ts_match_relationship(
+        self, ts_matcher_iri: str, ts_iri: str, original_annotation: bool
+    ) -> str:
+        """Relationship for a ts-match
+
+        Args:
+            ts_matcher_iri (str): _description_
+            ts_iri (str): _description_
+            original_annotation (bool): If yes, an additional relationship of the
+            "ORIGINAL_ANNOTATION" type will be creted as well
+
+        Returns:
+            str: _description_
+        """
+
+        match_relationship = Relationship(
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ANNOTATION_TS_MATCHER.value, iri=ts_matcher_iri)
+            .first(),
+            RelationshipTypes.TS_MATCH.value,
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.TIMESERIES_INPUT.value, iri=ts_iri)
+            .first(),
+        )
+        self.ps.graph.create(match_relationship)
+
+        if original_annotation:
+            match_relationship = Relationship(
+                NodeMatcher(self.ps.graph)
+                .match(NodeTypes.ANNOTATION_TS_MATCHER.value, iri=ts_matcher_iri)
+                .first(),
+                RelationshipTypes.ORIGINAL_ANNOTATED.value,
+                NodeMatcher(self.ps.graph)
+                .match(NodeTypes.TIMESERIES_INPUT.value, iri=ts_iri)
+                .first(),
+            )
+        self.ps.graph.create(match_relationship)

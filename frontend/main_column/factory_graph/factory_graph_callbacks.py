@@ -38,9 +38,12 @@ def _get_graph_age_seconds(timestamp):
     Input("graph-reload-button", "n_clicks"),
     State("cytoscape-graph-store", "data"),
     State("cytoscape-graph-store", "modified_timestamp"),
+    State("graph-force-full-reload-store", "modified_timestamp"),
     prevent_initial_call=True,
 )
-def update_factory_graph(n_clicks, stored_graph, local_timestamp):
+def update_factory_graph(
+    n_clicks, stored_graph, local_timestamp, force_reload_timestamp
+):
     """
     Updates the main graph: Loads the nodes and edges from Neo4J or local storage
     :param n:
@@ -53,6 +56,10 @@ def update_factory_graph(n_clicks, stored_graph, local_timestamp):
         or stored_graph is None
         or _get_graph_age_seconds(local_timestamp)
         > get_configuration_int(group=ConfigGroups.FRONTEND, key="max_graph_age")
+        or (
+            force_reload_timestamp is not None
+            and force_reload_timestamp > local_timestamp
+        )
     ):
         print("Loading graph from backend")
         assets_deep_json = api_client.get_json("/assets")
@@ -74,13 +81,13 @@ def update_factory_graph(n_clicks, stored_graph, local_timestamp):
     Input("interval-component-factory-graph", "n_intervals"),
     Input("graph-reload-button", "n_clicks"),
     Input("interval-component-factory-graph-initial-loading", "n_intervals"),
-    # State("cytoscape-graph", "elements"),
     State("cytoscape-graph-store", "modified_timestamp"),
     State("factory-graph-loading-state", "data"),
+    State("graph-force-full-reload-store", "modified_timestamp"),
     prevent_initial_call=True,
 )
 def factory_graph_update_trigger(
-    n, n_clicks, n_init_intervall, local_timestamp, graph_loaded
+    n, n_clicks, n_init_intervall, local_timestamp, graph_loaded, force_reload_timestamp
 ):
     # if elements is None or len(elements) == 0:
     #     print("Graph empty! Reloading...")
@@ -98,6 +105,9 @@ def factory_graph_update_trigger(
         )
         if _get_graph_age_seconds(local_timestamp) > get_configuration_int(
             group=ConfigGroups.FRONTEND, key="max_graph_age"
+        ) or (
+            force_reload_timestamp is not None
+            and force_reload_timestamp > local_timestamp
         ):
             print("Loading from backend. Giving it more time...")
             raise PreventUpdate()
@@ -190,6 +200,7 @@ def store_selected_element_info(n_clicks, last_click_time_str, tap_node, tap_edg
 @app.callback(
     Output("graph-positioning-saved-notifier", "children"),
     Output("graph-positioning-saved-notifier", "is_open"),
+    Output("graph-force-full-reload-store", "data"),
     Input("graph-positioning-save-button", "n_clicks"),
     State("selected-graph-element-store", "data"),
     prevent_initial_call=True,
@@ -211,7 +222,7 @@ def update_node_position(n_clicks, selected_el_json):
     )
 
     # Notify the user with an auto-dismissing alert:
-    return f"New node position saved!", True
+    return f"New node position saved!", True, datetime.now()
 
 
 @app.callback(
