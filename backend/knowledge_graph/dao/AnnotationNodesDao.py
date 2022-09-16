@@ -113,3 +113,18 @@ class AnnotationNodesDao(object):
         self.ps.graph.push(instance)
 
         return iri
+
+    def create_annotation_ts_matcher_instance_relationship(
+        self, ts_matcher_iri: str, instance_iri: str
+    ) -> str:
+
+        relationship = Relationship(
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ANNOTATION_INSTANCE.value, iri=instance_iri)
+            .first(),
+            RelationshipTypes.DETECTABLE_WITH.value,
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ANNOTATION_TS_MATCHER.value, iri=ts_matcher_iri)
+            .first(),
+        )
+        self.ps.graph.create(relationship)

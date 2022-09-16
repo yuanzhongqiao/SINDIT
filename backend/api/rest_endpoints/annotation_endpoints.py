@@ -55,12 +55,16 @@ def post_annotation_definition(instance: AnnotationInstanceArguments):
     for ts_iri in instance.ts_iri_list:
         ts_node = TIMESERIES_NODES_DAO.get_timeseries_node_flat(ts_iri)
 
-        ANNOTATIONS_DAO.create_annotation_ts_matcher(
+        ts_matcher_iri = ANNOTATIONS_DAO.create_annotation_ts_matcher(
             id_short=f"ts_matcher_for_{ts_iri}",
             caption=f"TS-Matcher: {ts_node.caption}",
         )
-    # TODO: create relationships matcher->ts
+        ANNOTATIONS_DAO.create_annotation_ts_matcher_instance_relationship(
+            ts_matcher_iri=ts_matcher_iri, instance_iri=instance_iri
+        )
     # TODO: create relationships instance->matcher
+    # TODO: create relationships matcher->ts
+    #
     # TODO: create relationships definition->instance
     # TODO: create relationships asset->definition
     # TODO: create relationships asset->instance
