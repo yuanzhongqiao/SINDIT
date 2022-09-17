@@ -30,25 +30,15 @@ def get_layout():
                             dbc.Tabs(
                                 id="tabs-infos",
                                 active_tab="tab-node-data",
-                                children=[
-                                    dbc.Tab(
-                                        label="Node details",
-                                        tab_id="tab-node-information",
-                                    ),
-                                    dbc.Tab(
-                                        label="Data",
-                                        tab_id="tab-node-data",
-                                    ),
-                                    # TODO: implement tabs for annotations and similarities
-                                    # dbc.Tab(
-                                    #     label="Annotations",
-                                    #     tab_id="tab-annotations",
-                                    # ),
-                                ],
+                                children=[],
                                 persistence=True,
                                 persistence_type="session",
                             ),
                             html.Div(id="tabs-content"),
+                            dcc.Store(
+                                id="last-manually-selected-tab",
+                                storage_type="session",
+                            ),
                         ],
                     ),
                 ],

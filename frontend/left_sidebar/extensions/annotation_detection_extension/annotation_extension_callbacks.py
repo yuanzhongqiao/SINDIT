@@ -163,20 +163,6 @@ def display_confirm(n):
     return True
 
 
-@app.callback(
-    Output("tabs-infos", "active_tab"),
-    Input("annotation-creation-store-step", "data"),
-)
-def change_navigation_tab(annotation_creation_step):
-    if (
-        annotation_creation_step is not None
-        and annotation_creation_step == CreationSteps.RANGE_SELECTION.value
-    ):
-        return "tab-node-data"
-    else:
-        raise PreventUpdate
-
-
 ##########################################
 # Raw inputs:
 ##########################################
