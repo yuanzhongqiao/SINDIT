@@ -68,7 +68,7 @@ def post_annotation_definition(instance: AnnotationInstanceArguments):
         ts_node = TIMESERIES_NODES_DAO.get_timeseries_node_flat(ts_iri)
 
         ts_matcher_iri = ANNOTATIONS_DAO.create_annotation_ts_matcher(
-            id_short=f"ts_matcher_for_{ts_iri}",
+            id_short=f"ts_matcher_for_{instance.id_short}_matching_{ts_node.id_short}",
             caption=f"TS-Matcher: {ts_node.caption}",
         )
         ANNOTATIONS_DAO.create_annotation_ts_matcher_instance_relationship(

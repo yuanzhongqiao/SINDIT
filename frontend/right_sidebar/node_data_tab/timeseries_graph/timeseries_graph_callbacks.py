@@ -99,9 +99,9 @@ def update_timeseries_graph(
     annotation_selected_range_start_str,
     annotation_selected_range_end_str,
 ):
-    # Cancel if nothing selected
     if selected_el_json is None:
-        return fig
+        # Cancel if nothing selected
+        raise PreventUpdate
     else:
         selected_el: GraphSelectedElement = GraphSelectedElement.from_json(
             selected_el_json
