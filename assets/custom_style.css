@@ -699,3 +699,11 @@ body {
     flex-flow: row;
     width: 300px;
 }
+
+.node-information-attribute-block {
+    padding-bottom: 10px;
+}
+
+.node-information-attribute-header {
+    font-weight: bold;
+}
