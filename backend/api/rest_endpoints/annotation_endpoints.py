@@ -116,3 +116,25 @@ def delete_annotation_definition(instance_iri: str):
 
     print(f"Deleting annotation definition: {instance_iri}...")
     ANNOTATIONS_DAO.delete_annotation_instance(instance_iri)
+
+
+@app.get("/annotation/ts_matcher/original_annotated_ts")
+def get_ts_matcher_original_ts(iri: str):
+    """
+    Returns the originally annotated timeseries node for a matcher
+    :raises IdNotFoundException: If the file is not found
+    :param iri:
+    :return:
+    """
+    return ANNOTATIONS_DAO.get_matcher_original_annotated_ts(iri)
+
+
+@app.get("/annotation/ts_matcher/related_annotation_instance")
+def get_ts_matcher_annotation_instance(iri: str):
+    """
+    Returns the annotation instance node for a matcher
+    :raises IdNotFoundException: If the file is not found
+    :param iri:
+    :return:
+    """
+    return ANNOTATIONS_DAO.get_matcher_annotation_instance(iri)

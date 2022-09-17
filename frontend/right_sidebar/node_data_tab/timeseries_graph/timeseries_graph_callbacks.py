@@ -13,7 +13,11 @@ from frontend.main_column.factory_graph.GraphSelectedElement import GraphSelecte
 from frontend.right_sidebar.node_data_tab.timeseries_graph import (
     timeseries_graph_layout,
 )
+from graph_domain.expert_annotations.AnnotationInstanceNode import (
+    AnnotationInstanceNodeFlat,
+)
 from graph_domain.factory_graph_types import NodeTypes
+from graph_domain.main_digital_twin.TimeseriesNode import TimeseriesNodeFlat
 from util.environment_and_configuration import (
     ConfigGroups,
     get_configuration,
@@ -95,19 +99,56 @@ def update_timeseries_graph(
     annotation_selected_range_start_str,
     annotation_selected_range_end_str,
 ):
+    # Cancel if nothing selected
+    if selected_el_json is None:
+        return fig
+    else:
+        selected_el: GraphSelectedElement = GraphSelectedElement.from_json(
+            selected_el_json
+        )
 
-    annotation_mode_range_selected = False
-    annotation_mode_view_defined = False
-    annotation_mode_active = (
-        annotation_creation_step is not None
-        and annotation_creation_step == CreationSteps.RANGE_SELECTION.value
-    )
-    annotation_viewer_mode = (
-        annotation_creation_step is not None
-        and annotation_creation_step > CreationSteps.RANGE_SELECTION.value
-    )
+    # If Matcher selected instead of timeseries, retrieve the related timeseries and set mode to annotation_viewer:
+    if selected_el.type == NodeTypes.ANNOTATION_TS_MATCHER.value:
+        annotation_node_json = api_client.get_str(
+            "/annotation/ts_matcher/related_annotation_instance", iri=selected_el.iri
+        )
+        annotation_node_flat: AnnotationInstanceNodeFlat = (
+            AnnotationInstanceNodeFlat.from_json(annotation_node_json)
+        )
+        # Set annotation_viewer mode:
+        annotation_mode_range_selected = True
+        annotation_mode_view_defined = True
+        annotation_creation_mode_active = False
+        annotation_viewer_mode = True
+        annotation_selected_range_start_str = None
+        annotation_selected_range_end_str = None
+        selected_range_start = annotation_node_flat.occurance_start_date_time
+        selected_range_end = annotation_node_flat.occurance_end_date_time
+
+        ts_node_json = api_client.get_str(
+            "/annotation/ts_matcher/original_annotated_ts", iri=selected_el.iri
+        )
+        ts_node_flat: TimeseriesNodeFlat = TimeseriesNodeFlat.from_json(ts_node_json)
+        # Override selected element with related timeseries
+        selected_el = GraphSelectedElement(
+            id_short=ts_node_flat.id_short,
+            iri=ts_node_flat.iri,
+            type=NodeTypes.TIMESERIES_INPUT.value,
+            is_node=True,
+        )
+    else:
+        annotation_mode_range_selected = False
+        annotation_mode_view_defined = False
+        annotation_creation_mode_active = (
+            annotation_creation_step is not None
+            and annotation_creation_step == CreationSteps.RANGE_SELECTION.value
+        )
+        annotation_viewer_mode = (
+            annotation_creation_step is not None
+            and annotation_creation_step > CreationSteps.RANGE_SELECTION.value
+        )
     if (
-        annotation_mode_active
+        annotation_creation_mode_active
         and annotation_selected_start_date is not None
         and annotation_selected_start_time is not None
         and annotation_selected_end_date is not None
@@ -142,7 +183,7 @@ def update_timeseries_graph(
             overridden_end_datetime = annotation_selected_end_datetime
 
     if (
-        (annotation_mode_active or annotation_viewer_mode)
+        (annotation_creation_mode_active or annotation_viewer_mode)
         and annotation_selected_range_start_str is not None
         and annotation_selected_range_end_str is not None
     ):
@@ -170,13 +211,7 @@ def update_timeseries_graph(
 
     fig = timeseries_graph_layout.get_figure()
 
-    # Cancel if nothing selected
-    if selected_el_json is None:
-        return fig
-
     data = pd.DataFrame(columns=["time", "value"])
-
-    selected_el: GraphSelectedElement = GraphSelectedElement.from_json(selected_el_json)
 
     # Cancel if anything else than timeseries is selected
     if selected_el.type != NodeTypes.TIMESERIES_INPUT.value:
@@ -184,7 +219,7 @@ def update_timeseries_graph(
         return fig
 
     if (
-        annotation_mode_active and annotation_mode_view_defined
+        annotation_creation_mode_active and annotation_mode_view_defined
     ) or annotation_viewer_mode:
         duration = overridden_duration
     else:
@@ -197,7 +232,7 @@ def update_timeseries_graph(
 
     # API call for the dataframe
     if (
-        annotation_mode_active and annotation_mode_view_defined
+        annotation_creation_mode_active and annotation_mode_view_defined
     ) or annotation_viewer_mode:
         date_time = overridden_end_datetime
     elif realtime_toggle:
@@ -271,7 +306,7 @@ def update_timeseries_graph(
     )
 
     if (
-        annotation_mode_active or annotation_viewer_mode
+        annotation_creation_mode_active or annotation_viewer_mode
     ) and annotation_mode_range_selected:
 
         color_array = []
@@ -313,7 +348,7 @@ def update_timeseries_graph(
         else ""
     )
 
-    if annotation_mode_active:
+    if annotation_creation_mode_active:
         # Activate selection mode
         fig.update_layout(
             dragmode="select",

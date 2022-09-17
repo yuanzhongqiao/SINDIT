@@ -26,6 +26,7 @@ from graph_domain.factory_graph_types import (
     NodeTypes,
     RelationshipTypes,
 )
+from graph_domain.main_digital_twin.TimeseriesNode import TimeseriesNodeFlat
 
 # TODO: move to a global place
 IRI_PREFIX_GLOBAL = "www.sintef.no/aas_identifiers/learning_factory/"
@@ -284,3 +285,33 @@ class AnnotationNodesDao(object):
         self.ps.graph.run(
             f"MATCH (n:{NodeTypes.ANNOTATION_INSTANCE.value}) WHERE n.iri = '{instance_iri}' DETACH DELETE n"
         )
+
+    @validate_result_nodes
+    def get_matcher_annotation_instance(self, matcher_iri):
+        """Returns the instance node that the matcher is related to"""
+        matches = self.ps.repo.match(model=AnnotationInstanceNodeFlat).where(
+            "(_)-[:"
+            + RelationshipTypes.DETECTABLE_WITH.value
+            + "]->(:"
+            + NodeTypes.ANNOTATION_TS_MATCHER.value
+            + ' {iri: "'
+            + matcher_iri
+            + '"}) '
+        )
+
+        return matches.first()
+
+    @validate_result_nodes
+    def get_matcher_original_annotated_ts(self, matcher_iri):
+        """Returns the timeseries node that the matcher is related to"""
+        matches = self.ps.repo.match(model=TimeseriesNodeFlat).where(
+            "(_)<-[:"
+            + RelationshipTypes.ORIGINAL_ANNOTATED.value
+            + "]-(:"
+            + NodeTypes.ANNOTATION_TS_MATCHER.value
+            + ' {iri: "'
+            + matcher_iri
+            + '"}) '
+        )
+
+        return matches.first()

@@ -43,7 +43,7 @@ def change_navigation_tab_content(tab, selected_el):
     """
     if tab == "tab-node-data":
         return html.Div(
-            children=[node_data_layout.get_layout(selected_el)],
+            children=node_data_layout.get_layout(selected_el),
             className="tab-content-container",
         )
     elif tab == "tab-node-information":

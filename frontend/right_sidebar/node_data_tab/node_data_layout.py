@@ -24,8 +24,17 @@ def get_layout(selected_el: GraphSelectedElement):
         return timeseries_graph_layout.get_layout()
     elif selected_el.type == NodeTypes.SUPPLEMENTARY_FILE.value:
         return file_visualization_layout.get_layout()
-    elif not selected_el.is_node:
-        return html.Div("No data available for edges.")
+    elif selected_el.type == NodeTypes.ANNOTATION_TS_MATCHER.value:
+        return [
+            html.Div(
+                "Original sequence of the annotation instance:",
+                style={
+                    "font-weight": "bold",
+                    "padding-bottom": "10px",
+                },
+            ),
+            timeseries_graph_layout.get_layout(),
+        ]
     else:
         # No data for this type of node
         return html.Div("No data can be visualized for this selection.")
