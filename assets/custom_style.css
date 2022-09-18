@@ -487,6 +487,7 @@ body {
 
 #timeseries-graph {
     flex: 1;
+    max-height: 90%;
 }
 
 #timeseries-count-info-container {
