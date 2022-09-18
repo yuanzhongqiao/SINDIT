@@ -34,10 +34,11 @@ def _get_graph_age_seconds(timestamp):
 @app.callback(
     Output("cytoscape-graph", "elements"),
     Output("cytoscape-graph-store", "data"),
+    Output("cytoscape-graph-store-age", "data"),
     Output("factory-graph-loading-state", "data"),
     Input("graph-reload-button", "n_clicks"),
     State("cytoscape-graph-store", "data"),
-    State("cytoscape-graph-store", "modified_timestamp"),
+    State("cytoscape-graph-store-age", "modified_timestamp"),
     State("graph-force-full-reload-store", "modified_timestamp"),
     prevent_initial_call=True,
 )
@@ -73,7 +74,7 @@ def update_factory_graph(
         cygraph_elements = stored_graph
         print("Using cached graph")
 
-    return cygraph_elements, cygraph_elements, True
+    return cygraph_elements, cygraph_elements, datetime.now().isoformat(), True
 
 
 @app.callback(

@@ -15,6 +15,8 @@ def get_layout():
             dcc.Store(id="selected-graph-element-store", storage_type="session"),
             # Storage for the graph content
             dcc.Store(id="cytoscape-graph-store", storage_type="local"),
+            # Age of the graph (needed, as otherwise the age would not be reset if the graph has not changed)
+            dcc.Store(id="cytoscape-graph-store-age", storage_type="local"),
             # Timestamp for the selected element storage
             dcc.Store(id="selected-graph-element-timestamp", storage_type="session"),
             dbc.Card(
