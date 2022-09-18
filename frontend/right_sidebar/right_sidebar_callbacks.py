@@ -121,7 +121,7 @@ def add_remove_navigation_tabs(
         and annotation_creation_step == CreationSteps.RANGE_SELECTION.value
     ):
         # Auto jump to data tab for time range selection
-        return "tab-node-data"
+        selected_tab = "tab-node-data"
 
     # Override selected tab, if not available for selected element
     if selected_tab not in available_tab_ids:
