@@ -1,124 +1,91 @@
 # SINDIT - SINTEF Digital Twin
 
+## Public Demonstrator
+
+A publicly accessible demonstration-instance of this work can be visited at:
+
+[https://sindit.sintef.cloud](https://sindit.sintef.cloud)
+
 ## Description
 
-### This work
+### Demonstration Factory
+For the demonstration of this project, we use a **fischertechnik © Training Factory Industry 4.0 24V**. 
 
-## Development setup
-For this project, a devcontainer-setup for Visual Studio Code is implemented. It can be used together with SSH remote development if needed.
+![](documentation/img/554868_Lernfabrik_Training_Factory_Fabrik_24V.jpg)
+> Image source: fischertechnik
 
-##### Requirements:
-- Recent Linux operating system, e.g. Debian 11 (Some used DBMS-versions (Neo4J) are incompatible with, for example older CentOS systems)
-- Docker and docker-compose installed
+This factory consists of multiple machines like a automated High-Bay-Warehouse and simulates a ordering- production- and delivery-process. It offers various time-series outputs that are available either via MQTT or OPC-UA. Most of those are included and utilized for this demonstrator.
 
-##### Development setup:
-1. Check out this repository on the execution device (remote or local)
-2. Open the folder on the development-client (local or with the VS Code remote development extension via SSH)
-3. Reopen the folder as container with the remote containers extension
-4. Reload the window after the container is fully loaded (as suggested by the initialization script, to apply the installed modules for auto-corrections)
-5. Start the development databases manually with `docker-compose -f docker-compose.dev.yml up -d`. As there sometimes seem to be problems with creating the defined storage-mapping, execute this from the server-host, not within the devcontainer!
+The controllers of the factory also expose multiple interfaces. More details can be found [here](documentation/fischertechnik-training-factory-information.md).
 
-After this, use the run and debug functionalities of the IDE to execute the separate services. The run configuration is already set up in this repository.
+Additional details about the factory can be found at [fischertechnik](https://www.fischertechnik.de/en/products/learning/training-models/554868-edu-training-factory-industry-4-0-24v-education#imagedownload).
 
-If the DT-instance was not previously initialized, run the initialization script. E.g. via the run configuration `Learning factory instance: initialization`.
+### SINDIT Digital Twin Platform
 
-##### Code formatting:
-The python formatting "black" is utilized and enforced by the IDE configuration. Auto-formatting is performed at every file-saving.
+![](documentation/img/dt_dashboard_zoomed.png)
 
-## Deployment and execution
-This project is deployed via docker-compose. Run `docker-compose up -d` to start the digital twin with all required services.
+The core of SINDIT is a universal Digital Twin platform, that holds all relevant information
+about the assets from a connected factory and is synchronized in real-time to the
+physical assets.
 
-If the DT-instance was not previously initialized, run the initialization scripts as described below (DT learning factory initialization script).
+The Digital Twin serves as a contextualization layer connecting available data to provide a general
+synopsis. 
+The system contains both static information like documents, as well as dynamic time-series data.
 
-For the learning factory example, remember to access the VPN / make a port mappig via Teleport tsh in order to get an actual connection!
+Knowledge Graphs (KG) are a convenient method to represent structures of connected entities and allow efficient querying. For this reason, SINDIT utilizes such a KG as its main structure. 
 
- 
+To make the concept be applicable to various domains and factories, a very generic meta-model has been
+created:
 
-For updating the DT after pushing to the deployment branch, run manually on the workstation: `docker-compose down && git pull && sudo chmod 777 -R docker_mounted_storage && sudo chmod 777 -R backups && docker-compose build && docker-compose up -d`.
+![](documentation/img/kg_dt_meta_model.svg)
 
-## Exposed interfaces:
+For specific data like time series or documents, specialized databases have been integrated. Connectors to commonly used messaging protocols like OPC UA and MQTT serve the real-time aspects of the digital twin.  
 
-**Dashboard**
+The graph-based Dashboard shown in the picture above serves as universal user interface and
+visualizes both the structure and data of the assets, as well as interfaces to additional packages described below.
 
-The main user interface (dashboard) of the digital twin can be reached at [http://localhost:8050/](http://localhost:8050/). 
+A REST-API is provided by the digital-twin service and is utilized by the dashboard-frontend. The following diagram provides an overview over the deployment architecture:
 
-**REST API**
-The REST API is availlable at [http://localhost:8000/](http://localhost:8000/). 
-Swagger documentation is availlable at [http://localhost:8000/docs](http://localhost:8000/docs). 
- 
-Webinterfaces of the used DBMS are available at  [http://localhost:7475/](http://localhost:7475/) (Neo4J) and  [http://localhost:8087/](http://localhost:8087/) (InfluxDB).
+![](documentation/img/dt_deployment_diagram_single_factory.svg)
 
-## Services:
 
-In addition to the DBMS systems, the DT includes following services and scripts:
 
-### DT-Backend service:
+### Similarity Measures and Clustering
 
-Sets up the realtime connections (OPC UA, MQTT) to persist timeseries data. Provides a REST API to access the assets of the factory including e.g. timeseries data (current and historic).
+Overview over the implemented similarity-pipeline for generic, human-understandable comparisons between factory assets:
 
-### DT-Frontend service:
+![](documentation/img/pipeline_overview.svg)
 
-Provides a dashboard and visualization of the DT via a web interface at [http://localhost:8050/](http://localhost:8050/). Utilizes the REST API
+More information about the similarity measures will follow soon.
 
-### Similarity-Pipeline:
+### Situation-related Knowledge Transfer and Domain Expert Annotations
 
-coming soon
+Information about this package will follow soon.
 
-### Learning factory interfaces:
-Provided by fischertechnik
+## Installation & Requirements
 
-#### fischertechnik cloud
-Available via internet at `https://www.fischertechnik-cloud.com/de/factory/`. Allows to view the status, camera image and make orders.
+This project is set up using Docker and Docker-Compose. 
 
-#### Node-RED Dashboard
-Available only locally at `http://<RASPBERRY_PI_HOST>:1880/ui/`. Allows to see the extended factory status including positioning data of the machines. Allows the calibration of machines as well as acknowledging errors, if needed.
+For developers, a Devcontainer-setup for Visual Studio Code is implemented. It can be used together with SSH remote development if needed.
 
-## DT learning factory initialization script:
+Please find the details on how to develop or deploy SINDIT [here](documentation/sindit-development-guide.md).
 
-Initializes the DT for the fischertechnik learning factory. Execute inside the standby container after starting the database services via: 
+## FAQ
 
-`docker-compose exec sindit_dt_standby_environment python init_learning_factory_from_cypher_file.py`
+You can find answers to frequent questions [here](documentation/FAQ.md).  
 
-After this, for the DT-services to connect to the newly created timeseries connections, restart the services with `docker-compose restart sindit_dt_backend sindit_dt_frontend` (simply restarting all containers does lead to the dependencies for database access not being resolved).
+## Historic Version of SINDIT
 
-## Learning factory continuous ordering script:
+The original release of SINDIT was based on a fictive chocolate factory and has bee presented at the [ICSA22 conference](https://icsa-conferences.org/2022/conference-tracks/new-and-emerging-ideas/). The paper can be found [here](https://ieeexplore.ieee.org/document/9779654). Watch the presentation [here](https://www.youtube.com/watch?v=ExHNP6527d8&list=PLmMTZhDUcVmuFcJG9tbxR6AAWcOl2Jej3&index=29&t=2s).
 
-Continuosly sends MQTT orders to the factory ordering a piece of random color. Execute inside the DT container after starting all services via: 
-
-`docker-compose exec sindit_dt_standby_environment python learning_factory_continuos_ordering.py`
-
-Alternatively, run the preconfigured launch configuration in VS Code (Inside the dev-container).
-
-## Backups
-Making backups of the factory data is currently done manually by simply copying the mapped docker directories:
-
-`sudo cp -R docker_mounted_storage/ backups/$(date +'%Y_%m_%d-%H_%M_%S')/` or inside the devcontainer-environment: `sudo cp -R docker_mounted_storage_devcontainer/ backups/$(date +'%Y_%m_%d-%H_%M_%S')/`
-
-**Restoring:**
-To restore a specific backup, run:
-1. `docker-compose down`
-2. `sudo rm -R docker_mounted_storage`
-3. `sudo cp -R backups/<THE_BACKUP_TO_RESTORE> docker_mounted_storage/`
-4. `docker-compose up -d`sudo cp -R docker_mounted_storage_devcontainer/ backups/$(date +'%Y_%m_%d-%H_%M_%S')/
-
-Or inside the devcontainer:
-1. `docker-compose -f docker-compose.dev.yml down`
-2. `sudo rm -R docker_mounted_storage_devcontainer`
-3. `sudo cp -R backups/<THE_BACKUP_TO_RESTORE> docker_mounted_storage_devcontainer/`
-4. `docker-compose -f docker-compose.dev.yml up -d`
-5. Restart the backend afterwards.
-
-## FAQ / Frequent bugs:
-
-##### The learning factory does suddenly not move anymore (VGR, HBW,...), but MQTT and OPC UA are active and e.g. the camera can still be controlled and moved. Both ordering and putting new items in does not lead to any movement.
-> The reason of this problem is currently unknown.
-> 
-> To temporally fix the problem, press 'Acknowledge Errors' at the Node-RED Dashboard.
-
-## References
-
-coming soon
+You can find the source code of the old version under [Release v1.0.0](https://github.com/SINTEF-9012/SINDIT/releases/tag/v1.0.0).
 
 ## Blame & Contact
 
-- Timo Peter [<timo.peter@sintef.no>](mailto:timo.peter@sintef.no)
+- Timo Peter [timo.peter@sintef.no]([timo.peter@sintef.no](mailto:timo.peter@sintef.no))
+
+- Maryna Waszak [maryna.waszak@sintef.no]([maryna.waszak@sintef.no](mailto:maryna.waszak@sintef.no))
+
+---
+
+This package is provided without any warranty.

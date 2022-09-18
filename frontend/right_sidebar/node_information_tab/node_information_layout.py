@@ -143,14 +143,5 @@ def get_layout(selected_el: GraphSelectedElement):
                     ],
                 )
                 for attribute in get_visualized_attributes_for_node_type(node)
-                # html.Div("IRI:", className="keyword"),
-                # html.Div(node.iri),
-                # html.Div(style={"height": "20px"}),
-                # html.Div("Description:", className="keyword"),
-                # html.Div(
-                #     node.description
-                #     if node.description is not None and node.description != ""
-                #     else "No description available"
-                # ),
             ]
         )
