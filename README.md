@@ -1,73 +1,91 @@
 # SINDIT - SINTEF Digital Twin
 
+## Public Demonstrator
+
+A publicly accessible demonstration-instance of this work can be visited at:
+
+[https://sindit.sintef.cloud](https://sindit.sintef.cloud)
+
 ## Description
-This work has bee presented at the [ICSA22 conference](https://icsa-conferences.org/2022/conference-tracks/new-and-emerging-ideas/)
-Link to the paper: [link](https://ieeexplore.ieee.org/document/9779654)
 
-[Watch the presentation here](https://www.youtube.com/watch?v=ExHNP6527d8&list=PLmMTZhDUcVmuFcJG9tbxR6AAWcOl2Jej3&index=29&t=2s)
+### Demonstration Factory
+For the demonstration of this project, we use a **fischertechnik © Training Factory Industry 4.0 24V**. 
 
-*Cite the work:*
+![](documentation/img/554868_Lernfabrik_Training_Factory_Fabrik_24V.jpg)
+> Image source: fischertechnik
 
-```
-@inproceedings{waszak2022ICSA,
-  title={Let the Asset Decide: Digital Twins with Knowledge Graphs},
-  author={Waszak, Maryna and Lam, An Ngoc and Hoffmann, Volker and Elvesæter, Brian and Mogos, Maria Flavia and Roman, Dumitru},
-  booktitle={IEEE 19th International Conference on Software Architecture Companion (ICSA-C)},
-  year={2022}
-}
-```
+This factory consists of multiple machines like a automated High-Bay-Warehouse and simulates a ordering- production- and delivery-process. It offers various time-series outputs that are available either via MQTT or OPC-UA. Most of those are included and utilized for this demonstrator.
 
+The controllers of the factory also expose multiple interfaces. More details can be found [here](documentation/fischertechnik-training-factory-information.md).
 
-![description](assets/description_sindit.PNG)
+Additional details about the factory can be found at [fischertechnik](https://www.fischertechnik.de/en/products/learning/training-models/554868-edu-training-factory-industry-4-0-24v-education#imagedownload).
 
-### Chocolate Production Process
+### SINDIT Digital Twin Platform
 
-Here, we have several steps before the chocolate bars can be moulded and finally wrapped. The process starts with conching ground sugar with melted cocoa butter. Through tempering of the chocolate it obtains the sheen and crisp properties that we all know from chocolate bars.
+![](documentation/img/dt_dashboard_zoomed.png)
 
-<img src="assets/fac_pics.jpg" alt="Picture1" style="zoom:20%; background-color: white" />
+The core of SINDIT is a universal Digital Twin platform, that holds all relevant information
+about the assets from a connected factory and is synchronized in real-time to the
+physical assets.
 
+The Digital Twin serves as a contextualization layer connecting available data to provide a general
+synopsis. 
+The system contains both static information like documents, as well as dynamic time-series data.
 
+Knowledge Graphs (KG) are a convenient method to represent structures of connected entities and allow efficient querying. For this reason, SINDIT utilizes such a KG as its main structure. 
 
-### Modelling the Chocolate Factory
+To make the concept be applicable to various domains and factories, a very generic meta-model has been
+created:
 
-This is a simplified digital model of the chocolate factory. M1-M5 are machines with sensors S1-S5. Between the machines the ingredients are stored in queues Q1-Q9. At the last queue Q9 the packaged chocolate bars are modelled as pink squares P1-P3.
+![](documentation/img/kg_dt_meta_model.svg)
 
-<img src="assets/fac_schema.jpg" alt="Picture2" style="zoom:20%; background-color: white" />
+For specific data like time series or documents, specialized databases have been integrated. Connectors to commonly used messaging protocols like OPC UA and MQTT serve the real-time aspects of the digital twin.  
 
-## **Requirements**
+The graph-based Dashboard shown in the picture above serves as universal user interface and
+visualizes both the structure and data of the assets, as well as interfaces to additional packages described below.
 
-### System:
+A REST-API is provided by the digital-twin service and is utilized by the dashboard-frontend. The following diagram provides an overview over the deployment architecture:
 
-1. Docker compose
-
-If you are using windows see [here](https://docs.microsoft.com/en-gb/windows/wsl/install-win10#step-4---download-the-linux-kernel-update-package)
-
-### Local deployment of example factory:
-
-2. Build the Docker containers
-
-	```sh
-	docker compose build
-	```
-
-3. Start up the Docker containers
-
-    ```sh
-	docker compose up
-	```
-	
-4. The example dash board of a chocolate factory can be reached at [http://localhost:8050/](http://localhost:8050/)
+![](documentation/img/dt_deployment_diagram_single_factory.svg)
 
 
-![dash](assets/fac_dashboard.JPG)
 
-To start the simulation enter the simulation duration and press 'Simulate'. With 'Reset' the original state of the factory graph can be restored.
+### Similarity Measures and Clustering
 
+Overview over the implemented similarity-pipeline for generic, human-understandable comparisons between factory assets:
 
-## References
+![](documentation/img/pipeline_overview.svg)
 
-1. [simpy](https://pypi.org/project/simpy/)
+More information about the similarity measures will follow soon.
+
+### Situation-related Knowledge Transfer and Domain Expert Annotations
+
+Information about this package will follow soon.
+
+## Installation & Requirements
+
+This project is set up using Docker and Docker-Compose. 
+
+For developers, a Devcontainer-setup for Visual Studio Code is implemented. It can be used together with SSH remote development if needed.
+
+Please find the details on how to develop or deploy SINDIT [here](documentation/sindit-development-guide.md).
+
+## FAQ
+
+You can find answers to frequent questions [here](documentation/FAQ.md).  
+
+## Historic Version of SINDIT
+
+The original release of SINDIT was based on a fictive chocolate factory and has bee presented at the [ICSA22 conference](https://icsa-conferences.org/2022/conference-tracks/new-and-emerging-ideas/). The paper can be found [here](https://ieeexplore.ieee.org/document/9779654). Watch the presentation [here](https://www.youtube.com/watch?v=ExHNP6527d8&list=PLmMTZhDUcVmuFcJG9tbxR6AAWcOl2Jej3&index=29&t=2s).
+
+You can find the source code of the old version under [Release v1.0.0](https://github.com/SINTEF-9012/SINDIT/releases/tag/v1.0.0).
 
 ## Blame & Contact
 
-- Maryna Waszak [<maryna.waszak@sintef.no>](mailto:maryna.waszak@sintef.no)
+- Timo Peter [timo.peter@sintef.no]([timo.peter@sintef.no](mailto:timo.peter@sintef.no))
+
+- Maryna Waszak [maryna.waszak@sintef.no]([maryna.waszak@sintef.no](mailto:maryna.waszak@sintef.no))
+
+---
+
+This package is provided without any warranty.

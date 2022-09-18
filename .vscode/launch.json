@@ -5,12 +5,58 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "DT Frontend",
+            "type": "python",
+            "request": "launch",
+            "program": "./dt_frontend.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "envFile": "${workspaceFolder}/environment_and_configuration/devcontainer_environment_frontend.env"
+        },
+        {
+            "name": "DT Backend",
+            "type": "python",
+            "request": "launch",
+            "program": "./dt_backend.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "envFile": "${workspaceFolder}/environment_and_configuration/devcontainer_environment_backend.env"
+        },
+        {
+            "name": "Similarity pipeline",
+            "type": "python",
+            "request": "launch",
+            "program": "./similarity_pipeline.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "envFile": "${workspaceFolder}/environment_and_configuration/devcontainer_environment_backend.env"
+        },
+        {
+            "name": "Learning factory instance: initialization",
+            "type": "python",
+            "request": "launch",
+            "program": "./init_learning_factory_from_cypher_file.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "envFile": "${workspaceFolder}/environment_and_configuration/devcontainer_environment_backend.env"
+        },
+        {
+            "name": "Learning factory: continuous ordering",
+            "type": "python",
+            "request": "launch",
+            "program": "./learning_factory_continuous_ordering.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "envFile": "${workspaceFolder}/environment_and_configuration/devcontainer_environment_backend.env"
+        },
+        {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": true,
+            "envFile": "${workspaceFolder}/environment_and_configuration/devcontainer_environment_backend.env"
         }
     ]
 }

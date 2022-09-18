@@ -1,20 +1,48 @@
-networkx
-simpy
-numpy
-kafka_python
-plotly
-dash
-requests
+black  # formatter
+networkx==2.8.4
+simpy~=4.0.1
+numpy==1.22.4  # specific max version required by "numba"
+plotly==5.8.2
+dash==2.5.1
+requests==2.28.0
 dash_html_components
-matplotlib
-pandas
-py2neo
-influxdb==5.3.1
+matplotlib~=3.5.2
+pandas~=1.4.2
+py2neo~=2021.2.3
 dash_cytoscape
-jsonpickle
-dash_core_components
+jsonpickle~=2.2.0
 dash_bootstrap_components
-fastapi
-python-dotenv
-uvicorn
+fastapi~=0.78.0
+python-dotenv~=0.20.0
+uvicorn~=0.17.6
 pyi40aas
+
+influxdb-client  # InfluxDB v2
+asyncua~=0.9.94
+paho-mqtt~=1.6.1
+interchange~=2021.0.4
+python-dateutil~=2.8.2
+dataclasses_json
+pytz~=2022.1
+dash_mantine_components
+dash_daq
+boto3  # Amazon S3 client compatible also with Minio S3
+cadquery==2.2.0b0  # CAD conversion
+cqkit
+numpy-stl
+textract  # pdf text extraction
+git+https://github.com/boudinfl/pke.git  # pke keyphrase extraction library
+
+# tsfresh is manually installed afterwards (via Dockerfile or devcontainer.json)
+# The reason is, that otherwise some issues with importing numpy occur that can 
+# be avoided this way (ImportError: numpy.core.multiarray failed to import).
+#
+# tsfresh  # timeseries feature extraction (requrires gcc)
+
+# Image object detection:
+# torch~=1.11
+# torchvision~=0.12
+opencv-python
+# openmim  # OpenMMLab package manager
+# mmdet
+# END Image object detection

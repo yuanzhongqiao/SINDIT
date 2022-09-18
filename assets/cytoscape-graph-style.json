@@ -1,0 +1,152 @@
+[
+    {
+        "selector": "node",
+        "style": {
+            "content": "data(label)",
+            "text-halign": "center",
+            "text-wrap": "wrap",
+            "text-max-width": 30,
+            "font-size": 14,
+            "font-weight": "bold",
+            "color": "#777",
+            "background-color": "#446e9b",
+            "background-fit": "none",
+            "background-width": "70%",
+            "background-height": "70%",
+            "height": 40,
+            "width": 40
+        }
+    },
+    {
+        "selector": "edge",
+        "style": {
+            "curve-style": "bezier",
+            "width": 2,
+            "arrow-scale": 2,
+            "line-color": "#777",
+            "target-arrow-shape": "triangle-backcurve",
+            "target-arrow-color": "#777",
+            "source-distance-from-node": 10,
+            "target-distance-from-node": 10
+        }
+    },
+    {
+        "selector": ".ASSET",
+        "style": {
+            "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/precision_manufacturing/wght500/48px.svg",
+            "height": 60,
+            "width": 60
+        }
+    },
+    {
+        "selector": ".TIMESERIES",
+        "style": {
+            "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/ssid_chart/wght500/48px.svg"
+        }
+    },
+    {
+        "selector": ".DATABASE_CONNECTION",
+        "style": {
+            "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/database/wght500/48px.svg"
+        }
+    },
+    {
+        "selector": ".RUNTIME_CONNECTION",
+        "style": {
+            "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/lan/wght500/48px.svg"
+        }
+    },
+    {
+        "selector": ".UNIT",
+        "style": {
+            "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/balance/wght500/48px.svg"
+        }
+    },
+    {
+        "selector": ".SUPPLEMENTARY_FILE",
+        "style": {
+            "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/description/wght500/48px.svg"
+        }
+    },
+    {
+        "selector": ".TIMESERIES_CLUSTER",
+        "style": {
+            "background-color": "#1A6152",
+            "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/scatter_plot/wght500/48px.svg"
+        }
+    },
+    {
+        "selector": ".ASSET_SIMILARITY",
+        "style": {
+            "curve-style": "bezier",
+            "width": 6,
+            "line-color": "#1A6152",
+            "target-arrow-shape": "none",
+            "source-distance-from-node": 10,
+            "target-distance-from-node": 10,
+            "content": "data(label)",
+            "text-halign": "center",
+            "text-valign": "top",
+            "text-wrap": "wrap",
+            "text-max-width": 300,
+            "font-size": 14,
+            "font-weight": "bold",
+            "color": "#1A6152"
+        }
+    },
+    {
+        "selector": ".EXTRACTED_KEYWORD",
+        "style": {
+            "background-color": "#1A6152",
+            "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/label/wght500/48px.svg"
+        }
+    },
+    {
+        "selector": ".KEYWORD_EXTRACTION",
+        "style": {
+            "width": 3,
+            "line-color": "#1A6152"
+        }
+    },
+    {
+        "selector": ".PART_OF_TS_CLUSTER",
+        "style": {
+            "width": 3,
+            "line-color": "#1A6152"
+        }
+    },
+    {
+        "selector": ".ANNOTATION_DEFINITION",
+        "style": {
+            "background-color": "#9b5c44",
+            "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/bookmarks/wght500/48px.svg"
+        }
+    },
+    {
+        "selector": ".ANNOTATION_INSTANCE",
+        "style": {
+            "background-color": "#9b5c44",
+            "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/label/wght500/48px.svg"
+        }
+    },
+    {
+        "selector": ".ANNOTATION_TS_MATCHER",
+        "style": {
+            "background-color": "#9b5c44",
+            "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/join_inner/wght500/48px.svg"
+        }
+    },
+    {
+        "selector": ".ANNOTATION_PRE_INDICATOR",
+        "style": {
+            "background-color": "#9b5c44",
+            "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/more/wght500/48px.svg"
+        }
+    },
+    {
+        "selector": ":selected",
+        "style": {
+            "background-color": "#449b87"
+        }
+    }
+]
