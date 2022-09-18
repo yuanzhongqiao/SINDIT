@@ -33,7 +33,7 @@ services:
       - sindit_network
     ports:
       - "9000:9000"
-      - "9099:9099"
+      - "9097:9099"
 
   sindit_dt_backend:
     build: .
