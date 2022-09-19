@@ -1,0 +1,16 @@
+apiVersion: v2
+name: sindit
+description: SINTEF Digital Twin
+type: application
+version: 0.0.1
+appVersion: "2.0.0"
+dependencies:
+  - name: influxdb
+    version: 5.4.2
+    repository: https://charts.bitnami.com/bitnami
+  - name: neo4j-standalone
+    version: 4.4.11
+    repository: https://helm.neo4j.com/neo4j
+  - name: minio
+    version: 11.10.2
+    repository: https://charts.bitnami.com/bitnami
