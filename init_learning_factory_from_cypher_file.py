@@ -41,9 +41,23 @@ S3_PASSWORD = get_environment_variable(
 S3_BUCKET_NAME = "sindit"  # Bucket name stored in graph!
 
 
-def setup_knowledge_graph():
-    g = py2neo.Graph(NEO4J_URI)
+def _get_neo4j_graph():
+    host = get_environment_variable(key="NEO4J_DB_HOST", optional=False)
+    graph_name = get_environment_variable(key="NEO4J_DB_NAME", optional=False)
+    user_name = get_environment_variable(key="NEO4J_DB_USER", optional=True)
+    pw = get_environment_variable(key="NEO4J_DB_PW", optional=True)
+    if user_name is not None and pw is not None:
+        auth = (user_name, pw)
+    elif user_name is not None:
+        auth = (user_name, None)
+    else:
+        auth = None
 
+    return py2neo.Graph(host, name=graph_name, auth=auth)
+
+
+def setup_knowledge_graph():
+    g = _get_neo4j_graph()
     tx = g.begin()
 
     # Delete everything
@@ -94,7 +108,7 @@ def import_binary_data():
 
     bucket.objects.all().delete()
 
-    g = py2neo.Graph(NEO4J_URI)
+    g = _get_neo4j_graph()
 
     file_list = g.run("MATCH (f:SUPPLEMENTARY_FILE) RETURN f.file_name, f.iri").data()
 
@@ -137,7 +151,7 @@ def generate_alternative_cad_format():
 
     bucket = s3_resource.Bucket(S3_BUCKET_NAME)
 
-    g = py2neo.Graph(NEO4J_URI)
+    g = _get_neo4j_graph()
 
     step_cad_file_list = g.run(
         'MATCH (f:SUPPLEMENTARY_FILE {type: "CAD_STEP"}) WHERE NOT (f)-[:SECONDARY_FORMAT]-(:SUPPLEMENTARY_FILE {type: "CAD_STL"}) RETURN f.file_name, f.iri, f.id_short, f.description'
