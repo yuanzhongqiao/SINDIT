@@ -1,9 +1,10 @@
 from datetime import datetime
 from typing import Dict
-import requests
 import json
+import time
+import requests
 import pandas as pd
-from requests.exceptions import RequestException
+from requests.exceptions import RequestException as ReqExc
 
 from util.environment_and_configuration import (
     ConfigGroups,
@@ -24,17 +25,20 @@ def get_json(relative_path: str, **kwargs):
     :param relative_path:
     :return: the response json as dict
     """
-    try:
-        resp_dict = requests.get(API_URI + relative_path, params=kwargs).json()
+    while True:
+        try:
+            resp_dict = requests.get(
+                API_URI + relative_path, params=kwargs, timeout=30
+            ).json()
 
-        if isinstance(resp_dict, str):
-            # Sometimes, the json is still represented as string instead of dict
-            resp_dict = json.loads(resp_dict)
+            if isinstance(resp_dict, str):
+                # Sometimes, the json is still represented as string instead of dict
+                resp_dict = json.loads(resp_dict)
 
-        return resp_dict
-    except RequestException as err:
-        print("API not availlable!")
-        return ""
+            return resp_dict
+        except ReqExc:
+            print("API not availlable! Retrying in 5 seconds...")
+            time.sleep(5)
 
 
 def get_dataframe(relative_path: str, **kwargs):
@@ -69,11 +73,14 @@ def get_raw(relative_path: str, **kwargs):
     :param relative_path:
     :return: the raw response
     """
-    try:
-        return requests.get(API_URI + relative_path, params=kwargs).content
-    except RequestException as err:
-        print("API not availlable!")
-        return None
+    while True:
+        try:
+            return requests.get(
+                API_URI + relative_path, params=kwargs, timeout=30
+            ).content
+        except ReqExc:
+            print("API not availlable! Retrying in 5 seconds...")
+            time.sleep(5)
 
 
 def get_str(relative_path: str, **kwargs):
@@ -82,11 +89,12 @@ def get_str(relative_path: str, **kwargs):
     :param relative_path:
     :return: the response as string
     """
-    try:
-        return requests.get(API_URI + relative_path, params=kwargs).text
-    except RequestException as err:
-        print("API not availlable!")
-        return ""
+    while True:
+        try:
+            return requests.get(API_URI + relative_path, params=kwargs, timeout=30).text
+        except ReqExc:
+            print("API not availlable! Retrying in 5 seconds...")
+            time.sleep(5)
 
 
 def get_int(relative_path: str, **kwargs):
@@ -95,11 +103,14 @@ def get_int(relative_path: str, **kwargs):
     :param relative_path:
     :return: the response as int number
     """
-    try:
-        return int(requests.get(API_URI + relative_path, params=kwargs).text)
-    except RequestException as err:
-        print("API not availlable!")
-        return None
+    while True:
+        try:
+            return int(
+                requests.get(API_URI + relative_path, params=kwargs, timeout=30).text
+            )
+        except ReqExc:
+            print("API not availlable! Retrying in 5 seconds...")
+            time.sleep(5)
 
 
 def get_float(relative_path: str, **kwargs):
@@ -108,18 +119,23 @@ def get_float(relative_path: str, **kwargs):
     :param relative_path:
     :return: the response as float number
     """
-    try:
-        return float(requests.get(API_URI + relative_path, params=kwargs).text)
-    except RequestException as err:
-        print("API not availlable!")
-        return None
+    while True:
+        try:
+            return float(
+                requests.get(API_URI + relative_path, params=kwargs, timeout=30).text
+            )
+        except ReqExc:
+            print("API not availlable! Retrying in 5 seconds...")
+            time.sleep(5)
 
 
 def patch(relative_path: str, **kwargs):
-    try:
-        requests.patch(API_URI + relative_path, params=kwargs)
-    except RequestException as err:
-        print("API not availlable!")
+    while True:
+        try:
+            requests.patch(API_URI + relative_path, params=kwargs)
+        except ReqExc:
+            print("API not availlable! Retrying in 5 seconds...")
+            time.sleep(5)
 
 
 def post(relative_path: str, data: Dict = None, json: Dict = None, **kwargs):
@@ -133,16 +149,18 @@ def post(relative_path: str, data: Dict = None, json: Dict = None, **kwargs):
     Returns:
         _type_: _description_
     """
-    try:
-        response = requests.post(
-            API_URI + relative_path, params=kwargs, data=data, json=json
-        )
-        text = response.text
-        if text[0] == '"' and text[-1] == '"':
-            text = text[1:-1]
-        return text
-    except RequestException as err:
-        print("API not availlable!")
+    while True:
+        try:
+            response = requests.post(
+                API_URI + relative_path, params=kwargs, data=data, json=json
+            )
+            text = response.text
+            if text[0] == '"' and text[-1] == '"':
+                text = text[1:-1]
+            return text
+        except ReqExc:
+            print("API not availlable! Retrying in 5 seconds...")
+            time.sleep(5)
 
 
 def delete(relative_path: str, **kwargs):
@@ -155,11 +173,13 @@ def delete(relative_path: str, **kwargs):
     Returns:
         _type_: _description_
     """
-    try:
-        response = requests.delete(API_URI + relative_path, params=kwargs)
-        text = response.text
-        if text[0] == '"' and text[-1] == '"':
-            text = text[1:-1]
-        return text
-    except RequestException as err:
-        print("API not availlable!")
+    while True:
+        try:
+            response = requests.delete(API_URI + relative_path, params=kwargs)
+            text = response.text
+            if text[0] == '"' and text[-1] == '"':
+                text = text[1:-1]
+            return text
+        except ReqExc:
+            print("API not availlable! Retrying in 5 seconds...")
+            time.sleep(5)

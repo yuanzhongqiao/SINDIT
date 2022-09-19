@@ -16,14 +16,13 @@ def get_layout():
     Layout of the visibility settings
     :return:
     """
-    try:
-        assets_flat_json = api_client.get_json("/assets", deep=False)
-        assets_flat: List[AssetNodeFlat] = [
-            AssetNodeFlat.from_json(m) for m in assets_flat_json
-        ]
-    except RequestException as err:
-        print("API not available when loading layout!")
-        assets_flat: List[AssetNodeFlat] = []
+    print(
+        "Loading available assets to be provided as options for the graph visibility multiselect..."
+    )
+    assets_flat_json = api_client.get_json("/assets", deep=False)
+    assets_flat: List[AssetNodeFlat] = [
+        AssetNodeFlat.from_json(m) for m in assets_flat_json
+    ]
     return html.Div(
         [
             html.Div(

@@ -1,17 +1,13 @@
 from datetime import datetime
-from random import randint
-from time import sleep
-from dash import ctx
+from dash import ctx, Input, Output, State
 from dash.exceptions import PreventUpdate
 import pytz
-from dash.dependencies import Input, Output, State
 from util.environment_and_configuration import (
     ConfigGroups,
     get_configuration_int,
 )
 from frontend import api_client
 from frontend.app import app
-from frontend.main_column.factory_graph import factory_graph_layout
 from frontend.main_column.factory_graph import factory_graph_cytoscape_converter
 from frontend.main_column.factory_graph.GraphSelectedElement import GraphSelectedElement
 from graph_domain.main_digital_twin.AssetNode import AssetNodeDeep
@@ -51,7 +47,8 @@ def update_factory_graph(
     :return:
     """
 
-    # Reload from backend when button manually clicked (n > 1), no graph is stored locally, or the stored one is older than the configured max age
+    # Reload from backend when button manually clicked (n > 1), no graph is stored locally,
+    # or the stored one is older than the configured max age
     if (
         n_clicks > 1
         or stored_graph is None
@@ -64,6 +61,7 @@ def update_factory_graph(
     ):
         print("Loading graph from backend")
         assets_deep_json = api_client.get_json("/assets")
+        # pylint: disable=no-member
         assets_deep = [AssetNodeDeep.from_json(m) for m in assets_deep_json]
         asset_similarities = api_client.get_json("/assets/similarities")
 
@@ -77,12 +75,13 @@ def update_factory_graph(
     return cygraph_elements, cygraph_elements, datetime.now().isoformat(), True
 
 
+# pylint: disable=W0613
 @app.callback(
     Output("graph-reload-button", "n_clicks"),
     Input("interval-component-factory-graph", "n_intervals"),
     Input("graph-reload-button", "n_clicks"),
     Input("interval-component-factory-graph-initial-loading", "n_intervals"),
-    State("cytoscape-graph-store", "modified_timestamp"),
+    State("cytoscape-graph-store-age", "modified_timestamp"),
     State("factory-graph-loading-state", "data"),
     State("graph-force-full-reload-store", "modified_timestamp"),
     Input("annotation-creation-saved", "modified_timestamp"),
@@ -111,7 +110,8 @@ def factory_graph_update_trigger(
         raise PreventUpdate()
     elif graph_loaded is None and n_init_intervall == 4:
         print(
-            "Graph not loaded after first intervall. Checking if reloading from backend or local storage..."
+            "Graph not loaded after first intervall. "
+            "Checking if reloading from backend or local storage..."
         )
         if _get_graph_age_seconds(local_timestamp) > get_configuration_int(
             group=ConfigGroups.FRONTEND, key="max_graph_age"
@@ -172,6 +172,7 @@ def store_selected_element_info(n_clicks, last_click_time_str, tap_node, tap_edg
     ):
         # Currently selected a node:
         selected_el = GraphSelectedElement.from_tap_node(tap_node)
+        # pylint: disable=no-member
         new_selected_el_json = selected_el.to_json()
         new_click_time = datetime.fromtimestamp(
             tap_node["timeStamp"] / 1000.0, tz=pytz.UTC
@@ -183,6 +184,7 @@ def store_selected_element_info(n_clicks, last_click_time_str, tap_node, tap_edg
     ):
         # Currently selected an edge:
         selected_el = GraphSelectedElement.from_tap_edge(tap_edge)
+        # pylint: disable=no-member
         new_selected_el_json = selected_el.to_json()
         new_click_time = datetime.fromtimestamp(
             tap_edge["timeStamp"] / 1000.0, tz=pytz.UTC
@@ -210,6 +212,7 @@ def update_node_position(n_clicks, selected_el_json):
     :param selected_el_json:
     :return:
     """
+    # pylint: disable=no-member
     selected_el: GraphSelectedElement = GraphSelectedElement.from_json(selected_el_json)
 
     api_client.patch(
@@ -220,7 +223,7 @@ def update_node_position(n_clicks, selected_el_json):
     )
 
     # Notify the user with an auto-dismissing alert:
-    return f"New node position saved!", True, datetime.now()
+    return "New node position saved!", True, datetime.now()
 
 
 @app.callback(
@@ -232,13 +235,15 @@ def update_node_position(n_clicks, selected_el_json):
 def toggle_layout_saver_visibility(selected_el_json, elements):
     """
     Called whenever a element is selected (or de-selected) in the graph, or when the graph changes.
-    Provides the user with a visible save-functionality for the altered node position, if a node is selected, that
+    Provides the user with a visible save-functionality for the altered node position,
+    if a node is selected, that
     the user moved via drag and drop.
     :param selected_el_json:
     :param elements:
     :return:
     """
     if selected_el_json is not None and elements is not None:
+        # pylint: disable=no-member
         selected_el: GraphSelectedElement = GraphSelectedElement.from_json(
             selected_el_json
         )

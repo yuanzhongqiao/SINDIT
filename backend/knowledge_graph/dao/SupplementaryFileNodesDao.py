@@ -56,7 +56,7 @@ class SupplementaryFileNodesDao(object):
         :return:
         :raises GraphNotConformantToMetamodelError: If Graph not conformant
         """
-        suppl_file_match = self.ps.repo.match(
+        suppl_file_match = self.ps.repo_match(
             model=SupplementaryFileNodeFlat, primary_value=iri
         )
 
@@ -72,7 +72,7 @@ class SupplementaryFileNodesDao(object):
         :return:
         :raises GraphNotConformantToMetamodelError: If Graph not conformant
         """
-        suppl_file_matches = self.ps.repo.match(model=SupplementaryFileNodeFlat).where(
+        suppl_file_matches = self.ps.repo_match(model=SupplementaryFileNodeFlat).where(
             '(_)<-[:SECONDARY_FORMAT *0..]-(: SUPPLEMENTARY_FILE {iri: "' + iri + '"}) '
         )
 
@@ -92,7 +92,7 @@ class SupplementaryFileNodesDao(object):
             else '"'
         )
 
-        files_flat_matches = self.ps.repo.match(model=SupplementaryFileNodeFlat).where(
+        files_flat_matches = self.ps.repo_match(model=SupplementaryFileNodeFlat).where(
             exclude_secondary_format_filter
         )
 
@@ -111,7 +111,7 @@ class SupplementaryFileNodesDao(object):
             else '"'
         )
 
-        file_deep_matches = self.ps.repo.match(model=SupplementaryFileNodeDeep).where(
+        file_deep_matches = self.ps.repo_match(model=SupplementaryFileNodeDeep).where(
             exclude_secondary_format_filter
         )
 
@@ -133,7 +133,7 @@ class SupplementaryFileNodesDao(object):
             else '"'
         )
 
-        files_flat_matches = self.ps.repo.match(model=SupplementaryFileNodeFlat).where(
+        files_flat_matches = self.ps.repo_match(model=SupplementaryFileNodeFlat).where(
             '_.type="' + type + exclude_secondary_format_filter
         )
 
@@ -154,14 +154,14 @@ class SupplementaryFileNodesDao(object):
             else '"'
         )
 
-        file_deep_matches = self.ps.repo.match(model=SupplementaryFileNodeDeep).where(
+        file_deep_matches = self.ps.repo_match(model=SupplementaryFileNodeDeep).where(
             '_.type="' + type + exclude_secondary_format_filter
         )
 
         return file_deep_matches.all()
 
     def reset_extracted_keywords(self):
-        self.ps.graph.run(
+        self.ps.graph_run(
             f"MATCH (n:{NodeTypes.EXTRACTED_KEYWORD.value}) DETACH DELETE n"
         )
 
@@ -178,7 +178,7 @@ class SupplementaryFileNodesDao(object):
             iri=f"www.sintef.no/aas_identifiers/learning_factory/similarity_analysis/extracted_keyword_{keyword}",
             keyword=keyword,
         )
-        self.ps.graph.merge(node)
+        self.ps.graph_merge(node)
 
         relationship = Relationship(
             NodeMatcher(self.ps.graph)
@@ -190,16 +190,16 @@ class SupplementaryFileNodesDao(object):
             .first(),
         )
 
-        self.ps.graph.create(relationship)
+        self.ps.graph_create(relationship)
 
     def save_extracted_text(self, file_iri: str, text: str):
         matcher = NodeMatcher(self.ps.graph)
         node: Node = matcher.match(iri=file_iri).first()
         node.update(extracted_text=text)
-        self.ps.graph.push(node)
+        self.ps.graph_push(node)
 
     def get_keywords_set_for_asset(self, asset_iri: str):
-        keywords_table = self.ps.graph.run(
+        keywords_table = self.ps.graph_run(
             "MATCH p=(a:"
             + NodeTypes.ASSET.value
             + ' {iri: "'
