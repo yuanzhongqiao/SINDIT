@@ -59,17 +59,6 @@ from util.environment_and_configuration import (
 # #############################################################################
 # Setup sensor connections and timeseries persistence
 # #############################################################################
-def init_database_connections():
-    print("Initializing database connections...")
-
-    # pylint: disable=W0612
-    kg_service = KnowledgeGraphPersistenceService.instance()
-
-    db_con_container: DatabasePersistenceServiceContainer = (
-        DatabasePersistenceServiceContainer.instance()
-    )
-
-    print("Done!")
 
 
 def init_database_data_if_not_available():
@@ -99,7 +88,7 @@ def refresh_ts_inputs():
 def refresh_time_series_thread_loop():
 
     while True:
-        time.sleep(20)
+        time.sleep(120)
         print("Refreshing time-series inputs and connections...")
         refresh_ts_inputs()
 
@@ -110,9 +99,22 @@ def refresh_time_series_thread_loop():
 # Launch backend
 # #############################################################################
 if __name__ == "__main__":
-    init_database_connections()
 
+    print("Initializing Knowledge Graph...")
+
+    # pylint: disable=W0612
+    kg_service = KnowledgeGraphPersistenceService.instance()
+
+    print("Done initializing Knowledge Graph.")
+
+    print("Checking, if data is present...")
     init_database_data_if_not_available()
+
+    print("Initializing specialized databases...")
+    db_con_container: DatabasePersistenceServiceContainer = (
+        DatabasePersistenceServiceContainer.instance()
+    )
+    print("Done initializing specialized databases.")
 
     print("Loading time-series inputs and connections...")
     refresh_ts_inputs()
