@@ -55,7 +55,7 @@ class TimeseriesNodesDao(object):
         :return:
         :raises GraphNotConformantToMetamodelError: If Graph not conformant
         """
-        ts_node_match = self.ps.repo.match(
+        ts_node_match = self.ps.repo_match(
             model=TimeseriesNodeFlat, primary_value=ts_iri
         )
 
@@ -69,7 +69,7 @@ class TimeseriesNodesDao(object):
         :return:
         :raises GraphNotConformantToMetamodelError: If Graph not conformant
         """
-        timeseries_flat_matches = self.ps.repo.match(model=TimeseriesNodeFlat)
+        timeseries_flat_matches = self.ps.repo_match(model=TimeseriesNodeFlat)
 
         return timeseries_flat_matches.all()
 
@@ -80,7 +80,7 @@ class TimeseriesNodesDao(object):
         :param self:
         :return:
         """
-        timeseries_deep_matches = self.ps.repo.match(model=TimeseriesNodeDeep)
+        timeseries_deep_matches = self.ps.repo_match(model=TimeseriesNodeDeep)
         return timeseries_deep_matches.all()
 
     # validator used manually because result type is json instead of node-list
@@ -99,14 +99,14 @@ class TimeseriesNodesDao(object):
         node: Node = matcher.match(iri=iri).first()
         feature_dict_str = json.dumps(feature_dict)
         node.update(feature_dict=feature_dict_str)
-        self.ps.graph.push(node)
+        self.ps.graph_push(node)
 
     def update_reduced_feature_list(self, iri: str, reduced_feature_list: List):
         matcher = NodeMatcher(self.ps.graph)
         node: Node = matcher.match(iri=iri).first()
         reduced_feature_list_str = json.dumps(reduced_feature_list)
         node.update(reduced_feature_list=reduced_feature_list_str)
-        self.ps.graph.create(node)
+        self.ps.graph_create(node)
 
     def create_ts_cluster(
         self, iri: str, id_short: str, description: str | None = None
@@ -114,10 +114,10 @@ class TimeseriesNodesDao(object):
         cluster_node = TimeseriesClusterNode(
             iri=iri, id_short=id_short, description=description
         )
-        self.ps.graph.push(cluster_node)
+        self.ps.graph_push(cluster_node)
 
     def reset_ts_clusters(self):
-        self.ps.graph.run(
+        self.ps.graph_run(
             f"MATCH (n:{NodeTypes.TIMESERIES_CLUSTER.value}) DETACH DELETE n"
         )
 
@@ -132,10 +132,10 @@ class TimeseriesNodesDao(object):
             .first(),
         )
 
-        self.ps.graph.create(relationship)
+        self.ps.graph_create(relationship)
 
     def get_cluster_list_for_asset(self, asset_iri: str) -> List[str]:
-        cluster_table = self.ps.graph.run(
+        cluster_table = self.ps.graph_run(
             "MATCH p=(a:"
             + NodeTypes.ASSET.value
             + ' {iri: "'
@@ -152,7 +152,7 @@ class TimeseriesNodesDao(object):
         return cluster_list
 
     def get_timeseries_count(self):
-        timeseries_count = self.ps.graph.run(
+        timeseries_count = self.ps.graph_run(
             f"MATCH (n:{NodeTypes.TIMESERIES_INPUT.value}) RETURN count(n)"
         ).to_table()[0][0]
 

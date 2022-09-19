@@ -8,7 +8,6 @@ from frontend import api_client
 from graph_domain.main_digital_twin.AssetNode import AssetNodeFlat
 from requests.exceptions import RequestException
 from dash.exceptions import PreventUpdate
-from frontend import resources_manager
 from frontend.left_sidebar.extensions.annotation_detection_extension.annotation_extension_callbacks import (
     CreationSteps,
 )
@@ -17,7 +16,6 @@ from frontend.main_column.factory_graph.factory_graph_layout import (
 )
 from graph_domain.factory_graph_types import (
     NODE_TYPE_STRINGS,
-    RELATIONSHIP_TYPES_FOR_NODE_TYPE,
     NodeTypes,
 )
 
@@ -132,7 +130,7 @@ def change_graph_visibility_options(
     Output("visibility-settings-ignored-info", "className"),
     Input("annotation-creation-store-step", "data"),
 )
-def change_graph_visibility_options(annotation_creation_step):
+def inform_graph_visibility_ignored(annotation_creation_step):
 
     if annotation_creation_step is not None:
         return ""
@@ -156,10 +154,5 @@ def update_asset_multi_options(n):
             assets_flat: List[AssetNodeFlat] = []
 
         return [{"label": asset.caption, "value": asset.iri} for asset in assets_flat]
-        return [
-            {"label": "New York Citya", "value": "NYCa"},
-            {"label": "Montreala", "value": "MTLa"},
-            {"label": "San Franciscoa", "value": "SFa"},
-        ]
     else:
         raise PreventUpdate

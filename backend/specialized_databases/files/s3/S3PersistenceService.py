@@ -40,6 +40,8 @@ class S3PersistenceService(FilesPersistenceService):
 
         self.bucket = self.resource.Bucket(self.bucket_name)
 
+        # Check connection:
+
     # override
     def stream_file(
         self,

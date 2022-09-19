@@ -81,7 +81,7 @@ def update_factory_graph(
     Input("interval-component-factory-graph", "n_intervals"),
     Input("graph-reload-button", "n_clicks"),
     Input("interval-component-factory-graph-initial-loading", "n_intervals"),
-    State("cytoscape-graph-store", "modified_timestamp"),
+    State("cytoscape-graph-store-age", "modified_timestamp"),
     State("factory-graph-loading-state", "data"),
     State("graph-force-full-reload-store", "modified_timestamp"),
     Input("annotation-creation-saved", "modified_timestamp"),

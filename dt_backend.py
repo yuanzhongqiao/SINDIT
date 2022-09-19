@@ -55,6 +55,8 @@ def init_database_connections():
     print("Initializing database connections...")
 
     # pylint: disable=W0612
+    kg_service = KnowledgeGraphPersistenceService.instance()
+
     db_con_container: DatabasePersistenceServiceContainer = (
         DatabasePersistenceServiceContainer.instance()
     )

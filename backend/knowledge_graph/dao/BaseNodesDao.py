@@ -54,7 +54,7 @@ class BaseNodeDao(object):
         node.update(
             visualization_positioning_x=new_pos_x, visualization_positioning_y=new_pos_y
         )
-        self.ps.graph.push(node)
+        self.ps.graph_push(node)
 
     @validate_result_nodes
     def get_generic_node(self, iri: str):
@@ -64,15 +64,13 @@ class BaseNodeDao(object):
         """
         ogm_class = OGM_CLASS_FOR_NODE_TYPE.get(self.get_node_type(iri))
 
-        node_matches = self.ps.repo.match(model=ogm_class, primary_value=iri)
+        node_matches = self.ps.repo_match(model=ogm_class, primary_value=iri)
 
         return node_matches.first()
 
     def get_node_type(self, iri: str):
-        types_table = self.ps.graph.run(
+        types_table = self.ps.graph_run(
             f'MATCH (n) WHERE n.iri = "{iri}" RETURN labels(n)[0]'
         ).to_table()
-
-        # keyword_list = [type[0] for type in types_table]
 
         return types_table[0][0]

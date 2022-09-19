@@ -1,15 +1,11 @@
-import json
 from typing import List
 from graph_domain.main_digital_twin.DatabaseConnectionNode import DatabaseConnectionNode
 
-from graph_domain.main_digital_twin.AssetNode import AssetNodeFlat, AssetNodeDeep
 from graph_domain.factory_graph_types import (
     NodeTypes,
     RelationshipTypes,
 )
-from backend.exceptions.GraphNotConformantToMetamodelError import (
-    GraphNotConformantToMetamodelError,
-)
+
 from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
     KnowledgeGraphPersistenceService,
 )
@@ -49,7 +45,7 @@ class DatabaseConnectionsDao(object):
         :return:
         :raises GraphNotConformantToMetamodelError: If Graph not conformant
         """
-        db_con_matches = self.ps.repo.match(model=DatabaseConnectionNode)
+        db_con_matches = self.ps.repo_match(model=DatabaseConnectionNode)
         db_cons = [m for m in db_con_matches]
 
         return db_cons
@@ -63,10 +59,7 @@ class DatabaseConnectionsDao(object):
         :return:
         :raises GraphNotConformantToMetamodelError: If Graph not conformant
         """
-        # db_con_matches = self.ps.repo.match(model=DatabaseConnection)
-        # db_cons = [m for m in db_con_matches]
-
-        node = self.ps.graph.evaluate(
+        node = self.ps.graph_evaluate(
             f'MATCH p=(t)-[r:{RelationshipTypes.TIMESERIES_DB_ACCESS.value}|{RelationshipTypes.FILE_DB_ACCESS.value}]->(d:{NodeTypes.DATABASE_CONNECTION.value}) where (t.iri= "{iri}") RETURN d'
         )
 
@@ -75,7 +68,7 @@ class DatabaseConnectionsDao(object):
         return model
 
     def get_db_connections_count(self):
-        db_connections_count = self.ps.graph.run(
+        db_connections_count = self.ps.graph_run(
             f"MATCH (n:{NodeTypes.DATABASE_CONNECTION.value}) RETURN count(n)"
         ).to_table()[0][0]
 
