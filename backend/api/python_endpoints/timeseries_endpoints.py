@@ -20,9 +20,6 @@ from backend.specialized_databases.timeseries.influx_db.InfluxDbPersistenceServi
 )
 
 
-DB_SERVICE_CONTAINER: DatabasePersistenceServiceContainer = (
-    DatabasePersistenceServiceContainer.instance()
-)
 DB_CON_NODE_DAO: DatabaseConnectionsDao = DatabaseConnectionsDao.instance()
 
 TIMESERIES_NODES_DAO: TimeseriesNodesDao = TimeseriesNodesDao.instance()
@@ -70,7 +67,9 @@ def _get_related_timeseries_database_service(iri: str) -> TimeseriesPersistenceS
             return pd.DataFrame(columns=["time", "value"])
 
         ts_service: TimeseriesPersistenceService = (
-            DB_SERVICE_CONTAINER.get_persistence_service(ts_con_node.iri)
+            DatabasePersistenceServiceContainer.instance().get_persistence_service(
+                ts_con_node.iri
+            )
         )
         return ts_service
     except IdNotFoundException as exc:

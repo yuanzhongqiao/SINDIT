@@ -47,7 +47,7 @@ class MqttRuntimeConnection(RuntimeConnection):
         )
 
         timeseries_input: MqttTimeseriesInput
-        for timeseries_input in self.timeseries_inputs:
+        for timeseries_input in self.timeseries_inputs.values():
             self.mqtt_client.subscribe(timeseries_input.connection_topic, 0)
 
     def __on_connect_fail(self, client, userdata):
@@ -75,6 +75,14 @@ class MqttRuntimeConnection(RuntimeConnection):
         """
         self.active = True
         timeseries_input: MqttTimeseriesInput
-        for timeseries_input in self.timeseries_inputs:
+        for timeseries_input in self.timeseries_inputs.values():
             if msg.topic == timeseries_input.connection_topic:
                 timeseries_input.handle_raw_reading(msg.payload)
+
+    def disconnect(self):
+        self.mqtt_client.loop_stop()
+        self.mqtt_client.disconnect()
+
+    def add_ts_input(self, ts_input: TimeseriesInput):
+        self.timeseries_inputs[ts_input.iri] = ts_input
+        self.mqtt_client.subscribe(ts_input.connection_topic, 0)
