@@ -38,7 +38,7 @@ jobs:
 
         uses: docker/build-push-action@v2
         with:
-          context: ./demonstrator
+          context: ./
           push: true
           tags: ${{ steps.meta-main.outputs.tags }}
           labels: ${{ steps.meta-main.outputs.labels }}
