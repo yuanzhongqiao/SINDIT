@@ -1,0 +1,67 @@
+name: Create and publish a Docker image
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: sintef-9012/sindit
+  # GITOPS_REPOSITORY: SINTEF/infrastructure-as-code-sustainable-communication-technologies
+
+jobs:
+  build-demonstrator-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for main image
+        id: meta-main
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build demonstrator docker image
+
+        uses: docker/build-push-action@v2
+        with:
+          context: ./demonstrator
+          push: true
+          tags: ${{ steps.meta-main.outputs.tags }}
+          labels: ${{ steps.meta-main.outputs.labels }}
+
+  # deploy:
+  #   if: contains(github.ref, 'heads')
+  #   runs-on: ubuntu-latest
+  #   needs:
+  #     - build-demonstrator-image
+  #     - build-demonstrator-init-image
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+  #       with:
+  #         repository: ${{ env.GITOPS_REPOSITORY }}
+  #         ssh-key: ${{secrets.GITOPS_REPOSITORY_SSH_KEY}}
+  #     - name: Patch version
+  #       run: |
+  #         yq --inplace '.image.tag |= "sha-'$GITHUB_REF_NAME'"' deployments/sindit/image-tag.yaml
+  #     - name: Commit and push
+  #       run: |
+  #         git config user.email "gitops@sintef.cloud"
+  #         git config user.name "GitOps"
+  #         git commit -am "GitOps update for SINDIT"
+  #         git pull --rebase
+  #         git push

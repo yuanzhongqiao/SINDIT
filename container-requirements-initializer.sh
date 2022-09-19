@@ -36,12 +36,7 @@ pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cpu/torch1.12.
 # RUN pip install mmdet
 cd dependencies
 
-if [ ! -d "./mmdetection" ]
-then
-    git clone https://github.com/open-mmlab/mmdetection.git
-else
-    git pull
-fi
+git clone --depth=1 https://github.com/open-mmlab/mmdetection.git
 
 cd mmdetection
 pip install -v -e .

@@ -4,9 +4,11 @@ RUN mkdir /opt/sindit
 WORKDIR /opt/sindit
 ENV PYTHONPATH /opt/sindit
 
-COPY . .
-
+COPY container-requirements-initializer.sh ./
+COPY requirements.txt ./
 RUN ./container-requirements-initializer.sh
+
+COPY . .
 
 EXPOSE 8050
 EXPOSE 8000
