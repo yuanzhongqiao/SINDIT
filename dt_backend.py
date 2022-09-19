@@ -6,12 +6,14 @@ Separated from api.py to avoid circular dependencies with endpoint
 files importing the "app" instance.
 """
 
+import time
 import uvicorn
 
 from backend.api.api import app
 from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
     KnowledgeGraphPersistenceService,
 )
+from backend.knowledge_graph.dao.AssetNodesDao import AssetsDao
 from backend.knowledge_graph.dao.TimeseriesNodesDao import TimeseriesNodesDao
 from backend.runtime_connections.RuntimeConnectionContainer import (
     RuntimeConnectionContainer,
@@ -42,6 +44,11 @@ from backend.api.rest_endpoints import annotation_endpoints
 
 # noinspection PyUnresolvedReferences
 from backend.api.rest_endpoints import graph_endpoints
+from init_learning_factory_from_cypher_file import (
+    generate_alternative_cad_format,
+    import_binary_data,
+    setup_knowledge_graph,
+)
 from util.environment_and_configuration import (
     get_environment_variable,
     get_environment_variable_int,
@@ -62,6 +69,19 @@ def init_database_connections():
     )
 
     print("Done!")
+
+
+def init_database_data_if_not_available():
+    asset_dao = AssetsDao.instance()
+    assets_count = asset_dao.get_assets_count()
+
+    if assets_count == 0:
+        print("No assets found! Initializing databases in 60 seconds, if not canceled.")
+        time.sleeep(60)
+
+        setup_knowledge_graph()
+        import_binary_data()
+        generate_alternative_cad_format()
 
 
 def init_sensors():
@@ -93,6 +113,9 @@ def init_sensors():
 # #############################################################################
 if __name__ == "__main__":
     init_database_connections()
+
+    init_database_data_if_not_available()
+
     init_sensors()
 
     # Run fast API
