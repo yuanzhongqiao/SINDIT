@@ -5,6 +5,6 @@
     "python.analysis.diagnosticMode": "workspace",
     "python.linting.pylintEnabled": true,
     "python.linting.pylintArgs": [
-        "--enable=W0611"
+        "--rcfile=.pylintrc"
     ]
 }

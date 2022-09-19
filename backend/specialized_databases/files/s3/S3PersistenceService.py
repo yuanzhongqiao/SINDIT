@@ -1,3 +1,5 @@
+""" S3 compatible persistence service """
+
 import boto3
 from botocore.client import Config
 
@@ -7,6 +9,12 @@ from backend.specialized_databases.files.FilesPersistenceService import (
 
 
 class S3PersistenceService(FilesPersistenceService):
+    """S3 compatible persistence service
+
+    Args:
+        FilesPersistenceService (_type_): _description_
+    """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -43,8 +51,8 @@ class S3PersistenceService(FilesPersistenceService):
         :return:
         :raise IdNotFoundException: if the iri is not found
         """
-        object = self.bucket.Object(iri)
-        response = object.get()
+        file_object = self.bucket.Object(iri)
+        response = file_object.get()
         file_stream = response["Body"]
         return file_stream
 

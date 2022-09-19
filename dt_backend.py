@@ -1,4 +1,10 @@
-import json
+"""
+Main entry point for the application layer
+Handles the sensor-connections and provides a API
+Introducing services for querying the KG
+Separated from api.py to avoid circular dependencies with endpoint
+files importing the "app" instance.
+"""
 
 import uvicorn
 
@@ -6,16 +12,12 @@ from backend.api.api import app
 from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
     KnowledgeGraphPersistenceService,
 )
-from backend.knowledge_graph.dao.DatabaseConnectionsDao import DatabaseConnectionsDao
 from backend.knowledge_graph.dao.TimeseriesNodesDao import TimeseriesNodesDao
 from backend.runtime_connections.RuntimeConnectionContainer import (
     RuntimeConnectionContainer,
 )
 from backend.specialized_databases.DatabasePersistenceServiceContainer import (
     DatabasePersistenceServiceContainer,
-)
-from backend.specialized_databases.timeseries.influx_db.InfluxDbPersistenceService import (
-    InfluxDbPersistenceService,
 )
 
 
@@ -45,13 +47,6 @@ from util.environment_and_configuration import (
     get_environment_variable_int,
 )
 
-"""
-Main entry point for the application layer
-Handles the sensor-connections and provides a API
-Introducing services for querying the KG
-Separated from api.py to avoid circular dependencies with endpoint files importing the "app" instance. 
-"""
-
 
 # #############################################################################
 # Setup sensor connections and timeseries persistence
@@ -59,6 +54,7 @@ Separated from api.py to avoid circular dependencies with endpoint files importi
 def init_database_connections():
     print("Initializing database connections...")
 
+    # pylint: disable=W0612
     db_con_container: DatabasePersistenceServiceContainer = (
         DatabasePersistenceServiceContainer.instance()
     )
@@ -69,6 +65,7 @@ def init_database_connections():
 def init_sensors():
     print("Initializing timeseries inputs...")
 
+    # pylint: disable=W0612
     kg_service: KnowledgeGraphPersistenceService = (
         KnowledgeGraphPersistenceService.instance()
     )

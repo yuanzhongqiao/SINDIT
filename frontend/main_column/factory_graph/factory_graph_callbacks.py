@@ -1,8 +1,7 @@
 from datetime import datetime
-from dash import ctx
+from dash import ctx, Input, Output, State
 from dash.exceptions import PreventUpdate
 import pytz
-from dash.dependencies import Input, Output, State
 from util.environment_and_configuration import (
     ConfigGroups,
     get_configuration_int,
@@ -48,7 +47,8 @@ def update_factory_graph(
     :return:
     """
 
-    # Reload from backend when button manually clicked (n > 1), no graph is stored locally, or the stored one is older than the configured max age
+    # Reload from backend when button manually clicked (n > 1), no graph is stored locally,
+    # or the stored one is older than the configured max age
     if (
         n_clicks > 1
         or stored_graph is None
@@ -75,6 +75,7 @@ def update_factory_graph(
     return cygraph_elements, cygraph_elements, datetime.now().isoformat(), True
 
 
+# pylint: disable=W0613
 @app.callback(
     Output("graph-reload-button", "n_clicks"),
     Input("interval-component-factory-graph", "n_intervals"),
@@ -109,7 +110,8 @@ def factory_graph_update_trigger(
         raise PreventUpdate()
     elif graph_loaded is None and n_init_intervall == 4:
         print(
-            "Graph not loaded after first intervall. Checking if reloading from backend or local storage..."
+            "Graph not loaded after first intervall. "
+            "Checking if reloading from backend or local storage..."
         )
         if _get_graph_age_seconds(local_timestamp) > get_configuration_int(
             group=ConfigGroups.FRONTEND, key="max_graph_age"
@@ -221,7 +223,7 @@ def update_node_position(n_clicks, selected_el_json):
     )
 
     # Notify the user with an auto-dismissing alert:
-    return f"New node position saved!", True, datetime.now()
+    return "New node position saved!", True, datetime.now()
 
 
 @app.callback(
@@ -233,7 +235,8 @@ def update_node_position(n_clicks, selected_el_json):
 def toggle_layout_saver_visibility(selected_el_json, elements):
     """
     Called whenever a element is selected (or de-selected) in the graph, or when the graph changes.
-    Provides the user with a visible save-functionality for the altered node position, if a node is selected, that
+    Provides the user with a visible save-functionality for the altered node position,
+    if a node is selected, that
     the user moved via drag and drop.
     :param selected_el_json:
     :param elements:
