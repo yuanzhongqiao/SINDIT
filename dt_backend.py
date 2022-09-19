@@ -18,9 +18,11 @@ from backend.specialized_databases.timeseries.influx_db.InfluxDbPersistenceServi
     InfluxDbPersistenceService,
 )
 
+
 # Import endpoint files (indirectly used through annotation)
 
 
+# pylint: disable=unused-import
 # noinspection PyUnresolvedReferences
 from backend.api.rest_endpoints import status_endpoints
 

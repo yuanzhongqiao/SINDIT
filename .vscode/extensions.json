@@ -1,5 +1,6 @@
 {
     "recommendations": [
-        "k--kato.intellij-idea-keybindings"
+        "k--kato.intellij-idea-keybindings",
+        "ms-python.pylint"
     ]
 }

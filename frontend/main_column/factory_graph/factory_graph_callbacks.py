@@ -1,6 +1,4 @@
 from datetime import datetime
-from random import randint
-from time import sleep
 from dash import ctx
 from dash.exceptions import PreventUpdate
 import pytz
@@ -11,7 +9,6 @@ from util.environment_and_configuration import (
 )
 from frontend import api_client
 from frontend.app import app
-from frontend.main_column.factory_graph import factory_graph_layout
 from frontend.main_column.factory_graph import factory_graph_cytoscape_converter
 from frontend.main_column.factory_graph.GraphSelectedElement import GraphSelectedElement
 from graph_domain.main_digital_twin.AssetNode import AssetNodeDeep
@@ -64,6 +61,7 @@ def update_factory_graph(
     ):
         print("Loading graph from backend")
         assets_deep_json = api_client.get_json("/assets")
+        # pylint: disable=no-member
         assets_deep = [AssetNodeDeep.from_json(m) for m in assets_deep_json]
         asset_similarities = api_client.get_json("/assets/similarities")
 
@@ -172,6 +170,7 @@ def store_selected_element_info(n_clicks, last_click_time_str, tap_node, tap_edg
     ):
         # Currently selected a node:
         selected_el = GraphSelectedElement.from_tap_node(tap_node)
+        # pylint: disable=no-member
         new_selected_el_json = selected_el.to_json()
         new_click_time = datetime.fromtimestamp(
             tap_node["timeStamp"] / 1000.0, tz=pytz.UTC
@@ -183,6 +182,7 @@ def store_selected_element_info(n_clicks, last_click_time_str, tap_node, tap_edg
     ):
         # Currently selected an edge:
         selected_el = GraphSelectedElement.from_tap_edge(tap_edge)
+        # pylint: disable=no-member
         new_selected_el_json = selected_el.to_json()
         new_click_time = datetime.fromtimestamp(
             tap_edge["timeStamp"] / 1000.0, tz=pytz.UTC
@@ -210,6 +210,7 @@ def update_node_position(n_clicks, selected_el_json):
     :param selected_el_json:
     :return:
     """
+    # pylint: disable=no-member
     selected_el: GraphSelectedElement = GraphSelectedElement.from_json(selected_el_json)
 
     api_client.patch(
@@ -239,6 +240,7 @@ def toggle_layout_saver_visibility(selected_el_json, elements):
     :return:
     """
     if selected_el_json is not None and elements is not None:
+        # pylint: disable=no-member
         selected_el: GraphSelectedElement = GraphSelectedElement.from_json(
             selected_el_json
         )

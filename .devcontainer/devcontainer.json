@@ -45,7 +45,8 @@
 				"donjayamanne.python-environment-manager",
 				"jakeboone02.cypher-query-language",
 				"tomoki1207.pdf",
-				"visualstudioexptteam.intellicode-api-usage-examples"
+				"visualstudioexptteam.intellicode-api-usage-examples",
+				"ms-python.pylint"
 			]
 		}
 	},

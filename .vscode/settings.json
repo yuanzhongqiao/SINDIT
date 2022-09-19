@@ -1,5 +1,10 @@
 {
     "python.formatting.provider": "black",
     "python.formatting.blackPath": "black",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "python.analysis.diagnosticMode": "workspace",
+    "python.linting.pylintEnabled": true,
+    "python.linting.pylintArgs": [
+        "--enable=W0611"
+    ]
 }

@@ -1,22 +1,12 @@
-from datetime import datetime
-import io
-from influxdb_client.client.write_api import SYNCHRONOUS
-from influxdb_client import InfluxDBClient, Point
-import pandas as pd
-from urllib3.exceptions import ReadTimeoutError
 import boto3
 from botocore.client import Config
 
-from graph_domain.main_digital_twin.DatabaseConnectionNode import DatabaseConnectionNode
-from backend.exceptions.IdNotFoundException import IdNotFoundException
 from backend.specialized_databases.files.FilesPersistenceService import (
     FilesPersistenceService,
 )
 
 
 class S3PersistenceService(FilesPersistenceService):
-    """ """
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
