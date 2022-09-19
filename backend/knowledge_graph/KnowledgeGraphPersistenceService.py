@@ -33,19 +33,28 @@ class KnowledgeGraphPersistenceService(object):
         while not self.connected:
             try:
                 print("Connecting to Neo4J...")
-                self._graph = py2neo.Graph(
-                    get_environment_variable(key="NEO4J_DB_HOST", optional=False),
-                    name=get_environment_variable(key="NEO4J_DB_NAME", optional=False),
+                host = get_environment_variable(key="NEO4J_DB_HOST", optional=False)
+                graph_name = get_environment_variable(
+                    key="NEO4J_DB_NAME", optional=False
                 )
+                user_name = get_environment_variable(key="NEO4J_DB_USER", optional=True)
+                pw = get_environment_variable(key="NEO4J_DB_PW", optional=True)
+                if user_name is not None and pw is not None:
+                    auth = (user_name, pw)
+                elif user_name is not None:
+                    auth = (user_name, None)
+                else:
+                    auth = None
 
-                self._repo = ogm.Repository(
-                    get_environment_variable(key="NEO4J_DB_HOST", optional=False),
-                    name=get_environment_variable(key="NEO4J_DB_NAME", optional=False),
-                )
+                self._graph = py2neo.Graph(host, name=graph_name, auth=auth)
+
+                self._repo = ogm.Repository(host, name=graph_name, auth=auth)
                 print("Successfully connected to Neo4J!")
                 self.connected = True
             except py2neo.ConnectionUnavailable:
-                print("Neo4J graph unavailable! Trying again in 10 seconds...")
+                print(
+                    "Neo4J graph unavailable or Authentication invalid! Trying again in 10 seconds..."
+                )
                 time.sleep(10)
 
     def graph_run(self, cypher: any) -> Cursor:
