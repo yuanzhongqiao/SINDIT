@@ -1,7 +1,6 @@
 from datetime import datetime
-import json
 from typing import List
-from py2neo import Node, NodeMatcher, Relationship
+from py2neo import NodeMatcher, Relationship
 from graph_domain.expert_annotations.AnnotationDefinitionNode import (
     AnnotationDefinitionNodeFlat,
 )
@@ -12,10 +11,6 @@ from graph_domain.expert_annotations.AnnotationTimeseriesMatcherNode import (
     AnnotationTimeseriesMatcherNodeFlat,
 )
 
-from graph_domain.main_digital_twin.AssetNode import AssetNodeFlat, AssetNodeDeep
-from backend.exceptions.GraphNotConformantToMetamodelError import (
-    GraphNotConformantToMetamodelError,
-)
 from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
     KnowledgeGraphPersistenceService,
 )
@@ -69,6 +64,7 @@ class AnnotationNodesDao(object):
         """Creates a new annotation definition"""
         iri = IRI_PREFIX_ANNOTATION_DEFINITION + id_short
 
+        # pylint: disable=unexpected-keyword-arg
         definition = AnnotationDefinitionNodeFlat(
             id_short=id_short,
             iri=iri,
@@ -76,7 +72,7 @@ class AnnotationNodesDao(object):
             caption=caption,
             description=description,
         )
-        self.ps.graph.push(definition)
+        self.ps.graph_push(definition)
 
         return iri
 
@@ -91,6 +87,7 @@ class AnnotationNodesDao(object):
         """Creates a new annotation instance"""
         iri = IRI_PREFIX_ANNOTATION_INSTANCE + id_short
 
+        # pylint: disable=unexpected-keyword-arg
         instance = AnnotationInstanceNodeFlat(
             id_short=id_short,
             iri=iri,
@@ -100,7 +97,7 @@ class AnnotationNodesDao(object):
             occurance_start_date_time=start_datetime,
             occurance_end_date_time=end_datetime,
         )
-        self.ps.graph.push(instance)
+        self.ps.graph_push(instance)
 
         return iri
 
@@ -108,10 +105,11 @@ class AnnotationNodesDao(object):
         """Creates a new annotation instance"""
         iri = IRI_PREFIX_ANNOTATION_TS_MATCHER + id_short
 
+        # pylint: disable=unexpected-keyword-arg
         instance = AnnotationTimeseriesMatcherNodeFlat(
             id_short=id_short, iri=iri, caption=caption
         )
-        self.ps.graph.push(instance)
+        self.ps.graph_push(instance)
 
         return iri
 
@@ -128,7 +126,7 @@ class AnnotationNodesDao(object):
             .match(NodeTypes.ANNOTATION_DEFINITION.value, iri=definition_iri)
             .first(),
         )
-        self.ps.graph.create(relationship)
+        self.ps.graph_create(relationship)
 
     def create_annotation_instance_asset_relationship(
         self, instance_iri: str, asset_iri: str
@@ -143,7 +141,7 @@ class AnnotationNodesDao(object):
             .match(NodeTypes.ANNOTATION_INSTANCE.value, iri=instance_iri)
             .first(),
         )
-        self.ps.graph.create(relationship)
+        self.ps.graph_create(relationship)
 
     def create_annotation_occurance_scan_relationship(
         self, definition_iri: str, asset_iri: str
@@ -158,7 +156,7 @@ class AnnotationNodesDao(object):
             .match(NodeTypes.ANNOTATION_DEFINITION.value, iri=definition_iri)
             .first(),
         )
-        self.ps.graph.create(relationship)
+        self.ps.graph_create(relationship)
 
     def create_annotation_ts_matcher_instance_relationship(
         self, ts_matcher_iri: str, instance_iri: str
@@ -173,7 +171,7 @@ class AnnotationNodesDao(object):
             .match(NodeTypes.ANNOTATION_TS_MATCHER.value, iri=ts_matcher_iri)
             .first(),
         )
-        self.ps.graph.create(relationship)
+        self.ps.graph_create(relationship)
 
     def create_annotation_ts_match_relationship(
         self, ts_matcher_iri: str, ts_iri: str, original_annotation: bool
@@ -199,7 +197,7 @@ class AnnotationNodesDao(object):
             .match(NodeTypes.TIMESERIES_INPUT.value, iri=ts_iri)
             .first(),
         )
-        self.ps.graph.create(match_relationship)
+        self.ps.graph_create(match_relationship)
 
         if original_annotation:
             match_relationship = Relationship(
@@ -211,7 +209,7 @@ class AnnotationNodesDao(object):
                 .match(NodeTypes.TIMESERIES_INPUT.value, iri=ts_iri)
                 .first(),
             )
-        self.ps.graph.create(match_relationship)
+        self.ps.graph_create(match_relationship)
 
     @validate_result_nodes
     def get_instances_of_annotation_definition(
@@ -223,7 +221,7 @@ class AnnotationNodesDao(object):
         :return:
         :raises GraphNotConformantToMetamodelError: If Graph not conformant
         """
-        matches = self.ps.repo.match(model=AnnotationInstanceNodeFlat).where(
+        matches = self.ps.repo_match(model=AnnotationInstanceNodeFlat).where(
             "(_)-[:"
             + RelationshipTypes.INSTANCE_OF.value
             + "]->(: "
@@ -246,7 +244,7 @@ class AnnotationNodesDao(object):
         :return:
         :raises GraphNotConformantToMetamodelError: If Graph not conformant
         """
-        matches = self.ps.repo.match(model=AnnotationTimeseriesMatcherNodeFlat).where(
+        matches = self.ps.repo_match(model=AnnotationTimeseriesMatcherNodeFlat).where(
             "(_)<-[:"
             + RelationshipTypes.DETECTABLE_WITH.value
             + " *..1]-(: "
@@ -270,26 +268,26 @@ class AnnotationNodesDao(object):
         Args:
             definition_iri (_type_): _description_
         """
-        self.ps.graph.run(
+        self.ps.graph_run(
             f"MATCH (n:{NodeTypes.ANNOTATION_DEFINITION.value}) WHERE n.iri = '{definition_iri}' DETACH DELETE n"
         )
 
     def delete_annotation_ts_matcher(self, ts_matcher_iri):
         """Deletes a time-series matcher and the attached relationships."""
-        self.ps.graph.run(
+        self.ps.graph_run(
             f"MATCH (n:{NodeTypes.ANNOTATION_TS_MATCHER.value}) WHERE n.iri = '{ts_matcher_iri}' DETACH DELETE n"
         )
 
     def delete_annotation_instance(self, instance_iri):
         """Deletes a annotation instance and the attached relationships."""
-        self.ps.graph.run(
+        self.ps.graph_run(
             f"MATCH (n:{NodeTypes.ANNOTATION_INSTANCE.value}) WHERE n.iri = '{instance_iri}' DETACH DELETE n"
         )
 
     @validate_result_nodes
     def get_matcher_annotation_instance(self, matcher_iri):
         """Returns the instance node that the matcher is related to"""
-        matches = self.ps.repo.match(model=AnnotationInstanceNodeFlat).where(
+        matches = self.ps.repo_match(model=AnnotationInstanceNodeFlat).where(
             "(_)-[:"
             + RelationshipTypes.DETECTABLE_WITH.value
             + "]->(:"
@@ -304,7 +302,7 @@ class AnnotationNodesDao(object):
     @validate_result_nodes
     def get_matcher_original_annotated_ts(self, matcher_iri):
         """Returns the timeseries node that the matcher is related to"""
-        matches = self.ps.repo.match(model=TimeseriesNodeFlat).where(
+        matches = self.ps.repo_match(model=TimeseriesNodeFlat).where(
             "(_)<-[:"
             + RelationshipTypes.ORIGINAL_ANNOTATED.value
             + "]-(:"

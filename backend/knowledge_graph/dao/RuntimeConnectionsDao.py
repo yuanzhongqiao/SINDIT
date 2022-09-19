@@ -42,7 +42,7 @@ class RuntimeConnectionsDao(object):
         )
 
     def get_rt_connections_count(self):
-        rt_connections_count = self.ps.graph.run(
+        rt_connections_count = self.ps.graph_run(
             f"MATCH (n:{NodeTypes.RUNTIME_CONNECTION.value}) RETURN count(n)"
         ).to_table()[0][0]
 

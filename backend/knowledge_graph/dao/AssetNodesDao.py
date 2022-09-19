@@ -48,7 +48,7 @@ class AssetsDao(object):
         :return:
         :raises GraphNotConformantToMetamodelError: If Graph not conformant
         """
-        assets_flat_matches = self.ps.repo.match(model=AssetNodeFlat)
+        assets_flat_matches = self.ps.repo_match(model=AssetNodeFlat)
 
         return assets_flat_matches.all()
 
@@ -59,7 +59,7 @@ class AssetsDao(object):
         :param self:
         :return:
         """
-        assets_deep_matches = self.ps.repo.match(model=AssetNodeDeep)
+        assets_deep_matches = self.ps.repo_match(model=AssetNodeDeep)
 
         return assets_deep_matches.all()
 
@@ -97,15 +97,15 @@ class AssetsDao(object):
         )
         # TODO: expand to multiple scores (one for TS, one for PDF keywords...)
 
-        self.ps.graph.create(relationship)
+        self.ps.graph_create(relationship)
 
     def delete_asset_similarities(self):
-        self.ps.graph.run(
+        self.ps.graph_run(
             f"MATCH p=()-[r:{RelationshipTypes.ASSET_SIMILARITY.value}]->() DELETE r"
         )
 
     def get_asset_similarities(self):
-        similarities_table = self.ps.graph.run(
+        similarities_table = self.ps.graph_run(
             f"MATCH p=(a1)-[r:{RelationshipTypes.ASSET_SIMILARITY.value}]->(a2) RETURN a1.iri,r.similarity_score,a2.iri"
         ).to_table()
 
@@ -121,7 +121,7 @@ class AssetsDao(object):
         return similarities_list
 
     def get_assets_count(self):
-        assets_count = self.ps.graph.run(
+        assets_count = self.ps.graph_run(
             f"MATCH (n:{NodeTypes.ASSET.value}) RETURN count(n)"
         ).to_table()[0][0]
 

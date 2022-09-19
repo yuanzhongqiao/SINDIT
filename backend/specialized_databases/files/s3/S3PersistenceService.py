@@ -1,21 +1,19 @@
-from datetime import datetime
-import io
-from influxdb_client.client.write_api import SYNCHRONOUS
-from influxdb_client import InfluxDBClient, Point
-import pandas as pd
-from urllib3.exceptions import ReadTimeoutError
+""" S3 compatible persistence service """
+
 import boto3
 from botocore.client import Config
 
-from graph_domain.main_digital_twin.DatabaseConnectionNode import DatabaseConnectionNode
-from backend.exceptions.IdNotFoundException import IdNotFoundException
 from backend.specialized_databases.files.FilesPersistenceService import (
     FilesPersistenceService,
 )
 
 
 class S3PersistenceService(FilesPersistenceService):
-    """ """
+    """S3 compatible persistence service
+
+    Args:
+        FilesPersistenceService (_type_): _description_
+    """
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -42,6 +40,8 @@ class S3PersistenceService(FilesPersistenceService):
 
         self.bucket = self.resource.Bucket(self.bucket_name)
 
+        # Check connection:
+
     # override
     def stream_file(
         self,
@@ -53,8 +53,8 @@ class S3PersistenceService(FilesPersistenceService):
         :return:
         :raise IdNotFoundException: if the iri is not found
         """
-        object = self.bucket.Object(iri)
-        response = object.get()
+        file_object = self.bucket.Object(iri)
+        response = file_object.get()
         file_stream = response["Body"]
         return file_stream
 

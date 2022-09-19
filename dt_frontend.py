@@ -1,8 +1,14 @@
+"""
+Main entry point for the presentation layer
+Separated from app.py to avoid circular dependencies with callback files importing the "app" instance. 
+"""
+
 from frontend.app import app
 from frontend import page_layout
 
 # Import callback files (indirectly used through annotation)
 
+# pylint: disable=unused-import
 # noinspection PyUnresolvedReferences
 from frontend.navbar import navbar_callbacks
 
@@ -49,22 +55,18 @@ from frontend.right_sidebar.node_data_tab.file_visualization import (
 
 from util.environment_and_configuration import (
     get_environment_variable,
-    get_environment_variable_bool,
     get_environment_variable_int,
 )
 
-
-"""
-Main entry point for the presentation layer
-Separated from app.py to avoid circular dependencies with callback files importing the "app" instance. 
-"""
 
 # #############################################################################
 # Launch frontend
 # #############################################################################
 if __name__ == "__main__":
     # Initialize layout
+    print("Initializing app layout...")
     app.layout = page_layout.get_layout()
+    print("Finished initializing the app layout.")
 
     app.run(
         host=get_environment_variable("FRONTEND_HOST"),
