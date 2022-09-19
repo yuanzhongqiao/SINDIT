@@ -68,25 +68,38 @@ class RuntimeConnectionContainer:
         # Check if ts inputs or connections have been removed:
         #
         updated_connection_iri_list = set(
-            [ts_node.db_connection.iri for ts_node in updated_ts_nodes_deep]
+            [ts_node.runtime_connection.iri for ts_node in updated_ts_nodes_deep]
         )
         updated_ts_input_iri_list = set(
             [ts_node.iri for ts_node in updated_ts_nodes_deep]
         )
-        runtime_connection: RuntimeConnection
-        for runtime_connection in self.connections.values():
 
-            if runtime_connection.iri not in updated_connection_iri_list:
-                # Whole connection was removed!
-                # Unregister all inputs and the connection
-                runtime_connection.disconnect()
-                del runtime_connection
-            else:
-                # Check if single ts inputs have been removed
-                ts_input: TimeseriesInput
-                for ts_input in runtime_connection.timeseries_inputs:
-                    if ts_input.iri not in updated_ts_input_iri_list:
-                        runtime_connection.remove_ts_input(ts_input.iri)
+        removed_connections = [
+            con
+            for con in self.connections.values()
+            if con.iri not in updated_connection_iri_list
+        ]
+        for con in removed_connections:
+            # Whole connection was removed!
+            # Unregister all inputs and the connection
+            con.disconnect()
+            self.connections.pop(con.iri)
+            del con
+
+        removed_inputs = []
+        for con in self.connections.values():
+            removed_inputs.extend(
+                [
+                    (ts_input, con)
+                    for ts_input in con.timeseries_inputs.values()
+                    if ts_input.iri not in updated_ts_input_iri_list
+                ]
+            )
+
+        ts_input: TimeseriesInput
+        con: RuntimeConnection
+        for (ts_input, con) in removed_inputs:
+            con.remove_ts_input(ts_input.iri)
 
         #
         # Initialize new ts inputs and connections

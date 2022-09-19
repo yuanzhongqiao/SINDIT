@@ -222,9 +222,9 @@ class OpcuaRuntimeConnection(RuntimeConnection):
                 )
 
     def disconnect(self):
+        self._opcua_client.disconnect()
         self.thread_stop = True
         self.opcua_connector_thread.join()
-        self._opcua_client.disconnect()
         self._asyncua_treadloop.stop()
 
     def add_ts_input(self, ts_input: TimeseriesInput):

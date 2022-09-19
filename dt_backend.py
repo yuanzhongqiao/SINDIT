@@ -99,7 +99,7 @@ def refresh_ts_inputs():
 def refresh_time_series_thread_loop():
 
     while True:
-        time.sleep(120)
+        time.sleep(20)
         print("Refreshing time-series inputs and connections...")
         refresh_ts_inputs()
 
