@@ -13,4 +13,9 @@ app = dash.Dash(
     external_stylesheets=external_stylesheets,
     suppress_callback_exceptions=True,
     assets_folder="../assets",
+    update_title=None,
+    title="SINDIT – SINTEF Digital Twin",
 )
+
+# pylint: disable=W0212
+app._favicon = "favicon.png"
