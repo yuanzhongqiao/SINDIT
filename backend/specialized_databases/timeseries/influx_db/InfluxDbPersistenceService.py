@@ -2,11 +2,10 @@ from datetime import datetime, timedelta
 from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client import InfluxDBClient, Point
 import pandas as pd
-from urllib3.exceptions import ReadTimeoutError
+from urllib3.exceptions import ReadTimeoutError, NewConnectionError, ConnectTimeoutError
 import warnings
 from influxdb_client.client.warnings import MissingPivotFunction
 
-from graph_domain.main_digital_twin.DatabaseConnectionNode import DatabaseConnectionNode
 from backend.exceptions.IdNotFoundException import IdNotFoundException
 from backend.specialized_databases.timeseries.TimeseriesPersistenceService import (
     TimeseriesPersistenceService,
@@ -22,6 +21,8 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
         super().__init__(**kwargs)
 
         self.bucket = self.group
+
+        self._last_reading_dropped = False
 
         self._client: InfluxDBClient = InfluxDBClient(
             url=self.host + ":" + self.port,
@@ -56,8 +57,40 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
             record.time(reading_time)
         try:
             self._write_api.write(bucket=self.bucket, record=record)
-        except ReadTimeoutError as err:
-            pass
+            if self._last_reading_dropped:
+                print("Writing of time-series readings working again.")
+            self._last_reading_dropped = False
+        except ReadTimeoutError:
+            if not self._last_reading_dropped:
+                print(
+                    "Time-series reading dropped: Database not available (ReadTimeoutError). "
+                    "Will notify when successful again."
+                )
+            self._last_reading_dropped = True
+            # continue with new readings (drop this one)
+        except NewConnectionError:
+            if not self._last_reading_dropped:
+                print(
+                    "Time-series reading dropped: Database not available (NewConnectionError). "
+                    "Will notify when successful again."
+                )
+            self._last_reading_dropped = True
+            # continue with new readings (drop this one)
+        except ConnectionResetError:
+            if not self._last_reading_dropped:
+                print(
+                    "Time-series reading dropped: Database not available (ConnectionResetError). "
+                    "Will notify when successful again."
+                )
+            self._last_reading_dropped = True
+            # continue with new readings (drop this one)
+        except ConnectTimeoutError:
+            if not self._last_reading_dropped:
+                print(
+                    "Time-series reading dropped: Database not available (ConnectTimeoutError). "
+                    "Will notify when successful again."
+                )
+            self._last_reading_dropped = True
             # continue with new readings (drop this one)
 
     def _timerange_query(self, begin_time: datetime | None, end_time: datetime | None):
@@ -115,21 +148,25 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
                 '|> rename(columns: {_time: "time", reading: "value"})'
             )
 
-        try:
-            df = self._query_api.query_data_frame(query=query)
+        while True:
+            try:
+                df = self._query_api.query_data_frame(query=query)
 
-            # Dataframe cleanup
-            df.drop(columns=["result", "table"], axis=1, inplace=True)
-            # df.rename(
-            #     columns={"_time": "time", READING_FIELD_NAME: "value"}, inplace=True
-            # )
-            # df.rename(columns={"_time": "time", "_value": "value"}, inplace=True)
+                # Dataframe cleanup
+                df.drop(columns=["result", "table"], axis=1, inplace=True)
+                # df.rename(
+                #     columns={"_time": "time", READING_FIELD_NAME: "value"}, inplace=True
+                # )
+                # df.rename(columns={"_time": "time", "_value": "value"}, inplace=True)
 
-            return df
+                return df
 
-        except KeyError:
-            # id_uri not found
-            raise IdNotFoundException
+            except KeyError:
+                # id_uri not found
+                raise IdNotFoundException
+            except NewConnectionError:
+                # Waiting for reconnect...
+                pass
 
     # override
     def count_entries_for_period(
@@ -154,11 +191,15 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
             f'|> keep(columns: ["_value"])'
         )
 
-        try:
-            df: pd.DataFrame = self._query_api.query_data_frame(query=query)
+        while True:
+            try:
+                df: pd.DataFrame = self._query_api.query_data_frame(query=query)
 
-            return int(df["_value"][0]) if not df.empty else 0
+                return int(df["_value"][0]) if not df.empty else 0
 
-        except KeyError:
-            # id_uri not found
-            raise IdNotFoundException
+            except KeyError:
+                # id_uri not found
+                raise IdNotFoundException
+            except NewConnectionError:
+                # Waiting for reconnect...
+                pass

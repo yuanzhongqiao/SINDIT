@@ -23,11 +23,10 @@ LEARNING_FACTORY_BINARIES_IMPORT_FOLDER = "./learning_factory_instance/binaries_
 # Read Config
 NEO4J_HOST = get_environment_variable(key="NEO4J_DB_HOST", optional=False)
 NEO4J_PORT = get_environment_variable(key="NEO4J_DB_PORT", optional=False)
+NEO4J_DB_NAME = get_environment_variable(key="NEO4J_DB_NAME", optional=False)
 NEO4J_URI = NEO4J_HOST + ":" + NEO4J_PORT
-NEO4J_USER = get_environment_variable(
-    key="NEO4J_DB_USER", optional=True, default="neo4j"
-)
-NEO4J_PASS = get_environment_variable(key="NEO4J_DB_PW", optional=True, default="neo4j")
+NEO4J_USER = get_environment_variable(key="NEO4J_DB_USER", optional=True)
+NEO4J_PW = get_environment_variable(key="NEO4J_DB_PW", optional=True)
 
 S3_HOST = get_environment_variable(key="MINIO_S3_HOST", optional=False)
 S3_PORT = get_environment_variable(key="MINIO_S3_PORT", optional=False)
@@ -41,9 +40,19 @@ S3_PASSWORD = get_environment_variable(
 S3_BUCKET_NAME = "sindit"  # Bucket name stored in graph!
 
 
-def setup_knowledge_graph():
-    g = py2neo.Graph(NEO4J_URI)
+def _get_neo4j_graph():
+    if NEO4J_USER is not None and NEO4J_PW is not None:
+        auth = (NEO4J_USER, NEO4J_PW)
+    elif NEO4J_USER is not None:
+        auth = (NEO4J_USER, None)
+    else:
+        auth = None
 
+    return py2neo.Graph(NEO4J_URI, name=NEO4J_DB_NAME, auth=auth)
+
+
+def setup_knowledge_graph():
+    g = _get_neo4j_graph()
     tx = g.begin()
 
     # Delete everything
@@ -94,7 +103,7 @@ def import_binary_data():
 
     bucket.objects.all().delete()
 
-    g = py2neo.Graph(NEO4J_URI)
+    g = _get_neo4j_graph()
 
     file_list = g.run("MATCH (f:SUPPLEMENTARY_FILE) RETURN f.file_name, f.iri").data()
 
@@ -137,7 +146,7 @@ def generate_alternative_cad_format():
 
     bucket = s3_resource.Bucket(S3_BUCKET_NAME)
 
-    g = py2neo.Graph(NEO4J_URI)
+    g = _get_neo4j_graph()
 
     step_cad_file_list = g.run(
         'MATCH (f:SUPPLEMENTARY_FILE {type: "CAD_STEP"}) WHERE NOT (f)-[:SECONDARY_FORMAT]-(:SUPPLEMENTARY_FILE {type: "CAD_STL"}) RETURN f.file_name, f.iri, f.id_short, f.description'

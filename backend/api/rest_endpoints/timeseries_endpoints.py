@@ -1,29 +1,13 @@
-import json
-from datetime import datetime, timedelta
-import pandas as pd
+from datetime import datetime
 
 from backend.api.api import app
-from backend.exceptions.IdNotFoundException import IdNotFoundException
-from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
-    KnowledgeGraphPersistenceService,
-)
+
 from backend.knowledge_graph.dao.DatabaseConnectionsDao import DatabaseConnectionsDao
 from backend.knowledge_graph.dao.TimeseriesNodesDao import TimeseriesNodesDao
-from backend.specialized_databases.DatabasePersistenceServiceContainer import (
-    DatabasePersistenceServiceContainer,
-)
-from backend.specialized_databases.timeseries.TimeseriesPersistenceService import (
-    TimeseriesPersistenceService,
-)
-from backend.specialized_databases.timeseries.influx_db.InfluxDbPersistenceService import (
-    InfluxDbPersistenceService,
-)
+
 import backend.api.python_endpoints.timeseries_endpoints as python_timeseries_endpoints
 
 
-DB_SERVICE_CONTAINER: DatabasePersistenceServiceContainer = (
-    DatabasePersistenceServiceContainer.instance()
-)
 DB_CON_NODE_DAO: DatabaseConnectionsDao = DatabaseConnectionsDao.instance()
 TIMESERIES_NODES_DAO: TimeseriesNodesDao = TimeseriesNodesDao.instance()
 

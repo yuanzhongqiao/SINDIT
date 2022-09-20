@@ -1,39 +1,17 @@
-import json
-from datetime import datetime, timedelta
-import pandas as pd
 from fastapi.responses import StreamingResponse
 from fastapi.responses import RedirectResponse
 from fastapi.responses import PlainTextResponse
 
 from backend.api.api import app
-from backend.exceptions.IdNotFoundException import IdNotFoundException
-from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
-    KnowledgeGraphPersistenceService,
-)
+
 from backend.knowledge_graph.dao.DatabaseConnectionsDao import DatabaseConnectionsDao
 from backend.knowledge_graph.dao.SupplementaryFileNodesDao import (
     SupplementaryFileNodesDao,
 )
-from backend.specialized_databases.DatabasePersistenceServiceContainer import (
-    DatabasePersistenceServiceContainer,
-)
-from backend.specialized_databases.files.FilesPersistenceService import (
-    FilesPersistenceService,
-)
-from backend.specialized_databases.timeseries.TimeseriesPersistenceService import (
-    TimeseriesPersistenceService,
-)
-from backend.specialized_databases.timeseries.influx_db.InfluxDbPersistenceService import (
-    InfluxDbPersistenceService,
-)
-from backend.knowledge_graph.dao.AssetNodesDao import AssetsDao
 
 import backend.api.python_endpoints.file_endpoints as python_file_endpoints
 
 
-DB_SERVICE_CONTAINER: DatabasePersistenceServiceContainer = (
-    DatabasePersistenceServiceContainer.instance()
-)
 DB_CON_NODE_DAO: DatabaseConnectionsDao = DatabaseConnectionsDao.instance()
 SUPPL_FILE_DAO: SupplementaryFileNodesDao = SupplementaryFileNodesDao.instance()
 

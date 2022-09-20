@@ -9,6 +9,7 @@ files importing the "app" instance.
 import time
 import uvicorn
 
+from threading import Thread
 from backend.api.api import app
 from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
     KnowledgeGraphPersistenceService,
@@ -58,17 +59,6 @@ from util.environment_and_configuration import (
 # #############################################################################
 # Setup sensor connections and timeseries persistence
 # #############################################################################
-def init_database_connections():
-    print("Initializing database connections...")
-
-    # pylint: disable=W0612
-    kg_service = KnowledgeGraphPersistenceService.instance()
-
-    db_con_container: DatabasePersistenceServiceContainer = (
-        DatabasePersistenceServiceContainer.instance()
-    )
-
-    print("Done!")
 
 
 def init_database_data_if_not_available():
@@ -77,46 +67,62 @@ def init_database_data_if_not_available():
 
     if assets_count == 0:
         print("No assets found! Initializing databases in 60 seconds, if not canceled.")
-        time.sleeep(60)
+        time.sleep(60)
 
         setup_knowledge_graph()
         import_binary_data()
         generate_alternative_cad_format()
+        print("Finished initilization.")
 
 
-def init_sensors():
-    print("Initializing timeseries inputs...")
-
-    # pylint: disable=W0612
-    kg_service: KnowledgeGraphPersistenceService = (
-        KnowledgeGraphPersistenceService.instance()
-    )
+def refresh_ts_inputs():
     timeseries_nodes_dao: TimeseriesNodesDao = TimeseriesNodesDao.instance()
-
     runtime_con_container: RuntimeConnectionContainer = (
         RuntimeConnectionContainer.instance()
     )
-
     timeseries_deep_nodes = timeseries_nodes_dao.get_all_timeseries_nodes_deep()
 
-    runtime_con_container.initialize_connections_inputs_and_handlers(
-        timeseries_deep_nodes
-    )
+    runtime_con_container.refresh_connection_inputs_and_handlers(timeseries_deep_nodes)
 
-    runtime_con_container.start_connections()
 
-    print("Done!")
+def refresh_time_series_thread_loop():
+
+    while True:
+        time.sleep(120)
+        print("Refreshing time-series inputs and connections...")
+        refresh_ts_inputs()
+
+        print("Done refreshing time-series inputs and connecitons.")
 
 
 # #############################################################################
 # Launch backend
 # #############################################################################
 if __name__ == "__main__":
-    init_database_connections()
 
+    print("Initializing Knowledge Graph...")
+
+    # pylint: disable=W0612
+    kg_service = KnowledgeGraphPersistenceService.instance()
+
+    print("Done initializing Knowledge Graph.")
+
+    print("Checking, if data is present...")
     init_database_data_if_not_available()
 
-    init_sensors()
+    print("Initializing specialized databases...")
+    db_con_container: DatabasePersistenceServiceContainer = (
+        DatabasePersistenceServiceContainer.instance()
+    )
+    print("Done initializing specialized databases.")
+
+    print("Loading time-series inputs and connections...")
+    refresh_ts_inputs()
+    print("Done loading time-series inputs and connections.")
+
+    # Thread checking regulary, if timeseries inputs and runtime-connections have been added / removed
+    ts_refresh_thread = Thread(target=refresh_time_series_thread_loop)
+    ts_refresh_thread.start()
 
     # Run fast API
     # noinspection PyTypeChecker

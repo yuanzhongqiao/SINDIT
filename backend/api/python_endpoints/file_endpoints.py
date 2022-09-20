@@ -27,10 +27,6 @@ from backend.specialized_databases.timeseries.influx_db.InfluxDbPersistenceServi
 )
 from backend.knowledge_graph.dao.AssetNodesDao import AssetsDao
 
-
-DB_SERVICE_CONTAINER: DatabasePersistenceServiceContainer = (
-    DatabasePersistenceServiceContainer.instance()
-)
 DB_CON_NODE_DAO: DatabaseConnectionsDao = DatabaseConnectionsDao.instance()
 SUPPL_FILE_DAO: SupplementaryFileNodesDao = SupplementaryFileNodesDao.instance()
 
@@ -53,7 +49,9 @@ def get_supplementary_file_stream(iri: str):
             return None
 
         file_service: FilesPersistenceService = (
-            DB_SERVICE_CONTAINER.get_persistence_service(file_con_node.iri)
+            DatabasePersistenceServiceContainer.instance().get_persistence_service(
+                file_con_node.iri
+            )
         )
 
         return file_service.stream_file(
@@ -82,7 +80,9 @@ def get_supplementary_file_temporary_link(iri: str):
             return None
 
         file_service: FilesPersistenceService = (
-            DB_SERVICE_CONTAINER.get_persistence_service(file_con_node.iri)
+            DatabasePersistenceServiceContainer.instance().get_persistence_service(
+                file_con_node.iri
+            )
         )
 
         # Create the temporary redirect link:

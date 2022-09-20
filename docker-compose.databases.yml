@@ -41,11 +41,7 @@ services:
       timeout: 2s
       retries: 10
     environment:
-      - NEO4J_AUTH=none
-      # Neo4J plugins for metamodel, similarity analysis, RDF semantics, ...
-      - NEO4JLABS_PLUGINS=["apoc", "n10s", "graph-data-science", "streams"]
-      # Allow the separate endpoint "/rdf" for RDF mappings
-      - NEO4J_dbms_unmanaged__extension__classes=n10s.endpoint=/rdf
+      - NEO4J_AUTH=neo4j/sindit-neo4j
 
   sindit_minio_s3:
     image: minio/minio

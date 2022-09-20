@@ -1,4 +1,5 @@
 import abc
+from typing import Dict
 
 from graph_domain.main_digital_twin.RuntimeConnectionNode import RuntimeConnectionNode
 from backend.runtime_connections.TimeseriesInput import TimeseriesInput
@@ -52,7 +53,7 @@ class RuntimeConnection(abc.ABC):
             else None
         )
 
-        self.timeseries_inputs = []
+        self.timeseries_inputs: Dict[str, TimeseriesInput] = dict()
 
     @classmethod
     def from_runtime_connection_node(cls, node: RuntimeConnectionNode):
@@ -64,12 +65,20 @@ class RuntimeConnection(abc.ABC):
             key_environment_variable=node.key_environment_variable,
         )
 
-    def add_input(self, input: TimeseriesInput):
-        self.timeseries_inputs.append(input)
-
     @abc.abstractmethod
     def start_connection(self):
         pass
 
     def is_active(self) -> bool:
         return self.active
+
+    def remove_ts_input(self, iri: str):
+        del self.timeseries_inputs[iri]
+
+    @abc.abstractmethod
+    def disconnect(self):
+        """Disconnects and prepares for deletion"""
+
+    @abc.abstractmethod
+    def add_ts_input(self, ts_input: TimeseriesInput):
+        pass

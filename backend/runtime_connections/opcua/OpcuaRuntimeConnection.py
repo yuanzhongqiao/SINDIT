@@ -30,7 +30,7 @@ class OpcuaRuntimeConnection(RuntimeConnection):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
+        self.thread_stop = False
         self.sampling_rate = SAMPLING_RATE
 
         self._opcua_client = None
@@ -68,7 +68,7 @@ class OpcuaRuntimeConnection(RuntimeConnection):
         subscription = None
 
         # Outer loop for restoring the whole connection after a timeout
-        while True:
+        while self.thread_stop == False:
             try:
                 self._opcua_client.connect()
                 self.__load_opcua_nodes()
@@ -88,7 +88,7 @@ class OpcuaRuntimeConnection(RuntimeConnection):
                 self.active = True
 
                 # Continuously test the connection. Otherwise, lost connections do not seem to lead to an exception
-                while True:
+                while self.thread_stop == False:
                     time.sleep(CONNECTION_CHECK_INTERVAL)
                     # 'i=84' is the root node that should always exist. Just for checking the connection
                     # self.__opcua_client.get_node('i=84')
@@ -116,7 +116,7 @@ class OpcuaRuntimeConnection(RuntimeConnection):
         self.__start_connection()
 
         # Outer loop for restoring the whole connection after a timeout
-        while True:
+        while self.thread_stop == False:
             try:
 
                 self._opcua_client.connect()
@@ -136,7 +136,7 @@ class OpcuaRuntimeConnection(RuntimeConnection):
                 )
 
                 # Continuously polling the sensor readings:
-                while True:
+                while self.thread_stop == False:
                     node: asyncua.sync.SyncNode
                     for node in self._nodes:
                         val = node.read_value()
@@ -145,7 +145,7 @@ class OpcuaRuntimeConnection(RuntimeConnection):
                         self.active = True
 
                         timeseries_input: OpcuaTimeseriesInput
-                        for timeseries_input in self.timeseries_inputs:
+                        for timeseries_input in self.timeseries_inputs.values():
                             timeseries_input.handle_reading_if_belonging(
                                 node_id=str(node),
                                 reading_time=data.SourceTimestamp,
@@ -176,7 +176,7 @@ class OpcuaRuntimeConnection(RuntimeConnection):
         Blocking until the connection is successfull!
         :return:
         """
-        while self._opcua_client is None:
+        while self._opcua_client is None and self.thread_stop == False:
             try:
                 self._opcua_client = asyncua.sync.Client(
                     url=f"opc.tcp://{self.host}:{self.port}",
@@ -195,7 +195,7 @@ class OpcuaRuntimeConnection(RuntimeConnection):
         :return:
         """
         timeseries_input: OpcuaTimeseriesInput
-        for timeseries_input in self.timeseries_inputs:
+        for timeseries_input in self.timeseries_inputs.values():
             self._nodes.append(
                 self._opcua_client.get_node(timeseries_input.connection_topic)
             )
@@ -214,9 +214,19 @@ class OpcuaRuntimeConnection(RuntimeConnection):
         if ONLY_CHANGES:
 
             timeseries_input: OpcuaTimeseriesInput
-            for timeseries_input in self.timeseries_inputs:
+            for timeseries_input in self.timeseries_inputs.values():
                 timeseries_input.handle_reading_if_belonging(
                     node_id=str(node),
                     reading_time=data.monitored_item.Value.SourceTimestamp,
                     value=val,
                 )
+
+    def disconnect(self):
+        self._opcua_client.disconnect()
+        self.thread_stop = True
+        self.opcua_connector_thread.join()
+        self._asyncua_treadloop.stop()
+
+    def add_ts_input(self, ts_input: TimeseriesInput):
+        self.timeseries_inputs[ts_input.iri] = ts_input
+        self._nodes.append(self._opcua_client.get_node(ts_input.connection_topic))
