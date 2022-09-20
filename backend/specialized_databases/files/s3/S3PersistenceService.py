@@ -18,6 +18,7 @@ class S3PersistenceService(FilesPersistenceService):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        # No exception handling required: If connection unavailable, the setup works anyways
         self.client = boto3.client(
             "s3",
             endpoint_url=self.host + ":" + self.port,
@@ -39,7 +40,6 @@ class S3PersistenceService(FilesPersistenceService):
         self.bucket_name = self.group
 
         self.bucket = self.resource.Bucket(self.bucket_name)
-
         # Check connection:
 
     # override
@@ -53,6 +53,7 @@ class S3PersistenceService(FilesPersistenceService):
         :return:
         :raise IdNotFoundException: if the iri is not found
         """
+        # No exception handling required: If connection unavailable, the calls will wait till it becomes available
         file_object = self.bucket.Object(iri)
         response = file_object.get()
         file_stream = response["Body"]
@@ -69,6 +70,7 @@ class S3PersistenceService(FilesPersistenceService):
             _type_: _description_
         """
 
+        # No exception handling required: If connection unavailable, the calls will wait till it becomes available
         return self.client.generate_presigned_url(
             "get_object",
             Params={"Bucket": self.bucket_name, "Key": iri},
