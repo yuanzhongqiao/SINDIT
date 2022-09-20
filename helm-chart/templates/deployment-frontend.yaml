@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sindit.fullname" . }}-frontend
+  labels:
+    {{- include "sindit.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "sindit.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "sindit.selectorLabels" . | nindent 8 }}
+        type: frontend
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "sindit.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-frontend
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["python", "dt_frontend.py"]
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: FAST_API_HOST
+              value: {{ .Values.ApiHost | default "/api" | quote }}
+            - name: FAST_API_PORT
+              value: {{ .Values.ApiPort | default "8000" | quote }}
+            - name: FRONTEND_PRODUCTION
+              value: "true"
+            - name: FRONTEND_HOST
+              value: "0.0.0.0"
+            - name: FRONTEND_PORT
+              value: "8050"
+          ports:
+            - name: frontend
+              containerPort: 8050
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: frontend
+          readinessProbe:
+            httpGet:
+              path: /
+              port: frontend
+          resources:
+            {{- toYaml .Values.resources.frontend | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,11 @@
+{{- if .Values.ingressBackend.traefik }}
+{{- $fullName := include "sindit.fullname" . -}}
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ $fullName }}-stripprefix-backend-middleware
+spec:
+  stripPrefix:
+    prefixes:
+      - /api
+{{- end}}
