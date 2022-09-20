@@ -8,8 +8,12 @@ metadata:
     "helm.sh/hook": test
 spec:
   containers:
-    - name: wget
+    - name: wget-backend
       image: busybox
       command: ['wget']
-      args: ['{{ include "sindit.fullname" . }}:{{ .Values.service.port }}']
+      args: ['{{ include "sindit.fullname" . }}-backend:{{ .Values.serviceBackend.port }}']
+    - name: wget-frontend
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "sindit.fullname" . }}-frontend:{{ .Values.serviceFrontend.port }}']
   restartPolicy: Never

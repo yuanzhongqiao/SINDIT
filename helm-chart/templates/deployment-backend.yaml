@@ -1,13 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "sindit.fullname" . }}
+  name: {{ include "sindit.fullname" . }}-backend
   labels:
     {{- include "sindit.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
   selector:
     matchLabels:
       {{- include "sindit.selectorLabels" . | nindent 6 }}
@@ -19,6 +17,7 @@ spec:
       {{- end }}
       labels:
         {{- include "sindit.selectorLabels" . | nindent 8 }}
+        type: backend
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -28,26 +27,6 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}-frontend
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["python", "dt_frontend.py"]
-          ports:
-            - name: http
-              containerPort: 8050
-              protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
-          resources:
-            {{- toYaml .Values.resources.frontend | nindent 12 }}
         - name: {{ .Chart.Name }}-backend
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
@@ -55,12 +34,14 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["python", "dt_backend.py"]
           env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
             - name: FAST_API_HOST
               value: "0.0.0.0"
             - name: FAST_API_PORT
               value: "8000"
             - name: NEO4J_DB_HOST
-              value: bolt://sindit-neo4j
+              value: {{ .Values.neo4j.host | quote }}
             - name: NEO4J_DB_PORT
               value: "7687"
             - name: NEO4J_DB_NAME
@@ -93,25 +74,25 @@ spec:
               value: "sindit-minio"
             - name: MINIO_S3_PORT
               value: "9000"
-          secrets:
-            - name: minio-s3-secret
-              items:
-                - key: accesskey
-                  path: accesskey
-                - key: secretkey
-                  path: secretkey
+            - name: MINIO_S3_USER
+              value: "sindit"
+            - name: MINIO_S3_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "sindit.fullname" . }}
+                  key: minio-s3-password
           ports:
-            - name: http
+            - name: backend
               containerPort: 8000
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /assets
-              port: http
+              port: backend
           readinessProbe:
             httpGet:
               path: /assets
-              port: http
+              port: backend
           resources:
             {{- toYaml .Values.resources.backend | nindent 12 }}
       {{- with .Values.nodeSelector }}

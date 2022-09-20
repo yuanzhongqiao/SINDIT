@@ -3,7 +3,7 @@ name: sindit
 description: SINTEF Digital Twin
 type: application
 version: 0.0.1
-appVersion: "2.0.0"
+appVersion: "2.0.1"
 dependencies:
   - name: influxdb
     version: 5.4.2
