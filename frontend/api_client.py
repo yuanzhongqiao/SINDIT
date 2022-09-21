@@ -76,7 +76,7 @@ def get_raw(relative_path: str, **kwargs):
     while True:
         try:
             return requests.get(
-                API_URI + relative_path, params=kwargs, timeout=30
+                API_URI + relative_path, params=kwargs, timeout=300
             ).content
         except ReqExc:
             print("API not availlable! Retrying in 5 seconds...")

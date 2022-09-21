@@ -46,7 +46,7 @@ class KnowledgeGraphPersistenceService(object):
                 else:
                     auth = None
 
-                self._graph = py2neo.Graph(host, name=graph_name, auth=auth)
+                self.graph = py2neo.Graph(host, name=graph_name, auth=auth)
 
                 self._repo = ogm.Repository(host, name=graph_name, auth=auth)
                 print("Successfully connected to Neo4J!")
@@ -63,7 +63,7 @@ class KnowledgeGraphPersistenceService(object):
         """
         while True:
             try:
-                return self._graph.run(cypher)
+                return self.graph.run(cypher)
             except ConnectionBroken:
                 self.connected = False
                 self._connect()
@@ -74,7 +74,7 @@ class KnowledgeGraphPersistenceService(object):
         """
         while True:
             try:
-                return self._graph.evaluate(cypher)
+                return self.graph.evaluate(cypher)
             except ConnectionBroken:
                 self.connected = False
                 self._connect()
@@ -85,7 +85,7 @@ class KnowledgeGraphPersistenceService(object):
         """
         while True:
             try:
-                return self._graph.push(subgraph)
+                return self.graph.push(subgraph)
             except ConnectionBroken:
                 self.connected = False
                 self._connect()
@@ -96,7 +96,7 @@ class KnowledgeGraphPersistenceService(object):
         """
         while True:
             try:
-                return self._graph.create(subgraph)
+                return self.graph.create(subgraph)
             except ConnectionBroken:
                 self.connected = False
                 self._connect()
@@ -107,7 +107,7 @@ class KnowledgeGraphPersistenceService(object):
         """
         while True:
             try:
-                return self._graph.merge(subgraph=subgraph, label=label)
+                return self.graph.merge(subgraph=subgraph, label=label)
             except ConnectionBroken:
                 self.connected = False
                 self._connect()

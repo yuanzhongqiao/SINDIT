@@ -3,7 +3,7 @@
 
 apt-get update
 
-apt-get install -y curl
+apt-get install -y curl wget
 
 # git required for the pke keyphrase extraction library (git pip link)
 apt-get install -y git
@@ -21,6 +21,11 @@ apt-get install -y python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-ut
 # tsfresh installation only works with the dependency (unlike the ones for other packages)
 apt-get install -y gcc
 pip install tsfresh
+
+# Influx cli for remote backup / restore
+wget https://dl.influxdata.com/influxdb/releases/influxdb2-client-2.4.0-amd64.deb
+apt install ./influxdb2-client-2.4.0-amd64.deb
+rm influxdb2-client-2.4.0-amd64.deb
 
 apt-get clean
 

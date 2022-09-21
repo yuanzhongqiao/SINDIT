@@ -1,4 +1,5 @@
 from dash.dependencies import Input, Output, State
+from dash import dcc
 from frontend.app import app
 from frontend import api_client
 
@@ -67,21 +68,12 @@ def download_single_notifier(n, m):
 )
 def download_single(n, selected_db):
     print(f"Startet export for single database: {selected_db}")
-    # Cancel if nothing selected
-    # if selected_el_json is None:
-    #     raise PreventUpdate()
 
-    # selected_el: GraphSelectedElement = GraphSelectedElement.from_json(selected_el_json)
-
-    # # Cancel if anything else than a file is selected
-    # if selected_el.type != NodeTypes.SUPPLEMENTARY_FILE.value:
-    #     print("Trying to download file for non-file element...")
-    #     raise PreventUpdate()
-
-    # suppl_file_data = api_client.get_raw(
-    #     relative_path="/supplementary_file/data",
-    #     iri=selected_el.iri,
-    # )
+    file_data = api_client.get_raw(
+        relative_path="/export/database_dump",
+        database_iri=selected_db,
+        all_databases=False,
+    )
 
     # suppl_file_details_dict = api_client.get_json(
     #     relative_path="/supplementary_file/details",
@@ -91,7 +83,7 @@ def download_single(n, selected_db):
     #     suppl_file_details_dict
     # )
 
-    # return dcc.send_bytes(src=suppl_file_data, filename=suppl_file_details.file_name)
+    return dcc.send_bytes(src=file_data, filename="test-file.txt")
 
 
 @app.callback(
