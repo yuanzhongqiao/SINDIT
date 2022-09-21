@@ -45,6 +45,10 @@ from backend.api.rest_endpoints import annotation_endpoints
 
 # noinspection PyUnresolvedReferences
 from backend.api.rest_endpoints import graph_endpoints
+
+# noinspection PyUnresolvedReferences
+from backend.api.rest_endpoints import import_export_endpoints
+
 from init_learning_factory_from_cypher_file import (
     generate_alternative_cad_format,
     import_binary_data,

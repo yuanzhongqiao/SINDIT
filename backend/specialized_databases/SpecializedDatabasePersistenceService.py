@@ -60,6 +60,6 @@ class SpecializedDatabasePersistenceService(abc.ABC):
             key_environment_variable=node.key_environment_variable,
         )
 
-    @abc.abstractmethod
-    def create_db_dump(self):
-        
+    # @abc.abstractmethod
+    # def create_db_dump(self):
+    #     pass

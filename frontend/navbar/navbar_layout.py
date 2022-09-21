@@ -1,6 +1,5 @@
-from dash import html
+from dash import html, dcc
 import dash_bootstrap_components as dbc
-import dash_core_components as dcc
 from frontend.app import app
 
 
@@ -76,6 +75,7 @@ def get_layout():
                                     "margin-bottom": "10px",
                                 },
                             ),
+                            dcc.Download(id="export-all-download"),
                             dcc.Dropdown(
                                 [],
                                 None,
@@ -97,6 +97,7 @@ def get_layout():
                                 },
                                 disabled=True,
                             ),
+                            dcc.Download(id="export-single-download"),
                             dbc.Alert(
                                 children="Export started. This can take a while!",
                                 id="export-started-notifier",

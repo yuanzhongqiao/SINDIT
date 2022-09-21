@@ -1,8 +1,6 @@
 from dash.dependencies import Input, Output, State
-from dash import html
-import dash_bootstrap_components as dbc
-import dash_core_components as dcc
 from frontend.app import app
+from frontend import api_client
 
 print("Initializing navbar callbacks...")
 
@@ -30,7 +28,11 @@ def toggle_popover(n, is_open):
     exportable_dbs = []
     if not is_open:
         # Load content
-        exportable_dbs = ["A", "B"]
+        options = api_client.get_json("/export/database_list")
+
+        exportable_dbs = [
+            {"value": option[0], "label": option[1]} for option in options
+        ]
 
     return not is_open, exportable_dbs
 
@@ -48,10 +50,71 @@ def download_single_button_active(selected):
 
 @app.callback(
     Output("export-started-notifier", "is_open"),
+    Input("export-all-button", "n_clicks"),
+    Input("export-single-button", "n_clicks"),
+    prevent_initial_call=True,
+)
+def download_single_notifier(n, m):
+    # Separate callback to display the notifier before the end of the main callback!
+    return True
+
+
+@app.callback(
+    Output("export-single-download", "data"),
     Input("export-single-button", "n_clicks"),
     State("exportable-databases-dropdown", "value"),
     prevent_initial_call=True,
 )
-def download_single_notifier(n, selected_db):
+def download_single(n, selected_db):
     print(f"Startet export for single database: {selected_db}")
-    return True
+    # Cancel if nothing selected
+    # if selected_el_json is None:
+    #     raise PreventUpdate()
+
+    # selected_el: GraphSelectedElement = GraphSelectedElement.from_json(selected_el_json)
+
+    # # Cancel if anything else than a file is selected
+    # if selected_el.type != NodeTypes.SUPPLEMENTARY_FILE.value:
+    #     print("Trying to download file for non-file element...")
+    #     raise PreventUpdate()
+
+    # suppl_file_data = api_client.get_raw(
+    #     relative_path="/supplementary_file/data",
+    #     iri=selected_el.iri,
+    # )
+
+    # suppl_file_details_dict = api_client.get_json(
+    #     relative_path="/supplementary_file/details",
+    #     iri=selected_el.iri,
+    # )
+    # suppl_file_details: SupplementaryFileNodeFlat = SupplementaryFileNodeFlat.from_dict(
+    #     suppl_file_details_dict
+    # )
+
+    # return dcc.send_bytes(src=suppl_file_data, filename=suppl_file_details.file_name)
+
+
+@app.callback(
+    Output("export-all-download", "data"),
+    Input("export-all-button", "n_clicks"),
+    prevent_initial_call=True,
+)
+def download_all(n):
+    print("Startet export for all databases")
+
+
+# @app.callback(
+#     Output("output-data-upload", "children"),
+#     Input("upload-data", "contents"),
+#     State("upload-data", "filename"),
+#     State("upload-data", "last_modified"),
+#     prevent_initial_call=True,
+# )
+# def upload_file(list_of_contents, list_of_names, list_of_dates):
+#     pass
+# if list_of_contents is not None:
+#     children = [
+#         parse_contents(c, n, d)
+#         for c, n, d in zip(list_of_contents, list_of_names, list_of_dates)
+#     ]
+#     return children

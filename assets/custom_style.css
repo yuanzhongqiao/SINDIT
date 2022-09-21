@@ -149,7 +149,7 @@
 }
 
 #import-export-dropdown {
-    width: 300px;
+    min-width: 400px;
 }
 
 .vertical-button-left-text {
