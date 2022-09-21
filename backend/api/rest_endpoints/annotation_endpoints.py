@@ -1,15 +1,12 @@
 from datetime import datetime
 import json
-from fastapi import FastAPI, HTTPException
+from fastapi import HTTPException
 from typing import List
 from backend.api.api import app
 from backend.knowledge_graph.dao.AnnotationNodesDao import AnnotationNodesDao
-from backend.knowledge_graph.dao.AssetNodesDao import AssetsDao
 from pydantic import BaseModel
-import backend.api.python_endpoints.asset_endpoints as python_asset_endpoints
 from backend.knowledge_graph.dao.TimeseriesNodesDao import TimeseriesNodesDao
 from graph_domain.expert_annotations.AnnotationTimeseriesMatcherNode import (
-    AnnotationTimeseriesMatcherNodeDeep,
     AnnotationTimeseriesMatcherNodeFlat,
 )
 
@@ -48,7 +45,7 @@ class AnnotationInstanceArguments(BaseModel):
 
 
 @app.post("/annotation/instance")
-def post_annotation_definition(instance: AnnotationInstanceArguments):
+def post_annotation_instance(instance: AnnotationInstanceArguments):
     print(f"Creating new annotation instance: {instance.id_short}...")
     instance_iri = ANNOTATIONS_DAO.create_annotation_instance(
         id_short=instance.id_short,
@@ -99,7 +96,7 @@ def delete_annotation_definition(definition_iri: str):
 
 
 @app.delete("/annotation/instance")
-def delete_annotation_definition(instance_iri: str):
+def delete_annotation_instance(instance_iri: str):
     """Deletes not only a instance, but also its related time-series matchers (and relationships)!
 
     Args:

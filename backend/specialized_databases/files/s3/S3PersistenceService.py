@@ -76,3 +76,11 @@ class S3PersistenceService(FilesPersistenceService):
             Params={"Bucket": self.bucket_name, "Key": iri},
             ExpiresIn=6000,
         )
+
+    def backup(self, backup_path: str):
+        pass
+        # TODO: implement
+
+    def restore(self, backup_path: str):
+        pass
+        # TODO: implement

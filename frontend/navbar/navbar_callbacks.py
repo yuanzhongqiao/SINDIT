@@ -89,10 +89,10 @@ def upload_notifier(n):
 )
 def download_export(n, m, selected_db):
     if ctx.triggered_id == "export-single-button":
-        print(f"Startet export for single database: {selected_db}")
+        print(f"Started export for single database: {selected_db}")
         multi_export = False
     else:
-        print("Startet export for all databases")
+        print("Started export for all databases")
         multi_export = True
     date_time_str = (
         datetime.now()

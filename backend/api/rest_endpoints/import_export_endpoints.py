@@ -5,9 +5,12 @@ import os
 import shutil
 from typing import List
 from fastapi.responses import StreamingResponse
-from fastapi import UploadFile, Form
+from fastapi import UploadFile, Form, HTTPException
 from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
     KnowledgeGraphPersistenceService,
+)
+from backend.specialized_databases.DatabasePersistenceServiceContainer import (
+    DatabasePersistenceServiceContainer,
 )
 from util.environment_and_configuration import (
     ConfigGroups,
@@ -72,11 +75,6 @@ def get_exportable_databases_list():
     return options
 
 
-# influx restore ./database_export/influx_db_test --host http://sindit-influx-db-devcontainer:8086 -t sindit_influxdb_admin_token
-# influx bucket delete -o sindit -n sindit --host http://sindit-influx-db-devcontainer:8086 -t sindit_influxdb_admin_token
-#  influx restore ./database_export/influx_db_test --host http://sindit-influx-db-devcontainer:8086 -t sindit_influxdb_admin_token
-
-
 def _remplace_illegal_characters_from_iri(iri: str) -> str:
     return "".join((char if char in FILENAME_ALLOWED_CHARS else "_") for char in iri)
 
@@ -101,10 +99,14 @@ def export_database_dumps(database_iri: str | None = None, all_databases: bool =
         db_list = [option[0] for option in get_exportable_databases_list()]
     else:
         if database_iri is None:
+            shutil.rmtree(backup_base_path)
             raise IdNotFoundException()
         db_list = [database_iri]
 
     backup_folder_names = dict()
+
+    persistence_container = DatabasePersistenceServiceContainer.instance()
+
     for db in db_list:
         if db == GRAPH_DATABASE_FAKE_IRI:
             backup_folder = GRAPH_DATABASE_BACKUP_FOLDER
@@ -114,7 +116,9 @@ def export_database_dumps(database_iri: str | None = None, all_databases: bool =
         else:
             backup_folder = _remplace_illegal_characters_from_iri(db)
             backup_path = backup_base_path + backup_folder
-            # TODO: make backup
+            persistence_service = persistence_container.get_persistence_service(db)
+            persistence_service.backup(backup_path)
+
             backup_folder_names[db] = backup_folder
 
     # Create info file:
@@ -139,21 +143,11 @@ def export_database_dumps(database_iri: str | None = None, all_databases: bool =
     shutil.make_archive(zip_file_path, "zip", backup_base_path)
     shutil.rmtree(backup_base_path)
 
-    # KnowledgeGraphPersistenceService.instance().restore(
-    #     "database_export/2022_09_21_14_20_42_583128/neo4j"
-    # )
-
     def iterfile():
         with open(zip_file_path_with_extension, mode="rb") as file_like:
             yield from file_like
 
     return StreamingResponse(iterfile(), media_type="application/octet-stream")
-
-
-# @app.post("/import/database_dumps")
-# def import_database_dumps(file: UploadFile):
-#     print(f"Importing database dump(s): {file.filename}")
-#     pass
 
 
 @app.post("/import/database_dumps")
@@ -169,8 +163,11 @@ def upload(file_name: str = Form(...), file_data: str = Form(...)):
 
     content_type, content_string = file_data.split(",")
     if content_type != "data:application/zip;base64":
-        return
-        # TODO: error response
+        shutil.rmtree(restore_base_path)
+        raise HTTPException(
+            status_code=403, detail="Invalid file: only zip archives allowed."
+        )
+
     decoded_bytes = base64.b64decode(content_string)
 
     zip_file_name = restore_base_path + "zip_archive.zip"
@@ -181,21 +178,30 @@ def upload(file_name: str = Form(...), file_data: str = Form(...)):
     os.remove(zip_file_name)
 
     # Parse info file:
-    with open(
-        restore_base_path + EXPORT_INFO_FILE_NAME, "r", encoding="utf-8"
-    ) as info_file:
-        info_file_json = info_file.read()
+    try:
+        with open(
+            restore_base_path + EXPORT_INFO_FILE_NAME, "r", encoding="utf-8"
+        ) as info_file:
+            info_file_json = info_file.read()
+    except FileNotFoundError:
+        print("Not a valid backup: sindit_export_info.txt file not found!")
+        shutil.rmtree(restore_base_path)
+        raise HTTPException(
+            status_code=403, detail="Invalid backup: sindit_export_info.txt missing"
+        )
+
     info_dict = json.loads(info_file_json)
     database_folders: dict = info_dict.get("backup_iri_mappings")
     # Restore databases:
+    persistence_container = DatabasePersistenceServiceContainer.instance()
     for iri in database_folders.keys():
         db_folder_name = database_folders.get(iri)
+        backup_path = restore_base_path + db_folder_name
         if iri == GRAPH_DATABASE_FAKE_IRI:
-            backup_path = restore_base_path + db_folder_name
             KnowledgeGraphPersistenceService.instance().restore(backup_path)
         else:
-            # TODO: restore
-            pass
+            persistence_service = persistence_container.get_persistence_service(iri)
+            persistence_service.restore(backup_path)
 
     shutil.rmtree(restore_base_path)
 

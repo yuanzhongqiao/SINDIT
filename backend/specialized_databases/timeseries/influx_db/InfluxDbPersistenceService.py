@@ -4,14 +4,23 @@ from influxdb_client import InfluxDBClient, Point
 import pandas as pd
 from urllib3.exceptions import ReadTimeoutError, NewConnectionError, ConnectTimeoutError
 import warnings
+import subprocess
 from influxdb_client.client.warnings import MissingPivotFunction
 
+from dateutil import tz
 from backend.exceptions.IdNotFoundException import IdNotFoundException
 from backend.specialized_databases.timeseries.TimeseriesPersistenceService import (
     TimeseriesPersistenceService,
 )
+from util.environment_and_configuration import (
+    ConfigGroups,
+    get_configuration,
+)
+import os
 
 READING_FIELD_NAME = "reading"
+SAFETY_BACKUP_PATH = "safety_backups/neo4j/"
+DATETIME_STRF_FORMAT = "%Y_%m_%d_%H_%M_%S_%f"
 
 
 class InfluxDbPersistenceService(TimeseriesPersistenceService):
@@ -24,8 +33,10 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
 
         self._last_reading_dropped = False
 
+        self.uri = self.host + ":" + self.port
+
         self._client: InfluxDBClient = InfluxDBClient(
-            url=self.host + ":" + self.port,
+            url=self.uri,
             token=self.key,
             org=self.database,
             verify_ssl=self.key is not None,
@@ -127,25 +138,24 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
                 '|> rename(columns: {_time: "time", reading: "value"})'
             )
 
-        while True:
-            try:
-                df = self._query_api.query_data_frame(query=query)
+        try:
+            df = self._query_api.query_data_frame(query=query)
 
-                # Dataframe cleanup
-                df.drop(columns=["result", "table"], axis=1, inplace=True)
-                # df.rename(
-                #     columns={"_time": "time", READING_FIELD_NAME: "value"}, inplace=True
-                # )
-                # df.rename(columns={"_time": "time", "_value": "value"}, inplace=True)
+            # Dataframe cleanup
+            df.drop(columns=["result", "table"], axis=1, inplace=True)
+            # df.rename(
+            #     columns={"_time": "time", READING_FIELD_NAME: "value"}, inplace=True
+            # )
+            # df.rename(columns={"_time": "time", "_value": "value"}, inplace=True)
 
-                return df
+            return df
 
-            except KeyError:
-                # id_uri not found
-                raise IdNotFoundException
-            except NewConnectionError:
-                # Waiting for reconnect...
-                pass
+        except KeyError:
+            # id_uri not found
+            raise IdNotFoundException
+        except NewConnectionError:
+            # Skip this ts
+            return None
 
     # override
     def count_entries_for_period(
@@ -170,17 +180,63 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
             f'|> keep(columns: ["_value"])'
         )
 
-        while True:
-            # pylint: disable=W0703
-            try:
-                df: pd.DataFrame = self._query_api.query_data_frame(query=query)
+        # pylint: disable=W0703
+        try:
+            df: pd.DataFrame = self._query_api.query_data_frame(query=query)
 
-                return int(df["_value"][0]) if not df.empty else 0
+            return int(df["_value"][0]) if not df.empty else 0
 
-            except KeyError:
-                # id_uri not found
-                raise IdNotFoundException
-            except Exception:
-                # Using generic exception on purpose, since there are many different ones occuring, that
-                # Waiting for reconnect...
-                pass
+        except KeyError:
+            # id_uri not found
+            raise IdNotFoundException
+        except Exception:
+            # Using generic exception on purpose, since there are many different ones occuring, that
+            # Waiting for reconnect...
+            return None
+
+    def backup(self, backup_path: str):
+        print("Backing up InfluxDB...")
+
+        subprocess.run(
+            ["influx", "backup", backup_path, "--host", self.uri, "-t", self.key]
+        )
+
+        print("Finished backing up InfluxDB.")
+
+    def restore(self, backup_path: str):
+        print("Restoring InfluxDB...")
+        print("Creating a safety backup before overwriting the database...")
+        safety_path = SAFETY_BACKUP_PATH + datetime.now().astimezone(
+            tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+        ).strftime(DATETIME_STRF_FORMAT)
+        os.makedirs(safety_path)
+        self.backup(backup_path=safety_path + "influxdb")
+
+        # Delete everything:
+        print("Deleting everything...")
+        subprocess.run(
+            [
+                "influx",
+                "bucket",
+                "delete",
+                "-o",
+                self.bucket,
+                "-n",
+                self.database,
+                "--host",
+                self.uri,
+                "-t",
+                self.key,
+            ]
+        )
+        print("Deleted everything.")
+        print("Restoring...")
+        subprocess.run(
+            ["influx", "restore", backup_path, "--host", self.uri, "-t", self.key]
+        )
+        print("Finished restoring InfluxDB.")
+
+
+# influx restore ./database_export/influx_db_test --host http://sindit-influx-db-devcontainer:8086 -t sindit_influxdb_admin_token
+# influx bucket delete -o sindit -n sindit --host http://sindit-influx-db-devcontainer:8086 -t sindit_influxdb_admin_token
+#  influx restore ./database_export/influx_db_test --host http://sindit-influx-db-devcontainer:8086 -t sindit_influxdb_admin_token

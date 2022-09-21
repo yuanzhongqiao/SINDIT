@@ -143,7 +143,7 @@ class KnowledgeGraphPersistenceService(object):
                 self.connected = False
                 self._connect()
 
-    def backup(self, path: str):
+    def backup(self, backup_path: str):
         print("Backing up neo4j...")
 
         driver = GraphDatabase.driver(
@@ -154,7 +154,7 @@ class KnowledgeGraphPersistenceService(object):
         )
 
         extractor = Extractor(
-            project_dir=path,
+            project_dir=backup_path,
             driver=driver,
             database=self.graph_name,
             input_yes=False,
@@ -171,7 +171,7 @@ class KnowledgeGraphPersistenceService(object):
             tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
         ).strftime(DATETIME_STRF_FORMAT)
         os.makedirs(safety_path)
-        self.backup(path=safety_path + "neo4j")
+        self.backup(backup_path=safety_path + "neo4j")
 
         # Delete everything:
         print("Deleting everything...")
