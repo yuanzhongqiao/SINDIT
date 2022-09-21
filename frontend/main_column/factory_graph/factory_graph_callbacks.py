@@ -86,7 +86,7 @@ def update_factory_graph(
     State("graph-force-full-reload-store", "modified_timestamp"),
     Input("annotation-creation-saved", "modified_timestamp"),
     Input("annotation-deleted", "modified_timestamp"),
-    Input("import-finished", "modified_timestamp"),
+    Input("import-finished", "data"),
     prevent_initial_call=True,
 )
 def factory_graph_update_trigger(
@@ -105,7 +105,7 @@ def factory_graph_update_trigger(
         "annotation-deleted",
         "import-finished",
     ]:
-        print("Reloading graph from backend after creating a new annotation...")
+        print("Reloading graph from backend after writing to the graph...")
         return 2
     elif graph_loaded is None and n_init_intervall == 1:
         # First loading after opening / reloading whole page

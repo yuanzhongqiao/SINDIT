@@ -32,9 +32,10 @@ def toggle_offcanvas(n1, is_open):
     Output("exportable-databases-dropdown", "options"),
     Input("import-export-button", "n_clicks"),
     State("import-export-dropdown", "is_open"),
+    Input("import-finished", "data"),
     prevent_initial_call=True,
 )
-def toggle_popover(n, is_open):
+def toggle_popover(n, is_open, import_finished):
     exportable_dbs = []
     if not is_open:
         # Load content

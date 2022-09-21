@@ -1,3 +1,4 @@
+import base64
 from datetime import datetime
 import json
 import os
@@ -38,6 +39,7 @@ DB_CONNECTION_LABEL_PREFIX = {
 }
 
 DATABASE_EXPORT_DIRECTORY = "database_export/"
+DATABASE_IMPORT_DIRECTORY = "database_import/"
 
 DATETIME_STRF_FORMAT = "%Y_%m_%d_%H_%M_%S_%f"
 
@@ -157,10 +159,44 @@ def export_database_dumps(database_iri: str | None = None, all_databases: bool =
 @app.post("/import/database_dumps")
 def upload(file_name: str = Form(...), file_data: str = Form(...)):
     print(f"Importing database dump(s): {file_name}")
+    restore_date_time = datetime.now()
+    restore_date_time_file_string = restore_date_time.astimezone(
+        tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+    ).strftime(DATETIME_STRF_FORMAT)
 
-    # image_as_bytes = str.encode(filedata)  # convert string to bytes
-    # img_recovered = base64.b64decode(image_as_bytes)  # decode base64string
-    # with open("uploaded_" + filename, "wb") as f:
-    #     f.write(img_recovered)
+    restore_base_path = DATABASE_IMPORT_DIRECTORY + restore_date_time_file_string + "/"
+    os.makedirs(restore_base_path)
+
+    content_type, content_string = file_data.split(",")
+    if content_type != "data:application/zip;base64":
+        return
+        # TODO: error response
+    decoded_bytes = base64.b64decode(content_string)
+
+    zip_file_name = restore_base_path + "zip_archive.zip"
+    with open(zip_file_name, "wb") as f:
+        f.write(decoded_bytes)
+
+    shutil.unpack_archive(filename=zip_file_name, extract_dir=restore_base_path)
+    os.remove(zip_file_name)
+
+    # Parse info file:
+    with open(
+        restore_base_path + EXPORT_INFO_FILE_NAME, "r", encoding="utf-8"
+    ) as info_file:
+        info_file_json = info_file.read()
+    info_dict = json.loads(info_file_json)
+    database_folders: dict = info_dict.get("backup_iri_mappings")
+    # Restore databases:
+    for iri in database_folders.keys():
+        db_folder_name = database_folders.get(iri)
+        if iri == GRAPH_DATABASE_FAKE_IRI:
+            backup_path = restore_base_path + db_folder_name
+            KnowledgeGraphPersistenceService.instance().restore(backup_path)
+        else:
+            # TODO: restore
+            pass
+
+    shutil.rmtree(restore_base_path)
 
     return {"message": f"Successfuly imported {file_name}"}
