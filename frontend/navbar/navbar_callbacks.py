@@ -64,7 +64,17 @@ def download_single_button_active(selected):
     Input("export-single-button", "n_clicks"),
     prevent_initial_call=True,
 )
-def download_single_notifier(n, m):
+def download_notifier(n, m):
+    # Separate callback to display the notifier before the end of the main callback!
+    return True
+
+
+@app.callback(
+    Output("import-started-notifier", "is_open"),
+    Input("import-upload-button", "n_clicks"),
+    prevent_initial_call=True,
+)
+def upload_notifier(n):
     # Separate callback to display the notifier before the end of the main callback!
     return True
 
@@ -101,15 +111,45 @@ def download_export(n, m, selected_db):
     return dcc.send_bytes(src=file_data, filename=file_name)
 
 
+@app.callback(
+    Output("import-file-selected-info", "children"),
+    Output("import-file-selected-info-collapse", "is_open"),
+    Output("import-upload-button", "disabled"),
+    # Input("upload-import", "contents"),
+    Input("upload-import", "filename"),
+    # State("upload-import", "last_modified"),
+    prevent_initial_call=True,
+)
+def select_upload_file(filename):
+    if filename is not None:
+        return filename, True, False
+    else:
+        return None, False, True
+
+
+@app.callback(
+    Output("upload-import", "filename"),
+    Output("import-finished", "data"),
+    Input("import-upload-button", "n_clicks"),
+    State("upload-import", "filename"),
+    State("upload-import", "contents"),
+    prevent_initial_call=True,
+)
+def upload_file(n, file_name, file_content):
+    return None, datetime.now()
+
+
 # @app.callback(
 #     Output("output-data-upload", "children"),
-#     Input("upload-data", "contents"),
-#     State("upload-data", "filename"),
-#     State("upload-data", "last_modified"),
+#     Input("upload-import", "contents"),
+#     State("upload-import", "filename"),
+#     State("upload-import", "last_modified"),
 #     prevent_initial_call=True,
 # )
 # def upload_file(list_of_contents, list_of_names, list_of_dates):
 #     pass
+
+
 # if list_of_contents is not None:
 #     children = [
 #         parse_contents(c, n, d)

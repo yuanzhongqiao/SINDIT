@@ -131,12 +131,26 @@ def get_layout():
                                 },
                                 multiple=False,
                             ),
+                            dbc.Collapse(
+                                id="import-file-selected-info-collapse",
+                                is_open=False,
+                                children=[
+                                    html.Div(
+                                        "File selected for import:",
+                                        style={
+                                            "font-weight": "bold",
+                                            "padding-top": "10px",
+                                        },
+                                    ),
+                                    html.Div(id="import-file-selected-info"),
+                                ],
+                            ),
                             dbc.Button(
                                 [
-                                    html.I(className="bi bi-download me-2"),
+                                    html.I(className="bi bi-upload me-2"),
                                     "Import",
                                 ],
-                                id="import-uploaded",
+                                id="import-upload-button",
                                 n_clicks=0,
                                 color="primary",
                                 size="sm",
@@ -146,6 +160,19 @@ def get_layout():
                                     "width": "100%",
                                     "margin-bottom": "10px",
                                 },
+                                disabled=True,
+                            ),
+                            dbc.Alert(
+                                children="Import started. This can take a while!",
+                                id="import-started-notifier",
+                                class_name="inline-alert",
+                                is_open=False,
+                                duration=5000,
+                                style={"padding-top": "8px"},
+                            ),
+                            dcc.Store(
+                                id="import-finished",
+                                storage_type="memory",
                             ),
                         ]
                     ),
