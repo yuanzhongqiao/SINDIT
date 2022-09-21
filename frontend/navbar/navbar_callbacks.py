@@ -1,9 +1,18 @@
+from datetime import datetime
 from dash.dependencies import Input, Output, State
 from dash import dcc
 from frontend.app import app
 from frontend import api_client
+from dateutil import tz
+from util.environment_and_configuration import (
+    ConfigGroups,
+    get_configuration,
+)
 
 print("Initializing navbar callbacks...")
+
+EXPORT_FILE_NAME_BASE = "sindit_database_export_"
+DATETIME_STRF_FORMAT = "%Y_%m_%d_%H_%M_%S_%f"
 
 
 @app.callback(
@@ -68,6 +77,14 @@ def download_single_notifier(n, m):
 )
 def download_single(n, selected_db):
     print(f"Startet export for single database: {selected_db}")
+    date_time_str = (
+        datetime.now()
+        .astimezone(
+            tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+        )
+        .strftime(DATETIME_STRF_FORMAT)
+    )
+    file_name = EXPORT_FILE_NAME_BASE + date_time_str + ".zip"
 
     file_data = api_client.get_raw(
         relative_path="/export/database_dump",
@@ -83,7 +100,7 @@ def download_single(n, selected_db):
     #     suppl_file_details_dict
     # )
 
-    return dcc.send_bytes(src=file_data, filename="test-file.txt")
+    return dcc.send_bytes(src=file_data, filename=file_name)
 
 
 @app.callback(

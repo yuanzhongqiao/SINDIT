@@ -1,14 +1,17 @@
 from datetime import datetime
+import json
 import os
+import shutil
 from typing import List
 from fastapi.responses import StreamingResponse
-from fastapi.responses import RedirectResponse
-from fastapi.responses import PlainTextResponse
-import py2neo
 from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
     KnowledgeGraphPersistenceService,
 )
-from util.environment_and_configuration import get_environment_variable
+from util.environment_and_configuration import (
+    ConfigGroups,
+    get_configuration,
+)
+from dateutil import tz
 from backend.api.api import app
 from backend.exceptions.IdNotFoundException import IdNotFoundException
 
@@ -17,19 +20,17 @@ from backend.knowledge_graph.dao.SupplementaryFileNodesDao import (
     SupplementaryFileNodesDao,
 )
 
-import backend.api.python_endpoints.file_endpoints as python_file_endpoints
 from graph_domain.main_digital_twin.DatabaseConnectionNode import (
     DatabaseConnectionNode,
     DatabaseConnectionTypes,
 )
-from neo4j import GraphDatabase
-from neo4j_backup import Extractor, Importer
 
 DB_CON_NODE_DAO: DatabaseConnectionsDao = DatabaseConnectionsDao.instance()
 SUPPL_FILE_DAO: SupplementaryFileNodesDao = SupplementaryFileNodesDao.instance()
 
-GRAPH_DATABASE_FAKE_IRI = "graph_db_iri"
+GRAPH_DATABASE_FAKE_IRI = "graph_database_neo4j"
 GRAPH_DATABASE_LABEL = "Graph Database (Neo4J)"
+GRAPH_DATABASE_BACKUP_FOLDER = "graph_database_neo4j"
 DB_CONNECTION_LABEL_PREFIX = {
     DatabaseConnectionTypes.INFLUX_DB.value: "Time-series DB",
     DatabaseConnectionTypes.S3.value: "Files DB",
@@ -38,6 +39,11 @@ DB_CONNECTION_LABEL_PREFIX = {
 DATABASE_EXPORT_DIRECTORY = "database_export/"
 
 DATETIME_STRF_FORMAT = "%Y_%m_%d_%H_%M_%S_%f"
+
+FILENAME_ALLOWED_CHARS = (
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-"
+)
+EXPORT_INFO_FILE_NAME = "sindit_export_info.txt"
 
 
 @app.get("/export/database_list")
@@ -63,86 +69,13 @@ def get_exportable_databases_list():
     return options
 
 
-# def _test_backup_neo4j():
-#     print("Backing up neo4j")
-
-#     uri = "neo4j://sindit-neo4j-kg-devcontainer:7687"
-#     username = "neo4j"
-#     password = "sindit-neo4j"
-#     encrypted = False
-#     trust = "TRUST_ALL_CERTIFICATES"
-#     driver = GraphDatabase.driver(
-#         uri, auth=(username, password), encrypted=encrypted, trust=trust
-#     )
-
-#     database = "neo4j"
-
-#     project_dir = "database_export/neo4j_test_export"
-#     input_yes = False
-#     compress = True
-#     extractor = Extractor(
-#         project_dir=project_dir,
-#         driver=driver,
-#         database=database,
-#         input_yes=input_yes,
-#         compress=compress,
-#     )
-#     extractor.extract_data()
-
-#     pass
-
-
-# NEO4J_HOST = get_environment_variable(key="NEO4J_DB_HOST", optional=False)
-# NEO4J_PORT = get_environment_variable(key="NEO4J_DB_PORT", optional=False)
-# NEO4J_DB_NAME = get_environment_variable(key="NEO4J_DB_NAME", optional=False)
-# NEO4J_URI = NEO4J_HOST + ":" + NEO4J_PORT
-# NEO4J_USER = get_environment_variable(key="NEO4J_DB_USER", optional=True)
-# NEO4J_PW = get_environment_variable(key="NEO4J_DB_PW", optional=True)
-
-
-# def _get_neo4j_graph():
-#     if NEO4J_USER is not None and NEO4J_PW is not None:
-#         auth = (NEO4J_USER, NEO4J_PW)
-#     elif NEO4J_USER is not None:
-#         auth = (NEO4J_USER, None)
-#     else:
-#         auth = None
-
-#     return py2neo.Graph(NEO4J_URI, name=NEO4J_DB_NAME, auth=auth)
-
-
-# def _test_restore_neo4j():
-#     print("Restoring neo4j")
-#     g = _get_neo4j_graph()
-#     # Delete everything
-#     print("Deleting everything...")
-#     g.delete_all()
-#     print("Deleted everything.")
-
-#     uri = "neo4j://sindit-neo4j-kg-devcontainer:7687"
-#     username = "neo4j"
-#     password = "sindit-neo4j"
-#     encrypted = False
-#     trust = "TRUST_ALL_CERTIFICATES"
-#     driver = GraphDatabase.driver(
-#         uri, auth=(username, password), encrypted=encrypted, trust=trust
-#     )
-
-#     database = "neo4j"
-
-#     project_dir = "database_export/neo4j_test_export"
-#     input_yes = False
-#     importer = Importer(
-#         project_dir=project_dir, driver=driver, database=database, input_yes=input_yes
-#     )
-#     importer.import_data()
-
-#     pass
-
-
 # influx restore ./database_export/influx_db_test --host http://sindit-influx-db-devcontainer:8086 -t sindit_influxdb_admin_token
 # influx bucket delete -o sindit -n sindit --host http://sindit-influx-db-devcontainer:8086 -t sindit_influxdb_admin_token
 #  influx restore ./database_export/influx_db_test --host http://sindit-influx-db-devcontainer:8086 -t sindit_influxdb_admin_token
+
+
+def _remplace_illegal_characters_from_iri(iri: str) -> str:
+    return "".join((char if char in FILENAME_ALLOWED_CHARS else "_") for char in iri)
 
 
 @app.get("/export/database_dump")
@@ -152,11 +85,12 @@ def get_supplementary_file(database_iri: str | None = None, all_databases: bool 
     :raises IdNotFoundException: If the file is not found
     :return:
     """
-    # _test_backup_neo4j()
-    # _test_restore_neo4j()
-    backup_base_path = (
-        DATABASE_EXPORT_DIRECTORY + datetime.now().strftime(DATETIME_STRF_FORMAT) + "/"
-    )
+    backup_date_time = datetime.now()
+    backup_date_time_file_string = backup_date_time.astimezone(
+        tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+    ).strftime(DATETIME_STRF_FORMAT)
+
+    backup_base_path = DATABASE_EXPORT_DIRECTORY + backup_date_time_file_string + "/"
 
     os.makedirs(backup_base_path)
 
@@ -167,25 +101,47 @@ def get_supplementary_file(database_iri: str | None = None, all_databases: bool 
             raise IdNotFoundException()
         db_list = [database_iri]
 
-    backup_folder_names = []
+    backup_folder_names = dict()
     for db in db_list:
         if db == GRAPH_DATABASE_FAKE_IRI:
-            backup_path = backup_base_path + "neo4j"
+            backup_folder = GRAPH_DATABASE_BACKUP_FOLDER
+            backup_path = backup_base_path + backup_folder
             KnowledgeGraphPersistenceService.instance().backup(backup_path)
-            backup_folder_names.append(backup_path)
+            backup_folder_names[db] = backup_folder
         else:
-            pass
-            # TODO: Create dump
+            backup_folder = _remplace_illegal_characters_from_iri(db)
+            backup_path = backup_base_path + backup_folder
+            # TODO: make backup
+            backup_folder_names[db] = backup_folder
 
-    # TODO: zip together...
-    zip_file_path = DATABASE_EXPORT_DIRECTORY + "test-file.txt"
+    # Create info file:
+    info_dict = {
+        "sindit_export_version": get_configuration(
+            group=ConfigGroups.GENERIC, key="sindit_export_version"
+        ),
+        "export_date_time": backup_date_time.isoformat(),
+        "backup_iri_mappings": backup_folder_names,
+    }
+
+    info_json = json.dumps(info_dict, indent=4)
+
+    with open(
+        backup_base_path + EXPORT_INFO_FILE_NAME, "w", encoding="utf-8"
+    ) as info_file:
+        info_file.write(info_json)
+
+    # Zip the folder and delete it
+    zip_file_path = DATABASE_EXPORT_DIRECTORY + backup_date_time_file_string
+    zip_file_path_with_extension = zip_file_path + ".zip"
+    shutil.make_archive(zip_file_path, "zip", backup_base_path)
+    shutil.rmtree(backup_base_path)
 
     # KnowledgeGraphPersistenceService.instance().restore(
     #     "database_export/2022_09_21_14_20_42_583128/neo4j"
     # )
 
     def iterfile():
-        with open(zip_file_path, mode="rb") as file_like:
+        with open(zip_file_path_with_extension, mode="rb") as file_like:
             yield from file_like
 
     return StreamingResponse(iterfile(), media_type="application/octet-stream")

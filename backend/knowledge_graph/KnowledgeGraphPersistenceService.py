@@ -2,6 +2,12 @@ from datetime import datetime
 import os
 from sqlite3 import Cursor
 import time
+from dateutil import tz
+from util.environment_and_configuration import (
+    ConfigGroups,
+    get_configuration,
+    get_environment_variable,
+)
 from typing import Any
 import py2neo
 import py2neo.ogm as ogm
@@ -9,7 +15,6 @@ from py2neo.errors import ConnectionBroken
 from neo4j import GraphDatabase
 from neo4j_backup import Extractor, Importer
 
-from util.environment_and_configuration import get_environment_variable
 
 SAFETY_BACKUP_PATH = "safety_backups/neo4j/"
 DATETIME_STRF_FORMAT = "%Y_%m_%d_%H_%M_%S_%f"
@@ -162,7 +167,9 @@ class KnowledgeGraphPersistenceService(object):
     def restore(self, backup_path: str):
         print("Restoring neo4j...")
         print("Creating a safety backup before overwriting the database...")
-        safety_path = SAFETY_BACKUP_PATH + datetime.now().strftime(DATETIME_STRF_FORMAT)
+        safety_path = SAFETY_BACKUP_PATH + datetime.now().astimezone(
+            tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+        ).strftime(DATETIME_STRF_FORMAT)
         os.makedirs(safety_path)
         self.backup(path=safety_path + "neo4j")
 
