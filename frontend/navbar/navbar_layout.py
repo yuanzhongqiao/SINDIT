@@ -75,7 +75,6 @@ def get_layout():
                                     "margin-bottom": "10px",
                                 },
                             ),
-                            dcc.Download(id="export-all-download"),
                             dcc.Dropdown(
                                 [],
                                 None,
@@ -97,7 +96,7 @@ def get_layout():
                                 },
                                 disabled=True,
                             ),
-                            dcc.Download(id="export-single-download"),
+                            dcc.Download(id="export-download"),
                             dbc.Alert(
                                 children="Export started. This can take a while!",
                                 id="export-started-notifier",

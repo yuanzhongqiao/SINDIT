@@ -1,6 +1,6 @@
 from datetime import datetime
 from dash.dependencies import Input, Output, State
-from dash import dcc
+from dash import dcc, ctx
 from frontend.app import app
 from frontend import api_client
 from dateutil import tz
@@ -70,13 +70,19 @@ def download_single_notifier(n, m):
 
 
 @app.callback(
-    Output("export-single-download", "data"),
+    Output("export-download", "data"),
     Input("export-single-button", "n_clicks"),
+    Input("export-all-button", "n_clicks"),
     State("exportable-databases-dropdown", "value"),
     prevent_initial_call=True,
 )
-def download_single(n, selected_db):
-    print(f"Startet export for single database: {selected_db}")
+def download_export(n, m, selected_db):
+    if ctx.triggered_id == "export-single-button":
+        print(f"Startet export for single database: {selected_db}")
+        multi_export = False
+    else:
+        print("Startet export for all databases")
+        multi_export = True
     date_time_str = (
         datetime.now()
         .astimezone(
@@ -89,27 +95,10 @@ def download_single(n, selected_db):
     file_data = api_client.get_raw(
         relative_path="/export/database_dump",
         database_iri=selected_db,
-        all_databases=False,
+        all_databases=multi_export,
     )
 
-    # suppl_file_details_dict = api_client.get_json(
-    #     relative_path="/supplementary_file/details",
-    #     iri=selected_el.iri,
-    # )
-    # suppl_file_details: SupplementaryFileNodeFlat = SupplementaryFileNodeFlat.from_dict(
-    #     suppl_file_details_dict
-    # )
-
     return dcc.send_bytes(src=file_data, filename=file_name)
-
-
-@app.callback(
-    Output("export-all-download", "data"),
-    Input("export-all-button", "n_clicks"),
-    prevent_initial_call=True,
-)
-def download_all(n):
-    print("Startet export for all databases")
 
 
 # @app.callback(
