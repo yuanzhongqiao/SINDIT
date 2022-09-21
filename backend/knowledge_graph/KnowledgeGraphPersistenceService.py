@@ -1,12 +1,18 @@
+from datetime import datetime
+import os
 from sqlite3 import Cursor
 import time
 from typing import Any
 import py2neo
 import py2neo.ogm as ogm
 from py2neo.errors import ConnectionBroken
-
+from neo4j import GraphDatabase
+from neo4j_backup import Extractor, Importer
 
 from util.environment_and_configuration import get_environment_variable
+
+SAFETY_BACKUP_PATH = "safety_backups/neo4j/"
+DATETIME_STRF_FORMAT = "%Y_%m_%d_%H_%M_%S_%f"
 
 
 class KnowledgeGraphPersistenceService(object):
@@ -30,30 +36,34 @@ class KnowledgeGraphPersistenceService(object):
         self._connect()
 
     def _connect(self):
+        self.uri_without_protocol = f"{get_environment_variable(key='NEO4J_DB_HOST', optional=False)}:{get_environment_variable(key='NEO4J_DB_PORT', optional=False)}"
+        self.bolt_uri = f"bolt://{self.uri_without_protocol}"
+        self.neo4j_uri = f"neo4j://{self.uri_without_protocol}"
+        self.graph_name = get_environment_variable(key="NEO4J_DB_NAME", optional=False)
+        self.user_name = get_environment_variable(key="NEO4J_DB_USER", optional=True)
+        self.pw = get_environment_variable(key="NEO4J_DB_PW", optional=True)
+        if self.user_name is not None and self.pw is not None:
+            self.auth = (self.user_name, self.pw)
+        elif self.user_name is not None:
+            self.auth = (self.user_name, None)
+        else:
+            self.auth = None
         while not self.connected:
             try:
                 print("Connecting to Neo4J...")
-                uri = f"bolt://{get_environment_variable(key='NEO4J_DB_HOST', optional=False)}:{get_environment_variable(key='NEO4J_DB_PORT', optional=False)}"
-                graph_name = get_environment_variable(
-                    key="NEO4J_DB_NAME", optional=False
-                )
-                user_name = get_environment_variable(key="NEO4J_DB_USER", optional=True)
-                pw = get_environment_variable(key="NEO4J_DB_PW", optional=True)
-                if user_name is not None and pw is not None:
-                    auth = (user_name, pw)
-                elif user_name is not None:
-                    auth = (user_name, None)
-                else:
-                    auth = None
 
                 print(
-                    f"Trying to connect to uri {uri}. "
-                    f"Using a user_name: {user_name is not None}, using a password: {pw is not None}"
+                    f"Trying to connect to uri {self.bolt_uri}. "
+                    f"Using a user_name: {self.user_name is not None}, using a password: {self.pw is not None}"
                 )
 
-                self.graph = py2neo.Graph(uri, name=graph_name, auth=auth)
+                self.graph = py2neo.Graph(
+                    self.bolt_uri, name=self.graph_name, auth=self.auth
+                )
 
-                self._repo = ogm.Repository(uri, name=graph_name, auth=auth)
+                self._repo = ogm.Repository(
+                    self.bolt_uri, name=self.graph_name, auth=self.auth
+                )
                 print("Successfully connected to Neo4J!")
                 self.connected = True
             except py2neo.ConnectionUnavailable:
@@ -127,3 +137,53 @@ class KnowledgeGraphPersistenceService(object):
             except ConnectionBroken:
                 self.connected = False
                 self._connect()
+
+    def backup(self, path: str):
+        print("Backing up neo4j...")
+
+        driver = GraphDatabase.driver(
+            self.neo4j_uri,
+            auth=self.auth,
+            encrypted=False,
+            trust="TRUST_ALL_CERTIFICATES",
+        )
+
+        extractor = Extractor(
+            project_dir=path,
+            driver=driver,
+            database=self.graph_name,
+            input_yes=False,
+            compress=True,
+        )
+        extractor.extract_data()
+
+        print("Finished backing up neo4j.")
+
+    def restore(self, backup_path: str):
+        print("Restoring neo4j...")
+        print("Creating a safety backup before overwriting the database...")
+        safety_path = SAFETY_BACKUP_PATH + datetime.now().strftime(DATETIME_STRF_FORMAT)
+        os.makedirs(safety_path)
+        self.backup(path=safety_path + "neo4j")
+
+        # Delete everything:
+        print("Deleting everything...")
+        self.graph.delete_all()
+        print("Deleted everything.")
+        print("Restoring...")
+        driver = GraphDatabase.driver(
+            self.neo4j_uri,
+            auth=self.auth,
+            encrypted=False,
+            trust="TRUST_ALL_CERTIFICATES",
+        )
+
+        importer = Importer(
+            project_dir=backup_path,
+            driver=driver,
+            database=self.graph_name,
+            input_yes=False,
+        )
+        importer.import_data()
+
+        print("Finished restoring neo4j.")
