@@ -71,7 +71,7 @@ spec:
             - name: FACTORY_OPC_UA_PORT
               value: {{ .Values.factory.opc_ua.port | quote }}
             - name: MINIO_S3_HOST
-              value: "sindit-minio"
+              value: "http://sindit-minio"
             - name: MINIO_S3_PORT
               value: "9000"
             - name: MINIO_S3_USER
