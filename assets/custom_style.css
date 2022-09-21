@@ -141,6 +141,16 @@
     border-radius: 0.5rem;
 }
 
+.popover-header {
+    height: 38px;
+    background-color: #EBF2FA;
+    font-weight: bold;
+    font-size: small;
+}
+
+#import-export-dropdown {
+    min-width: 400px;
+}
 
 .vertical-button-left-text {
     writing-mode: vertical-rl;

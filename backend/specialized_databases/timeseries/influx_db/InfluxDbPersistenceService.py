@@ -55,39 +55,18 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
         )
         if reading_time is not None:
             record.time(reading_time)
+        # pylint: disable=W0703
         try:
             self._write_api.write(bucket=self.bucket, record=record)
             if self._last_reading_dropped:
                 print("Writing of time-series readings working again.")
             self._last_reading_dropped = False
-        except ReadTimeoutError:
+        except Exception:
+            # Using generic exception on purpose, since there are many different ones occuring, that
+            # all require the same handling
             if not self._last_reading_dropped:
                 print(
                     "Time-series reading dropped: Database not available (ReadTimeoutError). "
-                    "Will notify when successful again."
-                )
-            self._last_reading_dropped = True
-            # continue with new readings (drop this one)
-        except NewConnectionError:
-            if not self._last_reading_dropped:
-                print(
-                    "Time-series reading dropped: Database not available (NewConnectionError). "
-                    "Will notify when successful again."
-                )
-            self._last_reading_dropped = True
-            # continue with new readings (drop this one)
-        except ConnectionResetError:
-            if not self._last_reading_dropped:
-                print(
-                    "Time-series reading dropped: Database not available (ConnectionResetError). "
-                    "Will notify when successful again."
-                )
-            self._last_reading_dropped = True
-            # continue with new readings (drop this one)
-        except ConnectTimeoutError:
-            if not self._last_reading_dropped:
-                print(
-                    "Time-series reading dropped: Database not available (ConnectTimeoutError). "
                     "Will notify when successful again."
                 )
             self._last_reading_dropped = True
@@ -192,6 +171,7 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
         )
 
         while True:
+            # pylint: disable=W0703
             try:
                 df: pd.DataFrame = self._query_api.query_data_frame(query=query)
 
@@ -200,6 +180,7 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
             except KeyError:
                 # id_uri not found
                 raise IdNotFoundException
-            except NewConnectionError:
+            except Exception:
+                # Using generic exception on purpose, since there are many different ones occuring, that
                 # Waiting for reconnect...
                 pass
