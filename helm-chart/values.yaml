@@ -153,4 +153,4 @@ minio:
     size: 8Gi
 
 neo4j:
-  host: bolt://sindit
+  host: sindit

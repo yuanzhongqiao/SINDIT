@@ -33,7 +33,7 @@ class KnowledgeGraphPersistenceService(object):
         while not self.connected:
             try:
                 print("Connecting to Neo4J...")
-                host = get_environment_variable(key="NEO4J_DB_HOST", optional=False)
+                uri = f"bolt://{get_environment_variable(key='NEO4J_DB_HOST', optional=False)}:{get_environment_variable(key='NEO4J_DB_PORT', optional=False)}"
                 graph_name = get_environment_variable(
                     key="NEO4J_DB_NAME", optional=False
                 )
@@ -46,9 +46,14 @@ class KnowledgeGraphPersistenceService(object):
                 else:
                     auth = None
 
-                self._graph = py2neo.Graph(host, name=graph_name, auth=auth)
+                print(
+                    f"Trying to connect to uri {uri}. "
+                    f"Using a user_name: {user_name is not None}, using a password: {pw is not None}"
+                )
 
-                self._repo = ogm.Repository(host, name=graph_name, auth=auth)
+                self._graph = py2neo.Graph(uri, name=graph_name, auth=auth)
+
+                self._repo = ogm.Repository(uri, name=graph_name, auth=auth)
                 print("Successfully connected to Neo4J!")
                 self.connected = True
             except py2neo.ConnectionUnavailable:
