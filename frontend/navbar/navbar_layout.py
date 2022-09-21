@@ -117,7 +117,10 @@ def get_layout():
                             dcc.Upload(
                                 id="upload-import",
                                 children=html.Div(
-                                    ["Drag and Drop or ", html.A("Select a File")]
+                                    [
+                                        "Drag and Drop or ",
+                                        html.A("Click to Select a File"),
+                                    ]
                                 ),
                                 style={
                                     "width": "100%",

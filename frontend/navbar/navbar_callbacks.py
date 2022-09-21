@@ -103,7 +103,7 @@ def download_export(n, m, selected_db):
     file_name = EXPORT_FILE_NAME_BASE + date_time_str + ".zip"
 
     file_data = api_client.get_raw(
-        relative_path="/export/database_dump",
+        relative_path="/export/database_dumps",
         database_iri=selected_db,
         all_databases=multi_export,
     )
@@ -135,7 +135,13 @@ def select_upload_file(filename):
     State("upload-import", "contents"),
     prevent_initial_call=True,
 )
-def upload_file(n, file_name, file_content):
+def upload_file(n, file_name, file_data):
+
+    response_body_text = api_client.post(
+        relative_path="/import/database_dumps",
+        data={"file_name": file_name, "file_data": file_data},
+    )
+
     return None, datetime.now()
 
 

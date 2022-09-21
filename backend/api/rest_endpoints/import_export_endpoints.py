@@ -4,6 +4,7 @@ import os
 import shutil
 from typing import List
 from fastapi.responses import StreamingResponse
+from fastapi import UploadFile, Form
 from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
     KnowledgeGraphPersistenceService,
 )
@@ -78,8 +79,8 @@ def _remplace_illegal_characters_from_iri(iri: str) -> str:
     return "".join((char if char in FILENAME_ALLOWED_CHARS else "_") for char in iri)
 
 
-@app.get("/export/database_dump")
-def get_supplementary_file(database_iri: str | None = None, all_databases: bool = True):
+@app.get("/export/database_dumps")
+def export_database_dumps(database_iri: str | None = None, all_databases: bool = True):
     """
     Creates a new database dump or returns a current one, if existing. For single databases or all in one zip.
     :raises IdNotFoundException: If the file is not found
@@ -145,3 +146,21 @@ def get_supplementary_file(database_iri: str | None = None, all_databases: bool 
             yield from file_like
 
     return StreamingResponse(iterfile(), media_type="application/octet-stream")
+
+
+# @app.post("/import/database_dumps")
+# def import_database_dumps(file: UploadFile):
+#     print(f"Importing database dump(s): {file.filename}")
+#     pass
+
+
+@app.post("/import/database_dumps")
+def upload(file_name: str = Form(...), file_data: str = Form(...)):
+    print(f"Importing database dump(s): {file_name}")
+
+    # image_as_bytes = str.encode(filedata)  # convert string to bytes
+    # img_recovered = base64.b64decode(image_as_bytes)  # decode base64string
+    # with open("uploaded_" + filename, "wb") as f:
+    #     f.write(img_recovered)
+
+    return {"message": f"Successfuly imported {file_name}"}
