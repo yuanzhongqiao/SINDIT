@@ -137,12 +137,12 @@ def select_upload_file(filename):
     prevent_initial_call=True,
 )
 def upload_file(n, file_name, file_data):
-
+    print(f"Started database import: {file_name} ...")
     response_body_text = api_client.post(
         relative_path="/import/database_dumps",
         data={"file_name": file_name, "file_data": file_data},
     )
-
+    print("Finished database import.")
     return None, datetime.now()
 
 

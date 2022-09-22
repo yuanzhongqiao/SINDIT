@@ -52,7 +52,7 @@ EXPORT_INFO_FILE_NAME = "sindit_export_info.txt"
 
 
 @app.get("/export/database_list")
-def get_exportable_databases_list():
+async def get_exportable_databases_list():
     """
     Returns a list of all exportable databases, including the main graph database.
     :return:
@@ -75,7 +75,9 @@ def get_exportable_databases_list():
 
 
 @app.get("/export/database_dumps")
-def export_database_dumps(database_iri: str | None = None, all_databases: bool = True):
+async def export_database_dumps(
+    database_iri: str | None = None, all_databases: bool = True
+):
     """
     Creates a new database dump or returns a current one, if existing. For single databases or all in one zip.
     :raises IdNotFoundException: If the file is not found
@@ -149,7 +151,7 @@ def export_database_dumps(database_iri: str | None = None, all_databases: bool =
 
 
 @app.post("/import/database_dumps")
-def upload(file_name: str = Form(...), file_data: str = Form(...)):
+async def upload(file_name: str = Form(...), file_data: str = Form(...)):
     print(f"Importing database dump(s): {file_name}")
     restore_date_time = datetime.now()
     restore_date_time_file_string = restore_date_time.astimezone(

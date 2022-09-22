@@ -13,7 +13,7 @@ TIMESERIES_NODES_DAO: TimeseriesNodesDao = TimeseriesNodesDao.instance()
 
 
 @app.get("/timeseries/current_range")
-def get_timeseries_current_range(
+async def get_timeseries_current_range(
     iri: str,
     duration: float,
     aggregation_window_ms: int | None = None,
@@ -32,7 +32,7 @@ def get_timeseries_current_range(
 
 
 @app.get("/timeseries/range")
-def get_timeseries_range(
+async def get_timeseries_range(
     iri: str,
     date_time_str: str | None,
     duration: float | None,
@@ -54,7 +54,7 @@ def get_timeseries_range(
 
 
 @app.get("/timeseries/entries_count")
-def get_timeseries_entries_count(
+async def get_timeseries_entries_count(
     iri: str, date_time_str: str | None, duration: float | None
 ):
     """
@@ -72,7 +72,7 @@ def get_timeseries_entries_count(
 
 
 @app.get("/timeseries/nodes")
-def get_timeseries_nodes(deep: bool = True):
+async def get_timeseries_nodes(deep: bool = True):
     if deep:
         return TIMESERIES_NODES_DAO.get_timeseries_deep_json()
     else:
@@ -80,5 +80,5 @@ def get_timeseries_nodes(deep: bool = True):
 
 
 @app.get("/timeseries/count")
-def get_timeseries_count():
+async def get_timeseries_count():
     return python_timeseries_endpoints.get_timeseries_count()

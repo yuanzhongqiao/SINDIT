@@ -15,20 +15,20 @@ RT_CON_CONTAINER: RuntimeConnectionContainer = RuntimeConnectionContainer.instan
 
 
 @app.get("/system_time")
-def get_system_time():
+async def get_system_time():
     return datetime.now().astimezone()
 
 
 @app.get("/database_connections/total_count")
-def get_db_connections_count():
+async def get_db_connections_count():
     return DB_CON_DAO.get_db_connections_count()
 
 
 @app.get("/runtime_connections/total_count")
-def get_rt_connections_count():
+async def get_rt_connections_count():
     return RT_CON_DAO.get_rt_connections_count()
 
 
 @app.get("/runtime_connections/active_count")
-def get_rt_active_connections_count():
+async def get_rt_active_connections_count():
     return RT_CON_CONTAINER.get_active_connections_count()

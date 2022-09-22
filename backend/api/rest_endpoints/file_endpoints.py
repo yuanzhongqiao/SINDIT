@@ -17,7 +17,7 @@ SUPPL_FILE_DAO: SupplementaryFileNodesDao = SupplementaryFileNodesDao.instance()
 
 
 @app.get("/supplementary_file/data")
-def get_supplementary_file(iri: str, proxy_mode: bool = False):
+async def get_supplementary_file(iri: str, proxy_mode: bool = False):
     """
     Reads the specified file from the file storage
     :raises IdNotFoundException: If the file is not found
@@ -31,7 +31,7 @@ def get_supplementary_file(iri: str, proxy_mode: bool = False):
 
 
 @app.get("/supplementary_file/temporary_link")
-def get_supplementary_file_temporary_link(iri: str):
+async def get_supplementary_file_temporary_link(iri: str):
     """
     Creates a temporary link to the specified file from the file storage
     :raises IdNotFoundException: If the file is not found
@@ -66,7 +66,7 @@ def get_supplementary_file_redirect(iri: str):
 
 
 @app.get("/supplementary_file/details")
-def get_supplementary_file_details_flat(iri: str):
+async def get_supplementary_file_details_flat(iri: str):
     """
     Reads the details (e.g. type and file-name) for a supplementary file from the graph
     :raises IdNotFoundException: If the file is not found
@@ -77,7 +77,7 @@ def get_supplementary_file_details_flat(iri: str):
 
 
 @app.get("/supplementary_file/alternative_formats")
-def get_supplementary_file_available_formats(iri: str):
+async def get_supplementary_file_available_formats(iri: str):
     """
     Returns a list of all available format nodes for a supplementary file (works on both secondary and primary ones as input iri)
     :raises IdNotFoundException: If the file is not found
