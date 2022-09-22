@@ -565,7 +565,7 @@ def annotation_ts_form_hide(current_step):
     Input("annotation-creation-store-step", "data"),
     prevent_initial_call=False,
 )
-def annotation_ts_form_hide(current_step):
+def annotation_range_form_hide(current_step):
 
     if current_step == CreationSteps.RANGE_SELECTION.value:
         return SHOW
@@ -691,7 +691,7 @@ def annotation_result_visualization_ts(current_step, ts_list_json):
     Input("annotation-creation-store-range-end", "data"),
     prevent_initial_call=False,
 )
-def annotation_result_visualization_ts(
+def annotation_result_visualization_range(
     current_step,
     selected_start_datetime_str,
     selected_end_datetime_str,
@@ -774,7 +774,7 @@ def init_date_time_pickers(current_step, selected_end_time):
     Input("annotation-deleted", "modified_timestamp"),
     prevent_initial_call=False,
 )
-def annotation_previous_step_button_activate(selected_el_json, deleted):
+def annotation_delete_button_activate(selected_el_json, deleted):
     if ctx.triggered_id == "annotation-deleted":
         return True
 

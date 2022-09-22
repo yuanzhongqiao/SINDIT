@@ -141,9 +141,10 @@ def inform_graph_visibility_ignored(annotation_creation_step):
 @app.callback(
     Output("asset-multi-select-dropdown", "options"),
     Input("interval-component-factory-graph-initial-loading", "n_intervals"),
+    prevent_initial_call=True,
 )
 def update_asset_multi_options(n):
-    if n == 3:
+    if n == 3:  # Do not load everything at once
         try:
             assets_flat_json = api_client.get_json("/assets", deep=False)
             assets_flat: List[AssetNodeFlat] = [

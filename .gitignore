@@ -12,3 +12,6 @@ mm_test/yolov3_mobilenetv2_320_300e_coco_20210719_215349-d18dff72.pth
 mm_test/yolov3_mobilenetv2_320_300e_coco.py
 mmcv_models/faster_rcnn/faster_rcnn_x101_64x4d_fpn_1x_coco_20200204-833ee192.pth
 mmcv_models/faster_rcnn/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth
+database_export/
+database_import/
+safety_backups/

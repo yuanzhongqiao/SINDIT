@@ -258,14 +258,17 @@ def update_timeseries_graph(
         )
 
     # API call for the count of readings
-    readings_count = int(
-        api_client.get_json(
-            relative_path="/timeseries/entries_count",
-            iri=selected_el.iri,
-            duration=duration.total_seconds(),
-            date_time_str=date_time.isoformat(),
-        )
+    readings_count_string = api_client.get_json(
+        relative_path="/timeseries/entries_count",
+        iri=selected_el.iri,
+        duration=duration.total_seconds(),
+        date_time_str=date_time.isoformat(),
     )
+    if readings_count_string is None:
+        # DB not available?
+        return fig, "Database could not be reached.", None
+
+    readings_count = int(readings_count_string)
 
     # Filtering to avoid loading to large readings datasets
     if readings_count > TIMESERIES_MAX_DISPLAYED_ENTRIES:

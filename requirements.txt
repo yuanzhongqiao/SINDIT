@@ -9,10 +9,12 @@ dash_html_components
 matplotlib~=3.5.2
 pandas~=1.4.2
 py2neo~=2021.2.3
+neo4j-backup # For remote backups
 dash_cytoscape
 jsonpickle~=2.2.0
 dash_bootstrap_components
 fastapi~=0.78.0
+python-multipart  # For file upload
 python-dotenv~=0.20.0
 uvicorn~=0.17.6
 pyi40aas

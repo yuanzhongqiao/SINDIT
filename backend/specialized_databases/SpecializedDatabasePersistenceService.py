@@ -59,3 +59,11 @@ class SpecializedDatabasePersistenceService(abc.ABC):
             user_environment_variable=node.user_environment_variable,
             key_environment_variable=node.key_environment_variable,
         )
+
+    @abc.abstractmethod
+    def backup(self, backup_path: str):
+        pass
+
+    @abc.abstractmethod
+    def restore(self, backup_path: str):
+        pass
