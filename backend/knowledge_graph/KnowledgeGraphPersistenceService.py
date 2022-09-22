@@ -2,6 +2,7 @@ from datetime import datetime
 import os
 from sqlite3 import Cursor
 import time
+import shutil
 from dateutil import tz
 from util.environment_and_configuration import (
     ConfigGroups,
@@ -171,8 +172,12 @@ class KnowledgeGraphPersistenceService(object):
             tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
         ).strftime(DATETIME_STRF_FORMAT)
         os.makedirs(safety_path)
-        self.backup(backup_path=safety_path + "neo4j")
-
+        self.backup(backup_path=safety_path + "/neo4j")
+        print("Zipping the safety backup...")
+        zip_file_path = safety_path + "/neo4j"
+        shutil.make_archive(zip_file_path, "zip", safety_path + "/neo4j")
+        shutil.rmtree(safety_path + "/neo4j")
+        print("Finished zipping the safety backup.")
         # Delete everything:
         print("Deleting everything...")
         self.graph.delete_all()
