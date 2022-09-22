@@ -63,7 +63,13 @@ class OpcuaRuntimeConnection(RuntimeConnection):
 
         # Try to initialize the connection
         # Once it was started once, it can be reused even after losing the connection for some period
-        self.__start_connection()
+        try:
+            self.__start_connection()
+        except Exception as exc:
+            print(
+                f"Exception occured while connecting to OPC-UA: {exc}.\n Skipping the connection..."
+            )
+            return
 
         subscription = None
 
@@ -103,6 +109,12 @@ class OpcuaRuntimeConnection(RuntimeConnection):
                 )
 
                 time.sleep(RECONNECT_DURATION)
+            except Exception as exc:
+                self.active = False
+                print(
+                    f"Unusual exception occured at the OPC-UA connection: {exc}. \nRetrying in {RECONNECT_DURATION} s ..."
+                )
+                time.sleep(RECONNECT_DURATION)
 
     def opcua_connection_thread_polling_based(self):
         """
@@ -113,7 +125,13 @@ class OpcuaRuntimeConnection(RuntimeConnection):
 
         # Try to initialize the connection
         # Once it was started once, it can be reused even after losing the connection for some period
-        self.__start_connection()
+        try:
+            self.__start_connection()
+        except Exception as exc:
+            print(
+                f"Exception occured while connecting to OPC-UA: {exc}.\n Skipping the connection..."
+            )
+            return
 
         # Outer loop for restoring the whole connection after a timeout
         while self.thread_stop == False:
@@ -166,6 +184,12 @@ class OpcuaRuntimeConnection(RuntimeConnection):
                 print(
                     "OPCUA connection: OSError. "
                     f"Host: {self.host}, port: {self.port}. Trying to reconnect in {RECONNECT_DURATION} s ..."
+                )
+                time.sleep(RECONNECT_DURATION)
+            except Exception as exc:
+                self.active = False
+                print(
+                    f"Unusual exception occured at the OPC-UA connection: {exc}. \nRetrying in {RECONNECT_DURATION} s ..."
                 )
                 time.sleep(RECONNECT_DURATION)
 
