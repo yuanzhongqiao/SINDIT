@@ -86,12 +86,16 @@ spec:
               containerPort: 8000
               protocol: TCP
           livenessProbe:
+            initialDelaySeconds: 600
+            timeoutSeconds: 60
             httpGet:
-              path: /assets
+              path: /system_time
               port: backend
           readinessProbe:
+            initialDelaySeconds: 600
+            timeoutSeconds: 60
             httpGet:
-              path: /assets
+              path: /system_time
               port: backend
           resources:
             {{- toYaml .Values.resources.backend | nindent 12 }}
