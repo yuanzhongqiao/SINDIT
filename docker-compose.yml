@@ -83,4 +83,4 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
-    entrypoint: python dt_frontend.py
+    entrypoint: gunicorn dt_frontend:server -b :8050 --timeout 1800 --workers 4

@@ -4,6 +4,8 @@ Separated from app.py to avoid circular dependencies with callback files importi
 """
 
 from frontend.app import app
+
+
 from frontend import page_layout
 
 # Import callback files (indirectly used through annotation)
@@ -62,11 +64,14 @@ from util.environment_and_configuration import (
 # #############################################################################
 # Launch frontend
 # #############################################################################
+
+server = app.server
+# Initialize layout
+print("Initializing app layout...")
+app.layout = page_layout.get_layout()
+print("Finished initializing the app layout.")
+
 if __name__ == "__main__":
-    # Initialize layout
-    print("Initializing app layout...")
-    app.layout = page_layout.get_layout()
-    print("Finished initializing the app layout.")
 
     app.run(
         host=get_environment_variable("FRONTEND_HOST"),
