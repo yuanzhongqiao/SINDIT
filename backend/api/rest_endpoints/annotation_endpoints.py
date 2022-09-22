@@ -23,7 +23,7 @@ class AnnotationDefinitionArguments(BaseModel):
 
 
 @app.post("/annotation/definition")
-def post_annotation_definition(definition: AnnotationDefinitionArguments):
+async def post_annotation_definition(definition: AnnotationDefinitionArguments):
     print(f"Creating new annotation definition: {definition.id_short}...")
     return ANNOTATIONS_DAO.create_annotation_definition(
         id_short=definition.id_short,
@@ -45,7 +45,7 @@ class AnnotationInstanceArguments(BaseModel):
 
 
 @app.post("/annotation/instance")
-def post_annotation_instance(instance: AnnotationInstanceArguments):
+async def post_annotation_instance(instance: AnnotationInstanceArguments):
     print(f"Creating new annotation instance: {instance.id_short}...")
     instance_iri = ANNOTATIONS_DAO.create_annotation_instance(
         id_short=instance.id_short,
@@ -82,7 +82,7 @@ def post_annotation_instance(instance: AnnotationInstanceArguments):
 
 
 @app.delete("/annotation/definition")
-def delete_annotation_definition(definition_iri: str):
+async def delete_annotation_definition(definition_iri: str):
     print(f"Deleting annotation definition: {definition_iri}...")
     instances = ANNOTATIONS_DAO.get_instances_of_annotation_definition(definition_iri)
 
@@ -96,7 +96,7 @@ def delete_annotation_definition(definition_iri: str):
 
 
 @app.delete("/annotation/instance")
-def delete_annotation_instance(instance_iri: str):
+async def delete_annotation_instance(instance_iri: str):
     """Deletes not only a instance, but also its related time-series matchers (and relationships)!
 
     Args:
@@ -116,7 +116,7 @@ def delete_annotation_instance(instance_iri: str):
 
 
 @app.get("/annotation/ts_matcher/original_annotated_ts")
-def get_ts_matcher_original_ts(iri: str):
+async def get_ts_matcher_original_ts(iri: str):
     """
     Returns the originally annotated timeseries node for a matcher
     :raises IdNotFoundException: If the file is not found
@@ -127,7 +127,7 @@ def get_ts_matcher_original_ts(iri: str):
 
 
 @app.get("/annotation/ts_matcher/related_annotation_instance")
-def get_ts_matcher_annotation_instance(iri: str):
+async def get_ts_matcher_annotation_instance(iri: str):
     """
     Returns the annotation instance node for a matcher
     :raises IdNotFoundException: If the file is not found

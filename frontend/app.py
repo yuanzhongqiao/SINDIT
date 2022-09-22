@@ -1,4 +1,5 @@
 import dash
+from flask import Flask
 import dash_bootstrap_components as dbc
 
 """
@@ -8,6 +9,7 @@ Separated from presentation.py to avoid circular dependencies with callback file
 
 # Build App
 external_stylesheets = [dbc.themes.SPACELAB, dbc.icons.BOOTSTRAP]
+server = Flask(__name__)
 app = dash.Dash(
     __name__,
     external_stylesheets=external_stylesheets,
@@ -15,6 +17,7 @@ app = dash.Dash(
     assets_folder="../assets",
     update_title=None,
     title="SINDIT – SINTEF Digital Twin",
+    server=server,
 )
 
 # pylint: disable=W0212

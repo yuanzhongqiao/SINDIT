@@ -9,7 +9,7 @@ ASSETS_DAO: AssetsDao = AssetsDao.instance()
 
 
 @app.get("/assets")
-def get_assets_deep(deep: bool = True):
+async def get_assets_deep(deep: bool = True):
     if deep:
         return ASSETS_DAO.get_assets_deep_json()
     else:
@@ -17,10 +17,10 @@ def get_assets_deep(deep: bool = True):
 
 
 @app.get("/assets/similarities")
-def get_asset_similarities():
+async def get_asset_similarities():
     return json.dumps(python_asset_endpoints.get_asset_similarities())
 
 
 @app.get("/assets/count")
-def get_assets_count():
+async def get_assets_count():
     return python_asset_endpoints.get_assets_count()

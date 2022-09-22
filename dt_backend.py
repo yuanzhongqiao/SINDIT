@@ -97,7 +97,7 @@ def refresh_time_series_thread_loop():
         print("Refreshing time-series inputs and connections...")
         refresh_ts_inputs()
 
-        print("Done refreshing time-series inputs and connecitons.")
+        print("Done refreshing time-series inputs and connections.")
 
 
 # #############################################################################
