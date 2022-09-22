@@ -13,7 +13,7 @@ from util.environment_and_configuration import (
 )
 
 DATABASE_EXPORT_DIRECTORY = "database_export"
-SAFETY_BACKUPS_DIRECTORY = "database_import"
+SAFETY_BACKUPS_DIRECTORY = "safety_backups"
 SAFETY_BACKUPS_SUBDIRECTORIES = ["neo4j", "s3", "influx_db"]
 MAX_AGE_EXPORT = timedelta(minutes=30)
 MAX_AGE_SAFETY_BACKUPS = timedelta(days=1)
