@@ -2,6 +2,7 @@
 
 import json
 import boto3
+import shutil
 import os
 from botocore.client import Config
 from util.environment_and_configuration import (
@@ -15,7 +16,7 @@ from backend.specialized_databases.files.FilesPersistenceService import (
 )
 from util.file_name_utils import _replace_illegal_characters_from_iri
 
-SAFETY_BACKUP_PATH = "safety_backups/neo4j/"
+SAFETY_BACKUP_PATH = "safety_backups/s3/"
 DATETIME_STRF_FORMAT = "%Y_%m_%d_%H_%M_%S_%f"
 EXPORT_INFO_FILE_NAME = "sindit_s3_backup_info.txt"
 
@@ -93,9 +94,11 @@ class S3PersistenceService(FilesPersistenceService):
         print("Backing up S3...")
         os.makedirs(backup_path)
         backup_file_names = dict()
-        self.client.create_bucket(
-            Bucket=self.bucket_name
-        )  # Idempotent: just to make sure it exists
+        if not self.bucket_name in [
+            b["Name"] for b in self.client.list_buckets()["Buckets"]
+        ]:
+            self.client.create_bucket(Bucket=self.bucket_name)
+            self.bucket = self.resource.Bucket(self.bucket_name)
         for s3_object in self.bucket.objects.all():
             iri = s3_object.key
             file_name = _replace_illegal_characters_from_iri(iri)
@@ -139,8 +142,12 @@ class S3PersistenceService(FilesPersistenceService):
             tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
         ).strftime(DATETIME_STRF_FORMAT)
         os.makedirs(safety_path)
-        self.backup(backup_path=safety_path + "s3")
-
+        self.backup(backup_path=safety_path + "/s3")
+        print("Zipping the safety backup...")
+        zip_file_path = safety_path + "/s3"
+        shutil.make_archive(zip_file_path, "zip", safety_path + "/s3")
+        shutil.rmtree(safety_path + "/s3")
+        print("Finished zipping the safety backup.")
         # Delete everything:
         print("Deleting everything...")
         try:

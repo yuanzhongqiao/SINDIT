@@ -6,7 +6,7 @@ from urllib3.exceptions import ReadTimeoutError, NewConnectionError, ConnectTime
 import warnings
 import subprocess
 from influxdb_client.client.warnings import MissingPivotFunction
-
+import shutil
 from dateutil import tz
 from backend.exceptions.IdNotFoundException import IdNotFoundException
 from backend.specialized_databases.timeseries.TimeseriesPersistenceService import (
@@ -19,7 +19,7 @@ from util.environment_and_configuration import (
 import os
 
 READING_FIELD_NAME = "reading"
-SAFETY_BACKUP_PATH = "safety_backups/neo4j/"
+SAFETY_BACKUP_PATH = "safety_backups/influx_db/"
 DATETIME_STRF_FORMAT = "%Y_%m_%d_%H_%M_%S_%f"
 
 
@@ -210,8 +210,12 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
             tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
         ).strftime(DATETIME_STRF_FORMAT)
         os.makedirs(safety_path)
-        self.backup(backup_path=safety_path + "influxdb")
-
+        self.backup(backup_path=safety_path + "/influx_db")
+        print("Zipping the safety backup...")
+        zip_file_path = safety_path + "/influx_db"
+        shutil.make_archive(zip_file_path, "zip", safety_path + "/influx_db")
+        shutil.rmtree(safety_path + "/influx_db")
+        print("Finished zipping the safety backup.")
         # Delete everything:
         print("Deleting everything...")
         subprocess.run(

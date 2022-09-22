@@ -11,6 +11,7 @@ import uvicorn
 
 from threading import Thread
 from backend.api.api import app
+from backend.cleanup_thread import start_storage_cleanup_thread
 from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
     KnowledgeGraphPersistenceService,
 )
@@ -127,6 +128,9 @@ if __name__ == "__main__":
     # Thread checking regulary, if timeseries inputs and runtime-connections have been added / removed
     ts_refresh_thread = Thread(target=refresh_time_series_thread_loop)
     ts_refresh_thread.start()
+
+    # Start cleanup thread deleting obsolete backups:
+    start_storage_cleanup_thread()
 
     # Run fast API
     # noinspection PyTypeChecker
