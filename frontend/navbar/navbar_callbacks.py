@@ -108,7 +108,7 @@ def download_export(n, m, selected_db):
         database_iri=selected_db,
         all_databases=multi_export,
     )
-
+    print("Export finished.")
     return dcc.send_bytes(src=file_data, filename=file_name)
 
 

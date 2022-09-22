@@ -5,7 +5,7 @@ import os
 import shutil
 from typing import List
 from fastapi.responses import StreamingResponse
-from fastapi import UploadFile, Form, HTTPException
+from fastapi import Form, HTTPException
 from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
     KnowledgeGraphPersistenceService,
 )
@@ -29,6 +29,7 @@ from graph_domain.main_digital_twin.DatabaseConnectionNode import (
     DatabaseConnectionNode,
     DatabaseConnectionTypes,
 )
+from util.file_name_utils import _replace_illegal_characters_from_iri
 
 DB_CON_NODE_DAO: DatabaseConnectionsDao = DatabaseConnectionsDao.instance()
 SUPPL_FILE_DAO: SupplementaryFileNodesDao = SupplementaryFileNodesDao.instance()
@@ -46,9 +47,7 @@ DATABASE_IMPORT_DIRECTORY = "database_import/"
 
 DATETIME_STRF_FORMAT = "%Y_%m_%d_%H_%M_%S_%f"
 
-FILENAME_ALLOWED_CHARS = (
-    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-"
-)
+
 EXPORT_INFO_FILE_NAME = "sindit_export_info.txt"
 
 
@@ -73,10 +72,6 @@ def get_exportable_databases_list():
     options.insert(0, (GRAPH_DATABASE_FAKE_IRI, GRAPH_DATABASE_LABEL))
 
     return options
-
-
-def _remplace_illegal_characters_from_iri(iri: str) -> str:
-    return "".join((char if char in FILENAME_ALLOWED_CHARS else "_") for char in iri)
 
 
 @app.get("/export/database_dumps")
@@ -114,7 +109,7 @@ def export_database_dumps(database_iri: str | None = None, all_databases: bool =
             KnowledgeGraphPersistenceService.instance().backup(backup_path)
             backup_folder_names[db] = backup_folder
         else:
-            backup_folder = _remplace_illegal_characters_from_iri(db)
+            backup_folder = _replace_illegal_characters_from_iri(db)
             backup_path = backup_base_path + backup_folder
             persistence_service = persistence_container.get_persistence_service(db)
             persistence_service.backup(backup_path)
@@ -122,6 +117,7 @@ def export_database_dumps(database_iri: str | None = None, all_databases: bool =
             backup_folder_names[db] = backup_folder
 
     # Create info file:
+    print("Creating backup info file...")
     info_dict = {
         "sindit_export_version": get_configuration(
             group=ConfigGroups.GENERIC, key="sindit_export_version"
@@ -138,10 +134,12 @@ def export_database_dumps(database_iri: str | None = None, all_databases: bool =
         info_file.write(info_json)
 
     # Zip the folder and delete it
+    print("Zipping the backup...")
     zip_file_path = DATABASE_EXPORT_DIRECTORY + backup_date_time_file_string
     zip_file_path_with_extension = zip_file_path + ".zip"
     shutil.make_archive(zip_file_path, "zip", backup_base_path)
     shutil.rmtree(backup_base_path)
+    print("Finished zipping the backup. Sending...")
 
     def iterfile():
         with open(zip_file_path_with_extension, mode="rb") as file_like:
@@ -194,7 +192,14 @@ def upload(file_name: str = Form(...), file_data: str = Form(...)):
     database_folders: dict = info_dict.get("backup_iri_mappings")
     # Restore databases:
     persistence_container = DatabasePersistenceServiceContainer.instance()
-    for iri in database_folders.keys():
+    database_iris = list(database_folders.keys())
+
+    # Make sure, the main graph database is being restored first
+    if GRAPH_DATABASE_FAKE_IRI in database_iris:
+        database_iris.remove(GRAPH_DATABASE_FAKE_IRI)
+        database_iris.insert(0, GRAPH_DATABASE_FAKE_IRI)
+
+    for iri in database_iris:
         db_folder_name = database_folders.get(iri)
         backup_path = restore_base_path + db_folder_name
         if iri == GRAPH_DATABASE_FAKE_IRI:

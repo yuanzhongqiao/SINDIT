@@ -235,8 +235,3 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
             ["influx", "restore", backup_path, "--host", self.uri, "-t", self.key]
         )
         print("Finished restoring InfluxDB.")
-
-
-# influx restore ./database_export/influx_db_test --host http://sindit-influx-db-devcontainer:8086 -t sindit_influxdb_admin_token
-# influx bucket delete -o sindit -n sindit --host http://sindit-influx-db-devcontainer:8086 -t sindit_influxdb_admin_token
-#  influx restore ./database_export/influx_db_test --host http://sindit-influx-db-devcontainer:8086 -t sindit_influxdb_admin_token
