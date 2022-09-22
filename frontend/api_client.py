@@ -18,6 +18,8 @@ API_URI = (
     + get_environment_variable("FAST_API_PORT")
 )
 
+RETRY_COUNT = 5
+
 
 def _handle_request_exception():
     print("API not available!")
@@ -26,13 +28,14 @@ def _handle_request_exception():
     time.sleep(5)
 
 
-def get_json(relative_path: str, **kwargs):
+def get_json(relative_path: str, endless_scan: bool = True, **kwargs):
     """
     Get request to the specified api endpoint
     :param relative_path:
     :return: the response json as dict
     """
-    for i in range(5):
+    range_limit = RETRY_COUNT if not endless_scan else 999999999999999999999999
+    for i in range(range_limit):
         try:
             resp_dict = requests.get(
                 API_URI + relative_path, params=kwargs, timeout=30
@@ -53,7 +56,7 @@ def get_dataframe(relative_path: str, **kwargs):
     :param relative_path:
     :return:
     """
-    df_dict = get_json(relative_path, **kwargs)
+    df_dict = get_json(relative_path, endless_scan=False, **kwargs)
 
     df = pd.DataFrame.from_dict(df_dict)
 
@@ -73,13 +76,14 @@ def get_dataframe(relative_path: str, **kwargs):
     return df
 
 
-def get_raw(relative_path: str, **kwargs):
+def get_raw(relative_path: str, endless_scan: bool = True, **kwargs):
     """
     Get request to the specified api endpoint
     :param relative_path:
     :return: the raw response
     """
-    for i in range(5):
+    range_limit = RETRY_COUNT if not endless_scan else 999999999999999999999999
+    for i in range(range_limit):
         try:
             return requests.get(
                 API_URI + relative_path, params=kwargs, timeout=300
@@ -88,26 +92,28 @@ def get_raw(relative_path: str, **kwargs):
             _handle_request_exception()
 
 
-def get_str(relative_path: str, **kwargs):
+def get_str(relative_path: str, endless_scan: bool = True, **kwargs):
     """
     Get request to the specified api endpoint
     :param relative_path:
     :return: the response as string
     """
-    for i in range(5):
+    range_limit = RETRY_COUNT if not endless_scan else 999999999999999999999999
+    for i in range(range_limit):
         try:
             return requests.get(API_URI + relative_path, params=kwargs, timeout=30).text
         except ReqExc:
             _handle_request_exception()
 
 
-def get_int(relative_path: str, **kwargs):
+def get_int(relative_path: str, endless_scan: bool = True, **kwargs):
     """
     Get request to the specified api endpoint
     :param relative_path:
     :return: the response as int number
     """
-    for i in range(5):
+    range_limit = RETRY_COUNT if not endless_scan else 999999999999999999999999
+    for i in range(range_limit):
         try:
             return int(
                 requests.get(API_URI + relative_path, params=kwargs, timeout=30).text
@@ -116,13 +122,14 @@ def get_int(relative_path: str, **kwargs):
             _handle_request_exception()
 
 
-def get_float(relative_path: str, **kwargs):
+def get_float(relative_path: str, endless_scan: bool = True, **kwargs):
     """
     Get request to the specified api endpoint
     :param relative_path:
     :return: the response as float number
     """
-    for i in range(5):
+    range_limit = RETRY_COUNT if not endless_scan else 999999999999999999999999
+    for i in range(range_limit):
         try:
             return float(
                 requests.get(API_URI + relative_path, params=kwargs, timeout=30).text
@@ -131,15 +138,22 @@ def get_float(relative_path: str, **kwargs):
             _handle_request_exception()
 
 
-def patch(relative_path: str, **kwargs):
-    for i in range(5):
+def patch(relative_path: str, endless_scan: bool = True, **kwargs):
+    range_limit = RETRY_COUNT if not endless_scan else 999999999999999999999999
+    for i in range(range_limit):
         try:
             requests.patch(API_URI + relative_path, params=kwargs)
         except ReqExc:
             _handle_request_exception()
 
 
-def post(relative_path: str, data: Dict = None, json: Dict = None, **kwargs):
+def post(
+    relative_path: str,
+    data: Dict = None,
+    json: Dict = None,
+    endless_scan: bool = True,
+    **kwargs,
+):
     """Post request. Returns the response body text
 
     Args:
@@ -150,7 +164,8 @@ def post(relative_path: str, data: Dict = None, json: Dict = None, **kwargs):
     Returns:
         _type_: _description_
     """
-    for i in range(5):
+    range_limit = RETRY_COUNT if not endless_scan else 999999999999999999999999
+    for i in range(range_limit):
         try:
             response = requests.post(
                 API_URI + relative_path, params=kwargs, data=data, json=json
@@ -163,7 +178,7 @@ def post(relative_path: str, data: Dict = None, json: Dict = None, **kwargs):
             _handle_request_exception()
 
 
-def delete(relative_path: str, **kwargs):
+def delete(relative_path: str, endless_scan: bool = True, **kwargs):
     """Delete request. Returns the response body text
 
     Args:
@@ -173,7 +188,8 @@ def delete(relative_path: str, **kwargs):
     Returns:
         _type_: _description_
     """
-    for i in range(5):
+    range_limit = RETRY_COUNT if not endless_scan else 999999999999999999999999
+    for i in range(range_limit):
         try:
             response = requests.delete(API_URI + relative_path, params=kwargs)
             text = response.text

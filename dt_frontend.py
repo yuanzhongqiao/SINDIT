@@ -71,11 +71,15 @@ print("Initializing app layout...")
 app.layout = page_layout.get_layout()
 print("Finished initializing the app layout.")
 
+FRONTEND_HOST = get_environment_variable("FRONTEND_HOST")
+FRONTEND_PORT = get_environment_variable_int("FRONTEND_PORT")
+print(f"Starting the frontend at host: {FRONTEND_HOST}, port: {FRONTEND_PORT}")
+
 if __name__ == "__main__":
 
     app.run(
-        host=get_environment_variable("FRONTEND_HOST"),
+        host=FRONTEND_HOST,
         debug=False,
-        port=get_environment_variable_int("FRONTEND_PORT"),
+        port=FRONTEND_PORT,
         use_reloader=False,
     )

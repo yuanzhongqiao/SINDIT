@@ -19,10 +19,15 @@ def get_layout():
     print(
         "Loading available assets to be provided as options for the graph visibility multiselect..."
     )
-    assets_flat_json = api_client.get_json("/assets", deep=False)
-    assets_flat: List[AssetNodeFlat] = [
-        AssetNodeFlat.from_json(m) for m in assets_flat_json
-    ]
+    assets_flat_json = api_client.get_json("/assets", deep=False, endless_scan=False)
+    if assets_flat_json is not None:
+        assets_flat: List[AssetNodeFlat] = [
+            AssetNodeFlat.from_json(m) for m in assets_flat_json
+        ]
+    else:
+        # Not reachable. Selections will be lost but dropdown will fill options later
+        assets_flat = []
+
     return html.Div(
         [
             html.Div(
