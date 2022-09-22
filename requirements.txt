@@ -17,6 +17,7 @@ fastapi~=0.78.0
 python-multipart  # For file upload
 python-dotenv~=0.20.0
 uvicorn~=0.17.6
+gunicorn
 pyi40aas
 
 influxdb-client  # InfluxDB v2

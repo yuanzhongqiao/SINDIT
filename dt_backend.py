@@ -135,7 +135,11 @@ if __name__ == "__main__":
     # Run fast API
     # noinspection PyTypeChecker
     uvicorn.run(
-        app,
+        "dt_backend:app",
         host=get_environment_variable("FAST_API_HOST"),
         port=get_environment_variable_int("FAST_API_PORT"),
+        # workers=4,
+        # # TODO: decide whether to introduce inter-process communication
+        # (e.g. for runtime-connection status) and to activate workers!
+        access_log=False,
     )
