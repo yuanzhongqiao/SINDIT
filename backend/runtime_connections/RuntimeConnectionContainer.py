@@ -7,7 +7,9 @@ from graph_domain.main_digital_twin.TimeseriesNode import (
     TimeseriesNodeDeep,
 )
 from backend.runtime_connections.RuntimeConnection import RuntimeConnection
-
+from backend.exceptions.EnvironmentalVariableNotFoundError import (
+    EnvironmentalVariableNotFoundError,
+)
 from backend.runtime_connections.TimeseriesInput import TimeseriesInput
 from backend.runtime_connections.mqtt.MqttRuntimeConnection import (
     MqttRuntimeConnection,
@@ -171,19 +173,24 @@ class RuntimeConnectionContainer:
             # Create actual connections:
             input_class = RT_CONNECTION_MAPPING.get(rt_con_node.type)
 
-            rt_connection: RuntimeConnection = input_class.from_runtime_connection_node(
-                rt_con_node
-            )
+            try:
+                rt_connection: RuntimeConnection = (
+                    input_class.from_runtime_connection_node(rt_con_node)
+                )
 
-            self.connections[rt_con_node.iri] = rt_connection
+                self.connections[rt_con_node.iri] = rt_connection
 
-            # Link the inputs to its connections:
-            rt_connection.timeseries_inputs = new_ts_inputs_per_connection.get(
-                rt_con_node.iri
-            )
-            # Start the connection
+                # Link the inputs to its connections:
+                rt_connection.timeseries_inputs = new_ts_inputs_per_connection.get(
+                    rt_con_node.iri
+                )
+                # Start the connection
 
-            rt_connection.start_connection()
+                rt_connection.start_connection()
+            except EnvironmentalVariableNotFoundError:
+                print(
+                    f"Setup of RuntimeConnection canceled because of missing environmetal variable: {rt_con_node.caption}"
+                )
 
     def get_runtime_connection(self, iri: str):
         return self.connections.get(iri)

@@ -3,3 +3,4 @@ class EnvironmentalVariableNotFoundError(Exception):
         super().__init__(
             f"The environmental variable {key} is not available but set to required!"
         )
+        self.key = key

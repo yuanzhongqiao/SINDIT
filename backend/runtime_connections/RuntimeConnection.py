@@ -1,5 +1,8 @@
 import abc
 from typing import Dict
+from backend.exceptions.EnvironmentalVariableNotFoundError import (
+    EnvironmentalVariableNotFoundError,
+)
 
 from graph_domain.main_digital_twin.RuntimeConnectionNode import RuntimeConnectionNode
 from backend.runtime_connections.TimeseriesInput import TimeseriesInput
@@ -29,41 +32,47 @@ class RuntimeConnection(abc.ABC):
         self.active = False
 
         self.iri = iri
-
-        self.host = get_environment_variable(
-            key=host_environment_variable, optional=False
-        )
-        self.port = get_environment_variable_int(
-            key=port_environment_variable, optional=False
-        )
-
-        self.user = (
-            get_environment_variable(
-                key=user_environment_variable, optional=True, default=None
+        try:
+            self.host = get_environment_variable(
+                key=host_environment_variable, optional=False
             )
-            if user_environment_variable is not None
-            else None
-        )
-
-        self.key = (
-            get_environment_variable(
-                key=key_environment_variable, optional=True, default=None
+            self.port = get_environment_variable_int(
+                key=port_environment_variable, optional=False
             )
-            if key_environment_variable is not None
-            else None
-        )
+
+            self.user = (
+                get_environment_variable(
+                    key=user_environment_variable, optional=True, default=None
+                )
+                if user_environment_variable is not None
+                else None
+            )
+
+            self.key = (
+                get_environment_variable(
+                    key=key_environment_variable, optional=True, default=None
+                )
+                if key_environment_variable is not None
+                else None
+            )
+        except EnvironmentalVariableNotFoundError as exc:
+            print(f"Environmetal variable missing: {exc.key}")
+            raise exc
 
         self.timeseries_inputs: Dict[str, TimeseriesInput] = dict()
 
     @classmethod
     def from_runtime_connection_node(cls, node: RuntimeConnectionNode):
-        return cls(
-            iri=node.iri,
-            host_environment_variable=node.host_environment_variable,
-            port_environment_variable=node.port_environment_variable,
-            user_environment_variable=node.user_environment_variable,
-            key_environment_variable=node.key_environment_variable,
-        )
+        try:
+            return cls(
+                iri=node.iri,
+                host_environment_variable=node.host_environment_variable,
+                port_environment_variable=node.port_environment_variable,
+                user_environment_variable=node.user_environment_variable,
+                key_environment_variable=node.key_environment_variable,
+            )
+        except EnvironmentalVariableNotFoundError as exc:
+            raise exc
 
     @abc.abstractmethod
     def start_connection(self):
