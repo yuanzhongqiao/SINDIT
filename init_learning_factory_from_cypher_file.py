@@ -16,6 +16,7 @@ import boto3
 from botocore.client import Config
 import cadquery
 import cqkit
+from util.log import logger
 
 LEARNING_FACTORY_CYPHER_FILE = "learning_factory_instance/learning_factory.cypher"
 LEARNING_FACTORY_BINARIES_IMPORT_FOLDER = "./learning_factory_instance/binaries_import/"
@@ -107,9 +108,9 @@ def import_binary_data():
 
     file_list = g.run("MATCH (f:SUPPLEMENTARY_FILE) RETURN f.file_name, f.iri").data()
 
-    print("Storing files in S3:")
+    logger.info("Storing files in S3:")
     for file in file_list:
-        print(f"{file['f.file_name']}")
+        logger.info(f"{file['f.file_name']}")
 
         bucket.upload_file(
             LEARNING_FACTORY_BINARIES_IMPORT_FOLDER + file["f.file_name"], file["f.iri"]
@@ -152,13 +153,15 @@ def generate_alternative_cad_format():
         'MATCH (f:SUPPLEMENTARY_FILE {type: "CAD_STEP"}) WHERE NOT (f)-[:SECONDARY_FORMAT]-(:SUPPLEMENTARY_FILE {type: "CAD_STL"}) RETURN f.file_name, f.iri, f.id_short, f.description'
     ).data()
 
-    print(
+    logger.info(
         f"Generating STL-files as alternative for STEP files. Total: {len(step_cad_file_list)}"
     )
     tx = g.begin()
     i = 1
     for file in step_cad_file_list:
-        print(f"Converting {file['f.file_name']} ({i}/{len(step_cad_file_list)})...")
+        logger.info(
+            f"Converting {file['f.file_name']} ({i}/{len(step_cad_file_list)})..."
+        )
 
         # Arguments:
         file_name = file["f.file_name"] + ".stl"

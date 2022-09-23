@@ -4,8 +4,9 @@ from datetime import timedelta
 
 
 from frontend.left_sidebar.global_information import global_information_layout
+from util.log import logger
 
-print("Initializing datetime selector callbacks...")
+logger.info("Initializing datetime selector callbacks...")
 
 
 @app.callback(

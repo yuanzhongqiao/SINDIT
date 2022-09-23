@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Dict
 import json
+from util.log import logger
 import time
 import requests
 import pandas as pd
@@ -22,9 +23,9 @@ RETRY_COUNT = 5
 
 
 def _handle_request_exception():
-    print("API not available!")
-    print(f"Tried to connect to {API_URI}")
-    print("Retrying in 5 seconds...")
+    logger.info("API not available!")
+    logger.info(f"Tried to connect to {API_URI}")
+    logger.info("Retrying in 5 seconds...")
     time.sleep(5)
 
 

@@ -11,9 +11,10 @@ from frontend.app import app
 from frontend.main_column.factory_graph import factory_graph_cytoscape_converter
 from frontend.main_column.factory_graph.GraphSelectedElement import GraphSelectedElement
 from graph_domain.main_digital_twin.AssetNode import AssetNodeDeep
+from util.log import logger
 
 
-print("Initializing factory graph callbacks...")
+logger.info("Initializing factory graph callbacks...")
 
 
 def _get_graph_age_seconds(timestamp):
@@ -59,7 +60,7 @@ def update_factory_graph(
             and force_reload_timestamp > local_timestamp
         )
     ):
-        print("Loading graph from backend")
+        logger.info("Loading graph from backend")
         assets_deep_json = api_client.get_json("/assets")
         # pylint: disable=no-member
         assets_deep = [AssetNodeDeep.from_json(m) for m in assets_deep_json]
@@ -70,7 +71,7 @@ def update_factory_graph(
         )
     else:
         cygraph_elements = stored_graph
-        print("Using cached graph")
+        logger.info("Using cached graph")
 
     return cygraph_elements, cygraph_elements, datetime.now().isoformat(), True
 
@@ -105,17 +106,17 @@ def factory_graph_update_trigger(
         "annotation-deleted",
         "import-finished",
     ]:
-        print("Reloading graph from backend after writing to the graph...")
+        logger.info("Reloading graph from backend after writing to the graph...")
         return 2
     elif graph_loaded is None and n_init_intervall == 1:
         # First loading after opening / reloading whole page
-        print("Initial graph loading...")
+        logger.info("Initial graph loading...")
         return 1
     elif graph_loaded is None and n_init_intervall < 4:
-        print("Waiting for graph to load...")
+        logger.info("Waiting for graph to load...")
         raise PreventUpdate()
     elif graph_loaded is None and n_init_intervall == 4:
-        print(
+        logger.info(
             "Graph not loaded after first intervall. "
             "Checking if reloading from backend or local storage..."
         )
@@ -125,20 +126,20 @@ def factory_graph_update_trigger(
             force_reload_timestamp is not None
             and force_reload_timestamp > local_timestamp
         ):
-            print("Loading from backend. Giving it more time...")
+            logger.info("Loading from backend. Giving it more time...")
             raise PreventUpdate()
         else:
-            print(
+            logger.info(
                 "Loading from local storage. Should be already finished. Reloading as fallback..."
             )
             return 1
     elif _get_graph_age_seconds(local_timestamp) > get_configuration_int(
         group=ConfigGroups.FRONTEND, key="max_graph_age"
     ):
-        print("Graph to old! Reloading graph from backend...")
+        logger.info("Graph to old! Reloading graph from backend...")
         return 2
     else:
-        print("Graph okay")
+        logger.info("Graph okay")
         raise PreventUpdate()
 
 

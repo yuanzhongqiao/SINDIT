@@ -10,6 +10,7 @@ from util.environment_and_configuration import (
     get_environment_variable,
     get_environment_variable_int,
 )
+from util.log import logger
 
 
 class RuntimeConnection(abc.ABC):
@@ -56,7 +57,7 @@ class RuntimeConnection(abc.ABC):
                 else None
             )
         except EnvironmentalVariableNotFoundError as exc:
-            print(f"Environmetal variable missing: {exc.key}")
+            logger.info(f"Environmetal variable missing: {exc.key}")
             raise exc
 
         self.timeseries_inputs: Dict[str, TimeseriesInput] = dict()

@@ -18,8 +18,9 @@ from graph_domain.factory_graph_types import (
     NODE_TYPE_STRINGS,
     NodeTypes,
 )
+from util.log import logger
 
-print("Initializing visibility settings callbacks...")
+logger.info("Initializing visibility settings callbacks...")
 
 
 @app.callback(
@@ -151,7 +152,7 @@ def update_asset_multi_options(n):
                 AssetNodeFlat.from_json(m) for m in assets_flat_json
             ]
         except RequestException as err:
-            print("API not available when loading layout!")
+            logger.info("API not available when loading layout!")
             assets_flat: List[AssetNodeFlat] = []
 
         return [{"label": asset.caption, "value": asset.iri} for asset in assets_flat]

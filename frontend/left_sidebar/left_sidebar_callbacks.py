@@ -6,8 +6,9 @@ from frontend.app import app
 from frontend.main_column.factory_graph.GraphSelectedElement import GraphSelectedElement
 from frontend.right_sidebar.node_data_tab import node_data_layout
 from frontend.right_sidebar.node_information_tab import node_information_layout
+from util.log import logger
 
-print("Initializing extension collapsable callbacks...")
+logger.info("Initializing extension collapsable callbacks...")
 
 SIDEBAR_CONTAINER_NORMAL = ""
 SIDEBAR_CONTAINER_EXTENDED = "left-sidebar-container-extended"

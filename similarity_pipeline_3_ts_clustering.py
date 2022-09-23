@@ -13,11 +13,12 @@ from graph_domain.main_digital_twin.TimeseriesNode import (
     TimeseriesNodeFlat,
     TimeseriesValueTypes,
 )
+from util.log import logger
 
 # #############################################################################
 # Timeseries clustering
 # #############################################################################
-print("\n\n\nSTEP 3: Timeseries clustering\n")
+logger.info("\n\n\nSTEP 3: Timeseries clustering\n")
 
 DBSCAN_EPS = 0.3 * (
     10**9
@@ -44,7 +45,7 @@ reduced_feature_lists = [
 #             for ts_node in timeseries_nodes_flat
 #         ]
 #     ):
-#         print(f"Removing feature {key} because of NaN occurances...")
+#         logger.info(f"Removing feature {key} because of NaN occurances...")
 #         for f_dict in feature_dicts:
 #             f_dict.pop(key)
 
@@ -60,24 +61,24 @@ clustering = DBSCAN(eps=DBSCAN_EPS, min_samples=DBSCAN_MIN_SAMPLES).fit(
 )
 
 cluster_count = max(clustering.labels_) + 1
-print("Cluster count: " + str(cluster_count))
+logger.info("Cluster count: " + str(cluster_count))
 
 clusters = [[] for i in range(cluster_count)]
 for i in range(len(timeseries_nodes_flat)):
     if clustering.labels_[i] != -1:
         clusters[clustering.labels_[i]].append(timeseries_nodes_flat[i])
 
-print("Clusters:")
+logger.info("Clusters:")
 i = 1
 for cluster in clusters:
-    print(
+    logger.info(
         f"Cluster: {i}, count: {len(cluster)}: {[ts_node.id_short for ts_node in cluster]}"
     )
     i += 1
 
 pass
 
-print("Adding clusters to KG-DT...")
+logger.info("Adding clusters to KG-DT...")
 timeseries_endpoints.reset_ts_clusters()
 
 i = 0

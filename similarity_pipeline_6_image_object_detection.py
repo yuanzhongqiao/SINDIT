@@ -29,13 +29,14 @@ from graph_domain.main_digital_twin.TimeseriesNode import (
     TimeseriesNodeFlat,
     TimeseriesValueTypes,
 )
+from util.log import logger
 
 # #############################################################################
 # Image object detection
 # #############################################################################
-print("\n\n\nSTEP 6: Image object detection\n")
+logger.info("\n\n\nSTEP 6: Image object detection\n")
 
-# print(f"CUDA is available: {torch.cuda.is_available()}")
+# logger.info(f"CUDA is available: {torch.cuda.is_available()}")
 
 
 # config_file = "./mm_test/yolov3_mobilenetv2_320_300e_coco.py"
@@ -47,7 +48,7 @@ print("\n\n\nSTEP 6: Image object detection\n")
 #     model, "learning_factory_instance/binaries_import/dps_model.jpg"
 # )
 
-# print(inference_results)
+# logger.info(inference_results)
 
 #
 #
@@ -88,13 +89,13 @@ result = inference_detector(model, img)
 model.show_result(img, result, out_file="result.jpg")
 
 ################################################
-# print("Deleting previosly calculated features...")
+# logger.info("Deleting previosly calculated features...")
 # file_endpoints.reset_extracted_keywords()
 # TODO
 
 
 ################################################
-print("Loading file-nodes...")
+logger.info("Loading file-nodes...")
 
 # get file nodes flat (just for iris)
 # file_nodes_flat: List[SupplementaryFileNodeFlat] = file_endpoints.get_file_nodes(
@@ -108,12 +109,14 @@ file_nodes_flat: List[SupplementaryFileNodeFlat] = file_endpoints.get_file_nodes
 )
 
 ################################################
-print("Detecting objects in picture files...")
+logger.info("Detecting objects in picture files...")
 
 i = 1
 for file_node in file_nodes_flat:
-    print(f"\nProcessing file {i} of {len(file_nodes_flat)}: {file_node.id_short}")
-    print("Loading file...")
+    logger.info(
+        f"\nProcessing file {i} of {len(file_nodes_flat)}: {file_node.id_short}"
+    )
+    logger.info("Loading file...")
     file_stream = file_endpoints.get_supplementary_file_stream(iri=file_node.iri)
 
     # tmp_file_path = "./temporary_cad.step"
@@ -123,7 +126,7 @@ for file_node in file_nodes_flat:
         for pdf_line in file_stream:
             tmp_file.write(pdf_line)
 
-    print("Detecting objects...")
+    logger.info("Detecting objects...")
 
     result = inference_detector(model, tmp_file_path)
     # # visualize the results in a new window
@@ -136,18 +139,18 @@ for file_node in file_nodes_flat:
     # prop = GProp_GProps()
     # tolerance = 1e-5  # Adjust to your liking
     # volume = brepgprop_VolumeProperties(cad_workplane, prop, tolerance)
-    # print(volume)
+    # logger.info(volume)
 
     pass
 
-    # print("Saving to KG...")
+    # logger.info("Saving to KG...")
     # file_endpoints.save_extracted_text(file_iri=file_node.iri, text=text)
     # TODO
 
-    print("Deleting temporary file...")
+    logger.info("Deleting temporary file...")
     os.remove(tmp_file_path)
 
-    # print("Processing text: Searching most relevant keyphrases from the text...")
+    # logger.info("Processing text: Searching most relevant keyphrases from the text...")
 
     # extractor = pke.unsupervised.TopicRank()
     # extractor.load_document(text, language="en")
@@ -158,8 +161,8 @@ for file_node in file_nodes_flat:
 
     # TODO: evtl. nachfiltern (redundanzen entfernen etc.)
 
-    # print("\n TopicRank")
-    # print(keyphrases)
+    # logger.info("\n TopicRank")
+    # logger.info(keyphrases)
 
     # TODO
 
@@ -167,10 +170,10 @@ for file_node in file_nodes_flat:
     #     keyphrase_score_pair[0] for keyphrase_score_pair in keyphrases
     # ]
 
-    # print(f"Extracted {len(extracted_keywords)} keywords")
+    # logger.info(f"Extracted {len(extracted_keywords)} keywords")
 
     # # Save keywords and relationships to KG
-    # print("Saving keywords to KG...")
+    # logger.info("Saving keywords to KG...")
     # for keyword in extracted_keywords:
     #     file_endpoints.add_keyword(file_iri=file_node.iri, keyword=keyword)
 

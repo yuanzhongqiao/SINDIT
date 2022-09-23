@@ -8,6 +8,7 @@ from backend.runtime_connections.RuntimeConnection import RuntimeConnection
 
 from backend.runtime_connections.TimeseriesInput import TimeseriesInput
 from backend.runtime_connections.opcua.OpcuaTimeseriesInput import OpcuaTimeseriesInput
+from util.log import logger
 
 RECONNECT_DURATION = 10  # time to wait before trying to reconnect (in s)
 CONNECTION_CHECK_INTERVAL = 10  # time to wait between checking the connection
@@ -66,7 +67,7 @@ class OpcuaRuntimeConnection(RuntimeConnection):
         try:
             self.__start_connection()
         except Exception as exc:
-            print(
+            logger.info(
                 f"Exception occured while connecting to OPC-UA: {exc}.\n Skipping the connection..."
             )
             return
@@ -86,7 +87,7 @@ class OpcuaRuntimeConnection(RuntimeConnection):
                     )
                     subscription.subscribe_data_change(self._nodes)
 
-                print(
+                logger.info(
                     "OPCUA connection active: "
                     f"Host: {self.host}, port: {self.port}. Subscribing to nodes..."
                 )
@@ -103,7 +104,7 @@ class OpcuaRuntimeConnection(RuntimeConnection):
 
             except asyncio.exceptions.TimeoutError:
                 self.active = False
-                print(
+                logger.info(
                     "OPCUA connection timeout."
                     f"Host: {self.host}, port: {self.port}. Trying to reconnect in {RECONNECT_DURATION} s ..."
                 )
@@ -111,7 +112,7 @@ class OpcuaRuntimeConnection(RuntimeConnection):
                 time.sleep(RECONNECT_DURATION)
             except Exception as exc:
                 self.active = False
-                print(
+                logger.info(
                     f"Unusual exception occured at the OPC-UA connection: {exc}. \nRetrying in {RECONNECT_DURATION} s ..."
                 )
                 time.sleep(RECONNECT_DURATION)
@@ -128,7 +129,7 @@ class OpcuaRuntimeConnection(RuntimeConnection):
         try:
             self.__start_connection()
         except Exception as exc:
-            print(
+            logger.info(
                 f"Exception occured while connecting to OPC-UA: {exc}.\n Skipping the connection..."
             )
             return
@@ -149,7 +150,7 @@ class OpcuaRuntimeConnection(RuntimeConnection):
                 # polling
                 subscription.subscribe_data_change(self._nodes[0])
 
-                print(
+                logger.info(
                     "OPCUA connection active: " f"Host: {self.host}, port: {self.port}."
                 )
 
@@ -174,21 +175,21 @@ class OpcuaRuntimeConnection(RuntimeConnection):
 
             except asyncio.exceptions.TimeoutError:
                 self.active = False
-                print(
+                logger.info(
                     "OPCUA connection timeout."
                     f"Host: {self.host}, port: {self.port}. Trying to reconnect in {RECONNECT_DURATION} s ..."
                 )
                 time.sleep(RECONNECT_DURATION)
             except OSError:
                 self.active = False
-                print(
+                logger.info(
                     "OPCUA connection: OSError. "
                     f"Host: {self.host}, port: {self.port}. Trying to reconnect in {RECONNECT_DURATION} s ..."
                 )
                 time.sleep(RECONNECT_DURATION)
             except Exception as exc:
                 self.active = False
-                print(
+                logger.info(
                     f"Unusual exception occured at the OPC-UA connection: {exc}. \nRetrying in {RECONNECT_DURATION} s ..."
                 )
                 time.sleep(RECONNECT_DURATION)
@@ -207,7 +208,7 @@ class OpcuaRuntimeConnection(RuntimeConnection):
                     tloop=self._asyncua_treadloop,
                 )
             except asyncio.exceptions.TimeoutError:
-                print(
+                logger.info(
                     "OPCUA connection timeout while initializing the connection. "
                     f"Host: {self.host}, port: {self.port}. Retrying in {RECONNECT_DURATION} s ..."
                 )

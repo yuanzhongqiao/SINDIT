@@ -9,6 +9,7 @@ from backend.knowledge_graph.dao.TimeseriesNodesDao import TimeseriesNodesDao
 from graph_domain.expert_annotations.AnnotationTimeseriesMatcherNode import (
     AnnotationTimeseriesMatcherNodeFlat,
 )
+from util.log import logger
 
 
 ANNOTATIONS_DAO: AnnotationNodesDao = AnnotationNodesDao.instance()
@@ -24,7 +25,7 @@ class AnnotationDefinitionArguments(BaseModel):
 
 @app.post("/annotation/definition")
 async def post_annotation_definition(definition: AnnotationDefinitionArguments):
-    print(f"Creating new annotation definition: {definition.id_short}...")
+    logger.info(f"Creating new annotation definition: {definition.id_short}...")
     return ANNOTATIONS_DAO.create_annotation_definition(
         id_short=definition.id_short,
         solution_proposal=definition.solution_proposal,
@@ -46,7 +47,7 @@ class AnnotationInstanceArguments(BaseModel):
 
 @app.post("/annotation/instance")
 async def post_annotation_instance(instance: AnnotationInstanceArguments):
-    print(f"Creating new annotation instance: {instance.id_short}...")
+    logger.info(f"Creating new annotation instance: {instance.id_short}...")
     instance_iri = ANNOTATIONS_DAO.create_annotation_instance(
         id_short=instance.id_short,
         start_datetime=instance.start_datetime,
@@ -83,11 +84,11 @@ async def post_annotation_instance(instance: AnnotationInstanceArguments):
 
 @app.delete("/annotation/definition")
 async def delete_annotation_definition(definition_iri: str):
-    print(f"Deleting annotation definition: {definition_iri}...")
+    logger.info(f"Deleting annotation definition: {definition_iri}...")
     instances = ANNOTATIONS_DAO.get_instances_of_annotation_definition(definition_iri)
 
     if len(instances) != 0:
-        print("Can not delete annotation definition: Related instances exist!")
+        logger.info("Can not delete annotation definition: Related instances exist!")
         raise HTTPException(
             status_code=403, detail="Instances have to be removed first."
         )
@@ -108,10 +109,10 @@ async def delete_annotation_instance(instance_iri: str):
     ] = ANNOTATIONS_DAO.get_ts_matchers_only_used_for(instance_iri)
 
     for matcher in deletable_matchers:
-        print(f"Deleting time-series matcher: {matcher.id_short}")
+        logger.info(f"Deleting time-series matcher: {matcher.id_short}")
         ANNOTATIONS_DAO.delete_annotation_ts_matcher(matcher.iri)
 
-    print(f"Deleting annotation definition: {instance_iri}...")
+    logger.info(f"Deleting annotation definition: {instance_iri}...")
     ANNOTATIONS_DAO.delete_annotation_instance(instance_iri)
 
 

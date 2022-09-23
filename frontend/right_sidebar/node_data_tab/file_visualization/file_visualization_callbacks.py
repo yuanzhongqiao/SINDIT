@@ -45,8 +45,9 @@ from util.environment_and_configuration import (
     get_configuration,
     get_configuration_float,
 )
+from util.log import logger
 
-print("Initializing file visualization callbacks...")
+logger.info("Initializing file visualization callbacks...")
 
 
 @app.callback(
@@ -96,7 +97,7 @@ def download_file(n_clicks, selected_el_json):
 
     # Cancel if anything else than a file is selected
     if selected_el.type != NodeTypes.SUPPLEMENTARY_FILE.value:
-        print("Trying to download file for non-file element...")
+        logger.info("Trying to download file for non-file element...")
         raise PreventUpdate()
 
     suppl_file_data = api_client.get_raw(
@@ -144,7 +145,7 @@ def visualize_file(_, selected_el_json):
 
     # Cancel if anything else than a file is selected
     if selected_el.type != NodeTypes.SUPPLEMENTARY_FILE.value:
-        print("Trying to download file for non-file element...")
+        logger.info("Trying to download file for non-file element...")
         raise PreventUpdate()
 
     # Get type of file

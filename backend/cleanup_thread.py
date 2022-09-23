@@ -11,6 +11,7 @@ from util.environment_and_configuration import (
     get_configuration,
     get_configuration_float,
 )
+from util.log import logger
 
 DATABASE_EXPORT_DIRECTORY = "database_export"
 SAFETY_BACKUPS_DIRECTORY = "safety_backups"
@@ -24,7 +25,7 @@ def _clean_directory(directory: str, max_age: timedelta):
     try:
         backup_files = [f for f in listdir(directory) if isfile(join(directory, f))]
     except FileNotFoundError:
-        print(
+        logger.info(
             f"Directory scanned for obsolete backups does not (yet) exist: {directory}"
         )
         return
@@ -40,20 +41,20 @@ def _clean_directory(directory: str, max_age: timedelta):
                 )
             )
         except ValueError:
-            print(
+            logger.info(
                 f"File exists in backups folder, "
                 f"that does not conform to the file-name-format: {backup_file} in {directory}. It was skipped!"
             )
             continue
         age: timedelta = now - date_time
         if age > max_age:
-            print(f"Removing backup: {backup_file} with age: {age}")
+            logger.info(f"Removing backup: {backup_file} with age: {age}")
             remove(join(directory, backup_file))
 
 
 def _cleanup_thread_loop():
     while True:
-        print("Checking for obsolete backups...")
+        logger.info("Checking for obsolete backups...")
         _clean_directory(directory=DATABASE_EXPORT_DIRECTORY, max_age=MAX_AGE_EXPORT)
         for subdir in SAFETY_BACKUPS_SUBDIRECTORIES:
             _clean_directory(
@@ -61,7 +62,7 @@ def _cleanup_thread_loop():
                 max_age=MAX_AGE_SAFETY_BACKUPS,
             )
 
-        print("Finished checking for obsolete backups.")
+        logger.info("Finished checking for obsolete backups.")
         time.sleep(300)
 
 

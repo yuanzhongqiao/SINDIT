@@ -25,6 +25,7 @@ from backend.specialized_databases.DatabasePersistenceServiceContainer import (
 from backend.specialized_databases.timeseries.influx_db.InfluxDbPersistenceService import (
     InfluxDbPersistenceService,
 )
+from util.log import logger
 
 # Maps node-types to the connection / input classes
 RT_CONNECTION_MAPPING = {
@@ -188,7 +189,7 @@ class RuntimeConnectionContainer:
 
                 rt_connection.start_connection()
             except EnvironmentalVariableNotFoundError:
-                print(
+                logger.info(
                     f"Setup of RuntimeConnection canceled because of missing environmetal variable: {rt_con_node.caption}"
                 )
 

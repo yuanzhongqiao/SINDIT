@@ -4,7 +4,7 @@ Separated from app.py to avoid circular dependencies with callback files importi
 """
 
 from frontend.app import app
-
+from util.log import logger
 
 from frontend import page_layout
 
@@ -67,13 +67,13 @@ from util.environment_and_configuration import (
 
 server = app.server
 # Initialize layout
-print("Initializing app layout...")
+logger.info("Initializing app layout...")
 app.layout = page_layout.get_layout()
-print("Finished initializing the app layout.")
+logger.info("Finished initializing the app layout.")
 
 FRONTEND_HOST = get_environment_variable("FRONTEND_HOST")
 FRONTEND_PORT = get_environment_variable_int("FRONTEND_PORT")
-print(f"Starting the frontend at host: {FRONTEND_HOST}, port: {FRONTEND_PORT}")
+logger.info(f"Starting the frontend at host: {FRONTEND_HOST}, port: {FRONTEND_PORT}")
 
 if __name__ == "__main__":
 

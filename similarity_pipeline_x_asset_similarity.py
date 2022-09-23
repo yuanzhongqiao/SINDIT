@@ -16,18 +16,19 @@ from graph_domain.main_digital_twin.TimeseriesNode import (
     TimeseriesNodeFlat,
     TimeseriesValueTypes,
 )
+from util.log import logger
 
 # #############################################################################
 # Asset similarity
 # #############################################################################
-print("\n\n\nSTEP X: Asset similarity\n")
+logger.info("\n\n\nSTEP X: Asset similarity\n")
 
 ################################################
-print("Deleting old asset similarity relationships...")
+logger.info("Deleting old asset similarity relationships...")
 asset_endpoints.delete_asset_similarities()
 
 ################################################
-print("Loading assets and related nodes...")
+logger.info("Loading assets and related nodes...")
 
 # get assets flat (just for iris)
 asset_nodes_flat: List[TimeseriesNodeFlat] = asset_endpoints.get_asset_nodes(deep=False)
@@ -46,7 +47,7 @@ for asset_node in asset_nodes_flat:
     )
 
 ################################################
-print("Calculating similarity scores...")
+logger.info("Calculating similarity scores...")
 
 # Between every pair of assets (one direction only)
 for i in range(0, len(asset_nodes_flat)):
@@ -84,7 +85,7 @@ for i in range(0, len(asset_nodes_flat)):
 
         combined_similarity = (cosine_similarity + jaccard_similarity) / 2
 
-        print(
+        logger.info(
             f"Similarity between {asset1.id_short} and {asset2.id_short}:\n\tTimeseries: {cosine_similarity}\n\tKeywords: {jaccard_similarity}\n\tCombined: {combined_similarity}"
         )
 
@@ -97,4 +98,4 @@ for i in range(0, len(asset_nodes_flat)):
 
 
 ################################################
-# print("Building clusters...") TODO
+# logger.info("Building clusters...") TODO

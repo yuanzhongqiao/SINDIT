@@ -12,8 +12,9 @@ from frontend.main_column.factory_graph.GraphSelectedElement import GraphSelecte
 from frontend.right_sidebar.node_data_tab import node_data_layout
 from frontend.right_sidebar.node_information_tab import node_information_layout
 from graph_domain.factory_graph_types import NodeTypes
+from util.log import logger
 
-print("Initializing navigation callbacks...")
+logger.info("Initializing navigation callbacks...")
 
 
 @app.callback(

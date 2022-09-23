@@ -30,6 +30,7 @@ from graph_domain.main_digital_twin.DatabaseConnectionNode import (
     DatabaseConnectionTypes,
 )
 from util.file_name_utils import _replace_illegal_characters_from_iri
+from util.log import logger
 
 DB_CON_NODE_DAO: DatabaseConnectionsDao = DatabaseConnectionsDao.instance()
 SUPPL_FILE_DAO: SupplementaryFileNodesDao = SupplementaryFileNodesDao.instance()
@@ -127,7 +128,7 @@ async def export_database_dumps(
             backup_folder_names[db] = backup_folder
 
     # Create info file:
-    print("Creating backup info file...")
+    logger.info("Creating backup info file...")
     info_dict = {
         "sindit_export_version": get_configuration(
             group=ConfigGroups.GENERIC, key="sindit_export_version"
@@ -144,12 +145,12 @@ async def export_database_dumps(
         info_file.write(info_json)
 
     # Zip the folder and delete it
-    print("Zipping the backup...")
+    logger.info("Zipping the backup...")
     zip_file_path = DATABASE_EXPORT_DIRECTORY + backup_date_time_file_string
     zip_file_path_with_extension = zip_file_path + ".zip"
     shutil.make_archive(zip_file_path, "zip", backup_base_path)
     shutil.rmtree(backup_base_path)
-    print("Finished zipping the backup. Sending...")
+    logger.info("Finished zipping the backup. Sending...")
 
     def iterfile():
         with open(zip_file_path_with_extension, mode="rb") as file_like:
@@ -160,7 +161,7 @@ async def export_database_dumps(
 
 @app.post("/import/database_dumps")
 async def upload(file_name: str = Form(...), file_data: str = Form(...)):
-    print(f"Importing database dump(s): {file_name}")
+    logger.info(f"Importing database dump(s): {file_name}")
     restore_date_time = datetime.now()
     restore_date_time_file_string = restore_date_time.astimezone(
         tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
@@ -192,7 +193,7 @@ async def upload(file_name: str = Form(...), file_data: str = Form(...)):
         ) as info_file:
             info_file_json = info_file.read()
     except FileNotFoundError:
-        print("Not a valid backup: sindit_export_info.txt file not found!")
+        logger.info("Not a valid backup: sindit_export_info.txt file not found!")
         shutil.rmtree(restore_base_path)
         raise HTTPException(
             status_code=403, detail="Invalid backup: sindit_export_info.txt missing"

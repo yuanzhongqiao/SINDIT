@@ -8,8 +8,9 @@ from util.environment_and_configuration import (
     ConfigGroups,
     get_configuration,
 )
+from util.log import logger
 
-print("Initializing navbar callbacks...")
+logger.info("Initializing navbar callbacks...")
 
 EXPORT_FILE_NAME_BASE = "sindit_database_export_"
 DATETIME_STRF_FORMAT = "%Y_%m_%d_%H_%M_%S_%f"
@@ -89,10 +90,10 @@ def upload_notifier(n):
 )
 def download_export(n, m, selected_db):
     if ctx.triggered_id == "export-single-button":
-        print(f"Started export for single database: {selected_db}")
+        logger.info(f"Started export for single database: {selected_db}")
         multi_export = False
     else:
-        print("Started export for all databases")
+        logger.info("Started export for all databases")
         multi_export = True
     date_time_str = (
         datetime.now()
@@ -108,7 +109,7 @@ def download_export(n, m, selected_db):
         database_iri=selected_db,
         all_databases=multi_export,
     )
-    print("Export finished.")
+    logger.info("Export finished.")
     return dcc.send_bytes(src=file_data, filename=file_name)
 
 
@@ -137,12 +138,12 @@ def select_upload_file(filename):
     prevent_initial_call=True,
 )
 def upload_file(n, file_name, file_data):
-    print(f"Started database import: {file_name} ...")
+    logger.info(f"Started database import: {file_name} ...")
     response_body_text = api_client.post(
         relative_path="/import/database_dumps",
         data={"file_name": file_name, "file_data": file_data},
     )
-    print("Finished database import.")
+    logger.info("Finished database import.")
     return None, datetime.now()
 
 
