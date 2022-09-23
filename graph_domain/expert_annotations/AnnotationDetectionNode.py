@@ -4,13 +4,16 @@ from datetime import datetime
 from typing import List
 
 from dataclasses_json import dataclass_json
-from py2neo.ogm import Property, Related
+from py2neo.ogm import Property, Related, RelatedTo
 
 from graph_domain.BaseNode import BaseNode
 from graph_domain.expert_annotations.AnnotationDefinitionNode import (
     AnnotationDefinitionNodeDeep,
 )
-
+from graph_domain.expert_annotations.AnnotationInstanceNode import (
+    AnnotationInstanceNodeDeep,
+    AnnotationInstanceNodeFlat,
+)
 from graph_domain.expert_annotations.AnnotationPreIndicatorNode import (
     AnnotationPreIndicatorNodeDeep,
 )
@@ -30,29 +33,31 @@ from util.datetime_utils import (
     neo4j_str_or_datetime_to_datetime,
 )
 
-LABEL = NodeTypes.ANNOTATION_INSTANCE.value
+LABEL = NodeTypes.ANNOTATION_DETECTION.value
 
 
 @dataclass
 @dataclass_json
-class AnnotationInstanceNodeFlat(BaseNode):
+class AnnotationDetectionNodeFlat(BaseNode):
     """
-    Flat expert annotation instance node without relationships, only containing properties
+    Flat expert annotation detection node without relationships, only containing properties
     """
 
     # Identifier for the node-type:
     __primarylabel__ = LABEL
 
     # Additional properties:
-    _creation_date_time: str | datetime = Property(key="creation_date_time")
+    _confirmation_date_time: str | datetime | None = Property(
+        key="confirmation_date_time"
+    )
 
     @property
-    def creation_date_time(self) -> datetime:
-        return neo4j_str_or_datetime_to_datetime(self._creation_date_time)
+    def confirmation_date_time(self) -> datetime:
+        return neo4j_str_or_datetime_to_datetime(self._confirmation_date_time)
 
-    @creation_date_time.setter
-    def creation_date_time(self, value):
-        self._creation_date_time = datetime_to_neo4j_str(value)
+    @confirmation_date_time.setter
+    def confirmation_date_time(self, value):
+        self._confirmation_date_time = datetime_to_neo4j_str(value)
 
     _occurance_start_date_time: str | datetime = Property(
         key="occurance_start_date_time"
@@ -83,9 +88,6 @@ class AnnotationInstanceNodeFlat(BaseNode):
         """
         super().validate_metamodel_conformance()
 
-        if self.creation_date_time is None:
-            raise GraphNotConformantToMetamodelError(self, "Missing creation date.")
-
         if self.occurance_start_date_time is None:
             raise GraphNotConformantToMetamodelError(
                 self, "Missing occurance start date."
@@ -99,7 +101,7 @@ class AnnotationInstanceNodeFlat(BaseNode):
 
 @dataclass
 @dataclass_json
-class AnnotationInstanceNodeDeep(AnnotationInstanceNodeFlat):
+class AnnotationDetectionNodeDeep(AnnotationDetectionNodeFlat):
     """
     Deep expert annotation instance node with relationships
     """
@@ -109,7 +111,7 @@ class AnnotationInstanceNodeDeep(AnnotationInstanceNodeFlat):
     # The OGM framework does not allow constraining to only one item!
     # Can only be one unit (checked by metamodel validator)
     _definition: List[AnnotationDefinitionNodeDeep] = Related(
-        AnnotationDefinitionNodeDeep, RelationshipTypes.INSTANCE_OF.value
+        AnnotationDefinitionNodeDeep, RelationshipTypes.DETECTED_OCCURANCE.value
     )
 
     @property
@@ -119,22 +121,20 @@ class AnnotationInstanceNodeDeep(AnnotationInstanceNodeFlat):
         else:
             return None
 
-    _pre_indicators: List[AnnotationPreIndicatorNodeDeep] = Related(
-        AnnotationPreIndicatorNodeDeep, RelationshipTypes.PRE_INDICATABLE_WITH.value
+    # The OGM framework does not allow constraining to only one item!
+    # Can only be one unit (checked by metamodel validator)
+    _matching_instance: List[AnnotationInstanceNodeDeep] = Related(
+        AnnotationInstanceNodeDeep, RelationshipTypes.MATCHING_INSTANCE.value
     )
 
     @property
-    def pre_indicators(self) -> List[AnnotationPreIndicatorNodeDeep]:
-        return [indicator for indicator in self._pre_indicators]
-
-    _ts_matchers: List[AnnotationTimeseriesMatcherNodeDeep] = Related(
-        AnnotationTimeseriesMatcherNodeDeep,
-        RelationshipTypes.DETECTABLE_WITH.value,
-    )
-
-    @property
-    def ts_matchers(self) -> List[AnnotationTimeseriesMatcherNodeDeep]:
-        return [matcher for matcher in self._ts_matchers]
+    def matching_instance(self) -> AnnotationInstanceNodeDeep:
+        if len(self._definition) > 0:
+            return [matching_instance for matching_instance in self._matching_instance][
+                0
+            ]
+        else:
+            return None
 
     def validate_metamodel_conformance(self):
         """
@@ -154,8 +154,13 @@ class AnnotationInstanceNodeDeep(AnnotationInstanceNodeFlat):
             )
         self.definition.validate_metamodel_conformance()
 
-        for pre_ind in self.pre_indicators:
-            pre_ind.validate_metamodel_conformance()
+        if len(self._definition) < 1:
+            raise GraphNotConformantToMetamodelError(
+                self, "Missing annotation definition."
+            )
 
-        for ts_matcher in self.ts_matchers:
-            ts_matcher.validate_metamodel_conformance()
+        if len(self._definition) > 1:
+            raise GraphNotConformantToMetamodelError(
+                self, "Only one annotation definition per instance."
+            )
+        self.matching_instance.validate_metamodel_conformance()
