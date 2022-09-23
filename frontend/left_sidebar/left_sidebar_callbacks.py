@@ -58,15 +58,28 @@ def select_similarity_pipeline_sidebar(n_clicks_sim, n_clicks_an, store):
     Output("annotation-detection-button-icon", "className"),
     Output("left-sidebar-container", "className"),
     Input("left-sidebar-collapsable-store", "data"),
+    Input("status-unconfirmed-annotation-detection", "modified_timestamp"),
+    State("status-unconfirmed-annotation-detection", "data"),
     prevent_initial_call=False,
 )
-def left_sidebar_collapse(store):
+def left_sidebar_collapse(store, _, new_detection):
     """
     Toggles the visibility of a left collapsable sidebar
     :param selected_el:
     :return:
     """
-    if store is None or store == CollapsableContainers.MAIN.value:
+    if new_detection is not None and new_detection:
+        logger.info("New unconfirmed annotation detection!")
+        return (
+            SIDEBAR_HIDDEN,
+            SIDEBAR_HIDDEN,
+            SIDEBAR_SHOWN,
+            COLLAPSE_BUTTON_COLLAPSED,
+            COLLAPSE_BUTTON_UNCOLLAPSED,
+            SIDEBAR_CONTAINER_EXTENDED,
+        )
+
+    elif store is None or store == CollapsableContainers.MAIN.value:
         return (
             SIDEBAR_SHOWN,
             SIDEBAR_HIDDEN,

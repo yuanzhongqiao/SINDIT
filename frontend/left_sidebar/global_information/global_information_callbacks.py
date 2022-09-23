@@ -24,6 +24,7 @@ def _warning_message(text: str = "Connection lost!"):
     Output("status-ts-connections", "children"),
     Output("status-ts-inputs", "children"),
     Output("status-assets-count", "children"),
+    Output("status-unconfirmed-annotation-detection", "data"),
     Input("interval-component", "n_intervals"),
 )
 def update_system_status(n):
@@ -36,16 +37,7 @@ def update_system_status(n):
     status_dict: Dict = api_client.get_json(relative_path="/status", retries=0)
 
     if status_dict is None:
-        # return (
-        #     "Connection lost!",
-        #     "Connection lost!",
-        #     "Connection lost!",
-        #     "Connection lost!",
-        #     "Connection lost!",
-        # )
-        # return 0, 0, 0, 0, 0
-        # return ("Connection lost!", 0, 0, 0, 0)
-        return (_warning_message(), "", "", "", "")
+        return (_warning_message(), "", "", "", "", False)
 
     system_time = datetime.fromisoformat(status_dict.get("system_time")).astimezone(
         tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
@@ -65,4 +57,5 @@ def update_system_status(n):
         else _warning_message(rt_con_str),
         status_dict.get("timeseries_count"),
         status_dict.get("assets_count"),
+        status_dict.get("unconfirmed_annotation_detection"),
     )
