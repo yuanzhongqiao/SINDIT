@@ -5,6 +5,7 @@ from backend.runtime_connections.RuntimeConnection import RuntimeConnection
 
 from backend.runtime_connections.TimeseriesInput import TimeseriesInput
 from backend.runtime_connections.mqtt.MqttTimeseriesInput import MqttTimeseriesInput
+from util.log import logger
 
 
 class MqttRuntimeConnection(RuntimeConnection):
@@ -41,7 +42,7 @@ class MqttRuntimeConnection(RuntimeConnection):
         :param reason_code:
         :return:
         """
-        print(
+        logger.info(
             "MQTT connected. "
             f"Host: {self.host}, port: {self.port}. Subscribing to topics..."
         )
@@ -52,7 +53,7 @@ class MqttRuntimeConnection(RuntimeConnection):
 
     def __on_connect_fail(self, client, userdata):
         self.active = False
-        print(
+        logger.info(
             f"MQTT connection could not be established: "
             f"Host: {self.host}, port: {self.port}"
         )
@@ -60,7 +61,7 @@ class MqttRuntimeConnection(RuntimeConnection):
     def __on_disconnect(self, client, userdata, reason_code):
         self.active = False
         if reason_code != 0:
-            print(
+            logger.info(
                 f"Unexpected MQTT disconnection. "
                 f"Host: {self.host}, port: {self.port}. Will auto-reconnect"
             )

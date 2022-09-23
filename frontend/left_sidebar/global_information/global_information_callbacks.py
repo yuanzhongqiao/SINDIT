@@ -8,8 +8,9 @@ from dash import html
 
 from frontend.left_sidebar.global_information import global_information_layout
 from util.environment_and_configuration import ConfigGroups, get_configuration
+from util.log import logger
 
-print("Initializing global information callbacks...")
+logger.info("Initializing global information callbacks...")
 
 
 @app.callback(

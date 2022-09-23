@@ -26,6 +26,7 @@ from backend.specialized_databases.timeseries.influx_db.InfluxDbPersistenceServi
     InfluxDbPersistenceService,
 )
 from backend.knowledge_graph.dao.AssetNodesDao import AssetsDao
+from util.log import logger
 
 DB_CON_NODE_DAO: DatabaseConnectionsDao = DatabaseConnectionsDao.instance()
 SUPPL_FILE_DAO: SupplementaryFileNodesDao = SupplementaryFileNodesDao.instance()
@@ -45,7 +46,7 @@ def get_supplementary_file_stream(iri: str):
         )
 
         if file_con_node is None:
-            print("File requested, but database connection node does not exist")
+            logger.info("File requested, but database connection node does not exist")
             return None
 
         file_service: FilesPersistenceService = (
@@ -76,7 +77,7 @@ def get_supplementary_file_temporary_link(iri: str):
         )
 
         if file_con_node is None:
-            print("File requested, but database connection node does not exist")
+            logger.info("File requested, but database connection node does not exist")
             return None
 
         file_service: FilesPersistenceService = (

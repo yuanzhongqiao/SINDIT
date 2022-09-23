@@ -16,8 +16,9 @@ from frontend.left_sidebar.global_information import global_information_layout
 from frontend.main_column.factory_graph.GraphSelectedElement import GraphSelectedElement
 from graph_domain.factory_graph_types import NodeTypes
 from util.environment_and_configuration import ConfigGroups, get_configuration
+from util.log import logger
 
-print("Initializing annotation extension callbacks...")
+logger.info("Initializing annotation extension callbacks...")
 
 HIDE = "hide-content"
 SHOW = ""
@@ -69,7 +70,7 @@ def save_annotation(
     new_annotation_description,
 ):
     if current_step is None or current_step != CreationSteps.FINISHED.value:
-        print("Tried to save early")
+        logger.info("Tried to save early")
         raise PreventUpdate
 
     asset: GraphSelectedElement = GraphSelectedElement.from_json(selected_asset_json)
@@ -80,7 +81,7 @@ def save_annotation(
     ]
 
     if True in new_annotation_switch:
-        print(
+        logger.info(
             f"Storing new annotation definition:\n Caption: {new_annotation_caption}\nid_short: {new_annotation_id_short}"
         )
         used_definition_iri = api_client.post(
@@ -104,7 +105,7 @@ def save_annotation(
         f"{used_definition_id_short}_{asset.id_short}_{datetime.now().isoformat()}"
     )
 
-    print(
+    logger.info(
         f"Storing new annotation:\n Caption: {caption}\nid_short: {instance_id_short}"
     )
 
@@ -121,7 +122,7 @@ def save_annotation(
             "description": description,
         },
     )
-    print("Finished storing annotation")
+    logger.info("Finished storing annotation")
     return datetime.now()
 
 
@@ -805,16 +806,16 @@ def delete_annotation(
     selected_el: GraphSelectedElement = GraphSelectedElement.from_json(selected_el_json)
 
     if selected_el.type == NodeTypes.ANNOTATION_INSTANCE.value:
-        print(f"Deleting annotation instance: {selected_el.id_short}")
+        logger.info(f"Deleting annotation instance: {selected_el.id_short}")
         api_client.delete(
             f"/annotation/instance/",
             instance_iri=selected_el.iri,
         )
     elif selected_el.type == NodeTypes.ANNOTATION_DEFINITION.value:
-        print(f"Deleting annotation definition: {selected_el.id_short}")
+        logger.info(f"Deleting annotation definition: {selected_el.id_short}")
         api_client.delete(f"/annotation/definition/", definition_iri=selected_el.iri)
     else:
-        print("Tried to remove annotation, but different object selected")
+        logger.info("Tried to remove annotation, but different object selected")
         raise PreventUpdate
 
     return datetime.now()

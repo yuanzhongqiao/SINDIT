@@ -23,6 +23,7 @@ from backend.runtime_connections.RuntimeConnectionContainer import (
 from backend.specialized_databases.DatabasePersistenceServiceContainer import (
     DatabasePersistenceServiceContainer,
 )
+from util.log import logger
 
 
 # Import endpoint files (indirectly used through annotation)
@@ -71,13 +72,15 @@ def init_database_data_if_not_available():
     assets_count = asset_dao.get_assets_count()
 
     if assets_count == 0:
-        print("No assets found! Initializing databases in 60 seconds, if not canceled.")
+        logger.info(
+            "No assets found! Initializing databases in 60 seconds, if not canceled."
+        )
         time.sleep(60)
 
         setup_knowledge_graph()
         import_binary_data()
         generate_alternative_cad_format()
-        print("Finished initilization.")
+        logger.info("Finished initilization.")
 
 
 def refresh_ts_inputs():
@@ -94,10 +97,10 @@ def refresh_time_series_thread_loop():
 
     while True:
         time.sleep(120)
-        print("Refreshing time-series inputs and connections...")
+        logger.info("Refreshing time-series inputs and connections...")
         refresh_ts_inputs()
 
-        print("Done refreshing time-series inputs and connections.")
+        logger.info("Done refreshing time-series inputs and connections.")
 
 
 # #############################################################################
@@ -105,25 +108,25 @@ def refresh_time_series_thread_loop():
 # #############################################################################
 if __name__ == "__main__":
 
-    print("Initializing Knowledge Graph...")
+    logger.info("Initializing Knowledge Graph...")
 
     # pylint: disable=W0612
     kg_service = KnowledgeGraphPersistenceService.instance()
 
-    print("Done initializing Knowledge Graph.")
+    logger.info("Done initializing Knowledge Graph.")
 
-    print("Checking, if data is present...")
+    logger.info("Checking, if data is present...")
     init_database_data_if_not_available()
 
-    print("Initializing specialized databases...")
+    logger.info("Initializing specialized databases...")
     db_con_container: DatabasePersistenceServiceContainer = (
         DatabasePersistenceServiceContainer.instance()
     )
-    print("Done initializing specialized databases.")
+    logger.info("Done initializing specialized databases.")
 
-    print("Loading time-series inputs and connections...")
+    logger.info("Loading time-series inputs and connections...")
     refresh_ts_inputs()
-    print("Done loading time-series inputs and connections.")
+    logger.info("Done loading time-series inputs and connections.")
 
     # Thread checking regulary, if timeseries inputs and runtime-connections have been added / removed
     ts_refresh_thread = Thread(target=refresh_time_series_thread_loop)

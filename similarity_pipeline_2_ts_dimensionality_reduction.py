@@ -15,11 +15,12 @@ from graph_domain.main_digital_twin.TimeseriesNode import (
     TimeseriesNodeFlat,
     TimeseriesValueTypes,
 )
+from util.log import logger
 
 # #############################################################################
 # Timeseries dimensionality reduction
 # #############################################################################
-print("\n\n\nSTEP 2: Timeseries dimensionality reduction\n")
+logger.info("\n\n\nSTEP 2: Timeseries dimensionality reduction\n")
 
 # Freshly read the nodes with the newest feature vectors
 timeseries_nodes_flat: List[
@@ -37,7 +38,7 @@ for key in timeseries_nodes_flat[0].feature_dict.keys():
             for ts_node in timeseries_nodes_flat
         ]
     ):
-        print(f"Removing feature {key} because of NaN occurances...")
+        logger.info(f"Removing feature {key} because of NaN occurances...")
         for f_dict in feature_dicts:
             f_dict.pop(key)
 
@@ -53,7 +54,7 @@ reduced_feature_lists = pca.fit_transform(feature_lists)
 
 np.cumsum(pca.explained_variance_ratio_)
 
-print("Writing to KG-DT...")
+logger.info("Writing to KG-DT...")
 i = 0
 for timeseries_node in timeseries_nodes_flat:
     timeseries_endpoints.set_ts_reduced_feature_list(

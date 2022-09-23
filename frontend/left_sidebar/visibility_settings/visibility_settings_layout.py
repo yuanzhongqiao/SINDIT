@@ -1,14 +1,13 @@
 from typing import List
 import dash_bootstrap_components as dbc
 from dash import html, dcc
-
-from requests.exceptions import RequestException
 from frontend import api_client
 from graph_domain.factory_graph_types import (
     NodeTypes,
     PseudoNodeTypes,
 )
 from graph_domain.main_digital_twin.AssetNode import AssetNodeFlat
+from util.log import logger
 
 
 def get_layout():
@@ -16,7 +15,7 @@ def get_layout():
     Layout of the visibility settings
     :return:
     """
-    print(
+    logger.info(
         "Loading available assets to be provided as options for the graph visibility multiselect..."
     )
     assets_flat_json = api_client.get_json("/assets", deep=False, endless_scan=False)

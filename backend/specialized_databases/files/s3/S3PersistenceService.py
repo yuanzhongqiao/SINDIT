@@ -15,6 +15,7 @@ from backend.specialized_databases.files.FilesPersistenceService import (
     FilesPersistenceService,
 )
 from util.file_name_utils import _replace_illegal_characters_from_iri
+from util.log import logger
 
 SAFETY_BACKUP_PATH = "safety_backups/s3/"
 DATETIME_STRF_FORMAT = "%Y_%m_%d_%H_%M_%S_%f"
@@ -91,7 +92,7 @@ class S3PersistenceService(FilesPersistenceService):
         )
 
     def backup(self, backup_path: str):
-        print("Backing up S3...")
+        logger.info("Backing up S3...")
         os.makedirs(backup_path)
         backup_file_names = dict()
         if not self.bucket_name in [
@@ -106,7 +107,7 @@ class S3PersistenceService(FilesPersistenceService):
             self.client.download_file(self.bucket_name, iri, file_path)
             backup_file_names[iri] = file_name
         # Create info file:
-        print("Creating S3 backup info file...")
+        logger.info("Creating S3 backup info file...")
         info_dict = {
             "bucket_name": self.bucket_name,
             "backup_iri_mappings": backup_file_names,
@@ -119,11 +120,11 @@ class S3PersistenceService(FilesPersistenceService):
         ) as info_file:
             info_file.write(info_json)
 
-        print("Finished backing up S3.")
+        logger.info("Finished backing up S3.")
 
     def restore(self, backup_path: str):
-        print("Restoring S3...")
-        print("Parsing backup...")
+        logger.info("Restoring S3...")
+        logger.info("Parsing backup...")
         # Parse info file:
         try:
             with open(
@@ -131,25 +132,25 @@ class S3PersistenceService(FilesPersistenceService):
             ) as info_file:
                 info_file_json = info_file.read()
         except FileNotFoundError:
-            print("Not a valid backup: s3 info file not found!")
+            logger.info("Not a valid backup: s3 info file not found!")
             return
 
         info_dict = json.loads(info_file_json)
         files: dict = info_dict.get("backup_iri_mappings")
         file_iris = list(files.keys())
-        print("Creating a safety backup before overwriting the database...")
+        logger.info("Creating a safety backup before overwriting the database...")
         safety_path = SAFETY_BACKUP_PATH + datetime.now().astimezone(
             tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
         ).strftime(DATETIME_STRF_FORMAT)
         os.makedirs(safety_path)
         self.backup(backup_path=safety_path + "/s3")
-        print("Zipping the safety backup...")
+        logger.info("Zipping the safety backup...")
         zip_file_path = safety_path + "/s3"
         shutil.make_archive(zip_file_path, "zip", safety_path + "/s3")
         shutil.rmtree(safety_path + "/s3")
-        print("Finished zipping the safety backup.")
+        logger.info("Finished zipping the safety backup.")
         # Delete everything:
-        print("Deleting everything...")
+        logger.info("Deleting everything...")
         try:
             self.bucket.objects.all().delete()
             self.bucket.delete()
@@ -158,11 +159,11 @@ class S3PersistenceService(FilesPersistenceService):
             pass
         self.client.create_bucket(Bucket=self.bucket_name)
         self.bucket = self.resource.Bucket(self.bucket_name)
-        print("Deleted everything.")
-        print("Restoring...")
+        logger.info("Deleted everything.")
+        logger.info("Restoring...")
         for iri in file_iris:
             file_name = files.get(iri)
             file_path = backup_path + "/" + file_name
             self.bucket.upload_file(file_path, iri)
 
-        print("Finished restoring S3.")
+        logger.info("Finished restoring S3.")

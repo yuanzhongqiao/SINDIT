@@ -8,6 +8,7 @@ from graph_domain.factory_graph_types import (
     NodeTypes,
     RelationshipTypes,
 )
+from util.log import logger
 
 
 # Take care: the order of this annotations makes a difference. Does not work with @dataclass before @dataclass_json
@@ -44,7 +45,7 @@ class GraphSelectedElement(object):
         if tap_edge["classes"] in ELEMENT_TYPE_STRINGS:
             el_type = tap_edge["classes"]
         else:
-            print("Edge type not found!")
+            logger.info("Edge type not found!")
             el_type = UNSPECIFIED_LABEL
 
         return GraphSelectedElement(
@@ -64,7 +65,7 @@ class GraphSelectedElement(object):
         if tap_node["classes"] in ELEMENT_TYPE_STRINGS:
             el_type = tap_node["classes"]
         else:
-            print("Node type not found! Fallback to unspecified.")
+            logger.info("Node type not found! Fallback to unspecified.")
             el_type = UNSPECIFIED_LABEL
 
         return cls(

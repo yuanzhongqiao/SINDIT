@@ -18,6 +18,7 @@ from backend.specialized_databases.timeseries.TimeseriesPersistenceService impor
 from backend.specialized_databases.timeseries.influx_db.InfluxDbPersistenceService import (
     InfluxDbPersistenceService,
 )
+from util.log import logger
 
 
 DB_CON_NODE_DAO: DatabaseConnectionsDao = DatabaseConnectionsDao.instance()
@@ -63,7 +64,9 @@ def _get_related_timeseries_database_service(iri: str) -> TimeseriesPersistenceS
         )
 
         if ts_con_node is None:
-            print("Timeseries requested, but database connection node does not exist")
+            logger.info(
+                "Timeseries requested, but database connection node does not exist"
+            )
             return pd.DataFrame(columns=["time", "value"])
 
         ts_service: TimeseriesPersistenceService = (

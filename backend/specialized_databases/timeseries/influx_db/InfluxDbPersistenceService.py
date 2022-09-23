@@ -17,6 +17,7 @@ from util.environment_and_configuration import (
     get_configuration,
 )
 import os
+from util.log import logger
 
 READING_FIELD_NAME = "reading"
 SAFETY_BACKUP_PATH = "safety_backups/influx_db/"
@@ -70,13 +71,13 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
         try:
             self._write_api.write(bucket=self.bucket, record=record)
             if self._last_reading_dropped:
-                print("Writing of time-series readings working again.")
+                logger.info("Writing of time-series readings working again.")
             self._last_reading_dropped = False
         except Exception:
             # Using generic exception on purpose, since there are many different ones occuring, that
             # all require the same handling
             if not self._last_reading_dropped:
-                print(
+                logger.info(
                     "Time-series reading dropped: Database not available (ReadTimeoutError). "
                     "Will notify when successful again."
                 )
@@ -195,29 +196,29 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
             return None
 
     def backup(self, backup_path: str):
-        print("Backing up InfluxDB...")
+        logger.info("Backing up InfluxDB...")
 
         subprocess.run(
             ["influx", "backup", backup_path, "--host", self.uri, "-t", self.key]
         )
 
-        print("Finished backing up InfluxDB.")
+        logger.info("Finished backing up InfluxDB.")
 
     def restore(self, backup_path: str):
-        print("Restoring InfluxDB...")
-        print("Creating a safety backup before overwriting the database...")
+        logger.info("Restoring InfluxDB...")
+        logger.info("Creating a safety backup before overwriting the database...")
         safety_path = SAFETY_BACKUP_PATH + datetime.now().astimezone(
             tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
         ).strftime(DATETIME_STRF_FORMAT)
         os.makedirs(safety_path)
         self.backup(backup_path=safety_path + "/influx_db")
-        print("Zipping the safety backup...")
+        logger.info("Zipping the safety backup...")
         zip_file_path = safety_path + "/influx_db"
         shutil.make_archive(zip_file_path, "zip", safety_path + "/influx_db")
         shutil.rmtree(safety_path + "/influx_db")
-        print("Finished zipping the safety backup.")
+        logger.info("Finished zipping the safety backup.")
         # Delete everything:
-        print("Deleting everything...")
+        logger.info("Deleting everything...")
         subprocess.run(
             [
                 "influx",
@@ -233,9 +234,9 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
                 self.key,
             ]
         )
-        print("Deleted everything.")
-        print("Restoring...")
+        logger.info("Deleted everything.")
+        logger.info("Restoring...")
         subprocess.run(
             ["influx", "restore", backup_path, "--host", self.uri, "-t", self.key]
         )
-        print("Finished restoring InfluxDB.")
+        logger.info("Finished restoring InfluxDB.")

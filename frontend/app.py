@@ -1,3 +1,4 @@
+import logging
 import dash
 from flask import Flask
 import dash_bootstrap_components as dbc
@@ -19,6 +20,9 @@ app = dash.Dash(
     title="SINDIT – SINTEF Digital Twin",
     server=server,
 )
+log = logging.getLogger("werkzeug")
+log.setLevel(logging.ERROR)
+# log.setLevel(logging.INFO)
 
 # pylint: disable=W0212
 app._favicon = "favicon.png"

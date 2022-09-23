@@ -15,6 +15,7 @@ import py2neo.ogm as ogm
 from py2neo.errors import ConnectionBroken
 from neo4j import GraphDatabase
 from neo4j_backup import Extractor, Importer
+from util.log import logger
 
 
 SAFETY_BACKUP_PATH = "safety_backups/neo4j/"
@@ -56,9 +57,9 @@ class KnowledgeGraphPersistenceService(object):
             self.auth = None
         while not self.connected:
             try:
-                print("Connecting to Neo4J...")
+                logger.info("Connecting to Neo4J...")
 
-                print(
+                logger.info(
                     f"Trying to connect to uri {self.bolt_uri}. "
                     f"Using a user_name: {self.user_name is not None}, using a password: {self.pw is not None}"
                 )
@@ -70,10 +71,10 @@ class KnowledgeGraphPersistenceService(object):
                 self._repo = ogm.Repository(
                     self.bolt_uri, name=self.graph_name, auth=self.auth
                 )
-                print("Successfully connected to Neo4J!")
+                logger.info("Successfully connected to Neo4J!")
                 self.connected = True
             except py2neo.ConnectionUnavailable:
-                print(
+                logger.info(
                     "Neo4J graph unavailable or Authentication invalid! Trying again in 10 seconds..."
                 )
                 time.sleep(10)
@@ -145,7 +146,7 @@ class KnowledgeGraphPersistenceService(object):
                 self._connect()
 
     def backup(self, backup_path: str):
-        print("Backing up neo4j...")
+        logger.info("Backing up neo4j...")
 
         driver = GraphDatabase.driver(
             self.neo4j_uri,
@@ -163,26 +164,26 @@ class KnowledgeGraphPersistenceService(object):
         )
         extractor.extract_data()
 
-        print("Finished backing up neo4j.")
+        logger.info("Finished backing up neo4j.")
 
     def restore(self, backup_path: str):
-        print("Restoring neo4j...")
-        print("Creating a safety backup before overwriting the database...")
+        logger.info("Restoring neo4j...")
+        logger.info("Creating a safety backup before overwriting the database...")
         safety_path = SAFETY_BACKUP_PATH + datetime.now().astimezone(
             tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
         ).strftime(DATETIME_STRF_FORMAT)
         os.makedirs(safety_path)
         self.backup(backup_path=safety_path + "/neo4j")
-        print("Zipping the safety backup...")
+        logger.info("Zipping the safety backup...")
         zip_file_path = safety_path + "/neo4j"
         shutil.make_archive(zip_file_path, "zip", safety_path + "/neo4j")
         shutil.rmtree(safety_path + "/neo4j")
-        print("Finished zipping the safety backup.")
+        logger.info("Finished zipping the safety backup.")
         # Delete everything:
-        print("Deleting everything...")
+        logger.info("Deleting everything...")
         self.graph.delete_all()
-        print("Deleted everything.")
-        print("Restoring...")
+        logger.info("Deleted everything.")
+        logger.info("Restoring...")
         driver = GraphDatabase.driver(
             self.neo4j_uri,
             auth=self.auth,
@@ -198,4 +199,4 @@ class KnowledgeGraphPersistenceService(object):
         )
         importer.import_data()
 
-        print("Finished restoring neo4j.")
+        logger.info("Finished restoring neo4j.")

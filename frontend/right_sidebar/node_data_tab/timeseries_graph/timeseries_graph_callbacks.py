@@ -23,6 +23,7 @@ from util.environment_and_configuration import (
     get_configuration,
     get_configuration_float,
 )
+from util.log import logger
 
 sensor_ID = None
 
@@ -31,7 +32,7 @@ TIMESERIES_MAX_DISPLAYED_ENTRIES = get_configuration_float(
 )
 
 
-print("Initializing timeseries callbacks...")
+logger.info("Initializing timeseries callbacks...")
 
 
 @app.callback(
@@ -215,7 +216,7 @@ def update_timeseries_graph(
 
     # Cancel if anything else than timeseries is selected
     if selected_el.type != NodeTypes.TIMESERIES_INPUT.value:
-        print("Trying to visualize timeseries from non-timeseries element...")
+        logger.info("Trying to visualize timeseries from non-timeseries element...")
         return fig
 
     if (

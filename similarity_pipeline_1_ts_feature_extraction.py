@@ -13,12 +13,13 @@ from graph_domain.main_digital_twin.TimeseriesNode import (
     TimeseriesNodeFlat,
     TimeseriesValueTypes,
 )
+from util.log import logger
 
 
 # #############################################################################
 # Timeseries feature extraction
 # #############################################################################
-print("\n\n\nSTEP 1: Timeseries feature extraction\n")
+logger.info("\n\n\nSTEP 1: Timeseries feature extraction\n")
 
 # Restricted comparison time
 comparison_end_date_time = datetime(
@@ -45,7 +46,7 @@ test_ts_dataframe = pd.DataFrame(columns=["time", "value"], data=[[0, 1], [1, 2]
 # Add id row that is required by tsfresh
 test_ts_dataframe.insert(loc=0, column="id", value=0)
 
-print("Finished loading dataframe. Extracting features...")
+logger.info("Finished loading dataframe. Extracting features...")
 extracted_test_features: pd.DataFrame = extract_features(
     test_ts_dataframe, column_id="id", column_sort="time", column_value="value"
 )
@@ -58,12 +59,12 @@ for key in empty_feature_dict.keys():
 
 i = 1
 pipeline_start_datetime = datetime.now()
-print(f"Timeseries analysis started at {pipeline_start_datetime}")
+logger.info(f"Timeseries analysis started at {pipeline_start_datetime}")
 timeseries_node: TimeseriesNodeFlat
 for timeseries_node in timeseries_nodes_flat:
     pipeline_single_node_start_datetime = datetime.now()
 
-    print(
+    logger.info(
         f"\n\nAnalyzing timeseries {i} of {len(timeseries_nodes_flat)}: {timeseries_node.id_short}"
     )
     # Note that this can result in very large ranges, if enough data is present!
@@ -72,14 +73,14 @@ for timeseries_node in timeseries_nodes_flat:
         date_time=comparison_end_date_time,
         duration=comparison_duration,
     )
-    print(f"Total entry count: {ts_entry_count}")
+    logger.info(f"Total entry count: {ts_entry_count}")
 
     # Cancel, if not int or float
     if timeseries_node.value_type in [
         TimeseriesValueTypes.DECIMAL.value,
         TimeseriesValueTypes.INT.value,
     ]:
-        print("Loading dataframe...")
+        logger.info("Loading dataframe...")
         ts_range_df = timeseries_endpoints.get_timeseries_range(
             iri=timeseries_node.iri,
             date_time=comparison_end_date_time,
@@ -90,7 +91,7 @@ for timeseries_node in timeseries_nodes_flat:
         # Add id row that is required by tsfresh
         ts_range_df.insert(loc=0, column="id", value=0)
 
-        print("Finished loading dataframe. Extracting features...")
+        logger.info("Finished loading dataframe. Extracting features...")
         extracted_features: pd.DataFrame = extract_features(
             ts_range_df, column_id="id", column_sort="time", column_value="value"
         )
@@ -99,18 +100,18 @@ for timeseries_node in timeseries_nodes_flat:
         # extracted_features.reset_index(inplace=True)
         # extracted_features.columns = ["feature_key", "value"]
     else:
-        print(
+        logger.info(
             f"Feature calculation with normal timeseries libraries not possible: Unsupported type: {timeseries_node.value_type}"
         )
-        print("Applying empty feature dict...")
+        logger.info("Applying empty feature dict...")
         feature_dict = empty_feature_dict
 
     pipeline_single_node_end_datetime = datetime.now()
-    print(
+    logger.info(
         f"Timeseries analysis finished at {pipeline_single_node_end_datetime} after {pipeline_single_node_end_datetime - pipeline_single_node_start_datetime}"
     )
 
-    print("Writing to KG-DT...")
+    logger.info("Writing to KG-DT...")
     timeseries_endpoints.set_ts_feature_dict(timeseries_node.iri, feature_dict)
 
     i += 1
@@ -118,7 +119,7 @@ for timeseries_node in timeseries_nodes_flat:
 
 pipeline_end_datetime = datetime.now()
 
-print(
+logger.info(
     f"Timeseries analysis finished at {pipeline_end_datetime} after {pipeline_end_datetime - pipeline_start_datetime}"
 )
 
