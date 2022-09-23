@@ -150,7 +150,7 @@ def patch(relative_path: str, retries: int = -1, **kwargs):
     range_limit = retries + 1 if retries >= 0 else 999999999999999999999999
     for i in range(range_limit):
         try:
-            requests.patch(API_URI + relative_path, params=kwargs)
+            return requests.patch(API_URI + relative_path, params=kwargs)
         except ReqExc:
             _handle_request_exception(i)
 
