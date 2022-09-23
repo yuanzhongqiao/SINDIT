@@ -25,6 +25,8 @@ SHOW = ""
 
 LIST_RESULT_PREFIX = "↪ "
 
+DATETIME_STRF_FORMAT = "%Y_%m_%d_%H_%M_%S_%f"
+
 
 class CreationSteps(Enum):
     ASSET_SELECTION = 1
@@ -101,9 +103,7 @@ def save_annotation(
         used_definition_iri = definition.iri
         used_definition_id_short = definition.id_short
 
-    instance_id_short = (
-        f"{used_definition_id_short}_{asset.id_short}_{datetime.now().isoformat()}"
-    )
+    instance_id_short = f"{used_definition_id_short}_{asset.id_short}_{datetime.now().strftime(DATETIME_STRF_FORMAT)}"
 
     logger.info(
         f"Storing new annotation:\n Caption: {caption}\nid_short: {instance_id_short}"

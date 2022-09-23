@@ -150,17 +150,15 @@ class AnnotationDetectionNodeDeep(AnnotationDetectionNodeFlat):
 
         if len(self._definition) > 1:
             raise GraphNotConformantToMetamodelError(
-                self, "Only one annotation definition per instance."
+                self, "Only one annotation definition per detection."
             )
         self.definition.validate_metamodel_conformance()
 
-        if len(self._definition) < 1:
-            raise GraphNotConformantToMetamodelError(
-                self, "Missing annotation definition."
-            )
+        if len(self._matching_instance) < 1:
+            raise GraphNotConformantToMetamodelError(self, "Missing matching instance.")
 
-        if len(self._definition) > 1:
+        if len(self._matching_instance) > 1:
             raise GraphNotConformantToMetamodelError(
-                self, "Only one annotation definition per instance."
+                self, "A detection can only refer to one matching instance."
             )
         self.matching_instance.validate_metamodel_conformance()

@@ -3,6 +3,9 @@ from itertools import chain
 from graph_domain.expert_annotations.AnnotationDefinitionNode import (
     AnnotationDefinitionNodeFlat,
 )
+from graph_domain.expert_annotations.AnnotationDetectionNode import (
+    AnnotationDetectionNodeFlat,
+)
 from graph_domain.expert_annotations.AnnotationInstanceNode import (
     AnnotationInstanceNodeFlat,
 )
@@ -39,4 +42,5 @@ OGM_CLASS_FOR_NODE_TYPE = {
     NodeTypes.ANNOTATION_INSTANCE.value: AnnotationInstanceNodeFlat,
     NodeTypes.ANNOTATION_PRE_INDICATOR.value: AnnotationPreIndicatorNodeFlat,
     NodeTypes.ANNOTATION_TS_MATCHER.value: AnnotationTimeseriesMatcherNodeFlat,
+    NodeTypes.ANNOTATION_DETECTION.value: AnnotationDetectionNodeFlat,
 }
