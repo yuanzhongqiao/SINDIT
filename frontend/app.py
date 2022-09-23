@@ -21,7 +21,7 @@ app = dash.Dash(
     server=server,
 )
 log = logging.getLogger("werkzeug")
-log.setLevel(logging.ERROR)
+log.setLevel(logging.WARNING)
 # log.setLevel(logging.INFO)
 
 # pylint: disable=W0212

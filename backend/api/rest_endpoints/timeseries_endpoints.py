@@ -81,4 +81,4 @@ async def get_timeseries_nodes(deep: bool = True):
 
 @app.get("/timeseries/count")
 async def get_timeseries_count():
-    return python_timeseries_endpoints.get_timeseries_count()
+    return python_timeseries_endpoints.get_timeseries_nodes_count()

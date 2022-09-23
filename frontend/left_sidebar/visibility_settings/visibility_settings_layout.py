@@ -18,7 +18,7 @@ def get_layout():
     logger.info(
         "Loading available assets to be provided as options for the graph visibility multiselect..."
     )
-    assets_flat_json = api_client.get_json("/assets", deep=False, endless_scan=False)
+    assets_flat_json = api_client.get_json("/assets", deep=False, retries=2)
     if assets_flat_json is not None:
         assets_flat: List[AssetNodeFlat] = [
             AssetNodeFlat.from_json(m) for m in assets_flat_json
