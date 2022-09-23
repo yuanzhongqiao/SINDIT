@@ -19,27 +19,29 @@ API_URI = (
     + get_environment_variable("FAST_API_PORT")
 )
 
-RETRY_COUNT = 5
 
-
-def _handle_request_exception():
+def _handle_request_exception(retry_number: int = 0):
     logger.info("API not available!")
     logger.info(f"Tried to connect to {API_URI}")
-    logger.info("Retrying in 5 seconds...")
-    time.sleep(5)
+
+    sleep_time = 5 * (2**retry_number)
+
+    logger.info(f"Retrying in {sleep_time} seconds...")
+    time.sleep(sleep_time)
 
 
-def get_json(relative_path: str, endless_scan: bool = True, **kwargs):
+def get_json(relative_path: str, retries: int = -1, timeout: int = 30, **kwargs):
     """
     Get request to the specified api endpoint
     :param relative_path:
+    :param retries: how often to retry if the call failed. Negative numbners mean (about) unlimited.
     :return: the response json as dict
     """
-    range_limit = RETRY_COUNT if not endless_scan else 999999999999999999999999
+    range_limit = retries + 1 if retries >= 0 else 999999999999999999999999
     for i in range(range_limit):
         try:
             resp_dict = requests.get(
-                API_URI + relative_path, params=kwargs, timeout=30
+                API_URI + relative_path, params=kwargs, timeout=timeout
             ).json()
 
             if isinstance(resp_dict, str):
@@ -48,16 +50,18 @@ def get_json(relative_path: str, endless_scan: bool = True, **kwargs):
 
             return resp_dict
         except ReqExc:
-            _handle_request_exception()
+            if i < retries:
+                _handle_request_exception(i)
 
 
 def get_dataframe(relative_path: str, **kwargs):
     """
     Get request to the specified api endpoint. Deserializes to dataframe
     :param relative_path:
+    :param retries: how often to retry if the call failed. Negative numbners mean (about) unlimited.
     :return:
     """
-    df_dict = get_json(relative_path, endless_scan=False, **kwargs)
+    df_dict = get_json(relative_path=relative_path, **kwargs)
 
     df = pd.DataFrame.from_dict(df_dict)
 
@@ -77,95 +81,99 @@ def get_dataframe(relative_path: str, **kwargs):
     return df
 
 
-def get_raw(relative_path: str, endless_scan: bool = True, **kwargs):
+def get_raw(relative_path: str, retries: int = -1, **kwargs):
     """
     Get request to the specified api endpoint
     :param relative_path:
+    :param retries: how often to retry if the call failed. Negative numbners mean (about) unlimited.
     :return: the raw response
     """
-    range_limit = RETRY_COUNT if not endless_scan else 999999999999999999999999
+    range_limit = retries + 1 if retries >= 0 else 999999999999999999999999
     for i in range(range_limit):
         try:
             return requests.get(
                 API_URI + relative_path, params=kwargs, timeout=300
             ).content
         except ReqExc:
-            _handle_request_exception()
+            _handle_request_exception(i)
 
 
-def get_str(relative_path: str, endless_scan: bool = True, **kwargs):
+def get_str(relative_path: str, retries: int = -1, **kwargs):
     """
     Get request to the specified api endpoint
     :param relative_path:
     :return: the response as string
     """
-    range_limit = RETRY_COUNT if not endless_scan else 999999999999999999999999
+    range_limit = retries + 1 if retries >= 0 else 999999999999999999999999
     for i in range(range_limit):
         try:
             return requests.get(API_URI + relative_path, params=kwargs, timeout=30).text
         except ReqExc:
-            _handle_request_exception()
+            _handle_request_exception(i)
 
 
-def get_int(relative_path: str, endless_scan: bool = True, **kwargs):
+def get_int(relative_path: str, retries: int = -1, **kwargs):
     """
     Get request to the specified api endpoint
     :param relative_path:
+    :param retries: how often to retry if the call failed. Negative numbners mean (about) unlimited.
     :return: the response as int number
     """
-    range_limit = RETRY_COUNT if not endless_scan else 999999999999999999999999
+    range_limit = retries + 1 if retries >= 0 else 999999999999999999999999
     for i in range(range_limit):
         try:
             return int(
                 requests.get(API_URI + relative_path, params=kwargs, timeout=30).text
             )
         except ReqExc:
-            _handle_request_exception()
+            _handle_request_exception(i)
 
 
-def get_float(relative_path: str, endless_scan: bool = True, **kwargs):
+def get_float(relative_path: str, retries: int = -1, **kwargs):
     """
     Get request to the specified api endpoint
     :param relative_path:
+    :param retries: how often to retry if the call failed. Negative numbners mean (about) unlimited.
     :return: the response as float number
     """
-    range_limit = RETRY_COUNT if not endless_scan else 999999999999999999999999
+    range_limit = retries + 1 if retries >= 0 else 999999999999999999999999
     for i in range(range_limit):
         try:
             return float(
                 requests.get(API_URI + relative_path, params=kwargs, timeout=30).text
             )
         except ReqExc:
-            _handle_request_exception()
+            _handle_request_exception(i)
 
 
-def patch(relative_path: str, endless_scan: bool = True, **kwargs):
-    range_limit = RETRY_COUNT if not endless_scan else 999999999999999999999999
+def patch(relative_path: str, retries: int = -1, **kwargs):
+    range_limit = retries + 1 if retries >= 0 else 999999999999999999999999
     for i in range(range_limit):
         try:
             requests.patch(API_URI + relative_path, params=kwargs)
         except ReqExc:
-            _handle_request_exception()
+            _handle_request_exception(i)
 
 
 def post(
     relative_path: str,
     data: Dict = None,
     json: Dict = None,
-    endless_scan: bool = True,
+    retries: int = -1,
     **kwargs,
 ):
     """Post request. Returns the response body text
 
     Args:
-        relative_path (str): _description_
+    relative_path (str): _description_
+    retries: how often to retry if the call failed. Negative numbners mean (about) unlimited.
         data (Dict, optional): _description_. Defaults to None.
         json (Dict, optional): _description_. Defaults to None.
 
     Returns:
         _type_: _description_
     """
-    range_limit = RETRY_COUNT if not endless_scan else 999999999999999999999999
+    range_limit = retries + 1 if retries >= 0 else 999999999999999999999999
     for i in range(range_limit):
         try:
             response = requests.post(
@@ -176,20 +184,21 @@ def post(
                 text = text[1:-1]
             return text
         except ReqExc:
-            _handle_request_exception()
+            _handle_request_exception(i)
 
 
-def delete(relative_path: str, endless_scan: bool = True, **kwargs):
+def delete(relative_path: str, retries: int = -1, **kwargs):
     """Delete request. Returns the response body text
 
     Args:
-        relative_path (str): _description_
+    relative_path (str): _description_
+    retries: how often to retry if the call failed. Negative numbners mean (about) unlimited.
 
 
     Returns:
         _type_: _description_
     """
-    range_limit = RETRY_COUNT if not endless_scan else 999999999999999999999999
+    range_limit = retries + 1 if retries >= 0 else 999999999999999999999999
     for i in range(range_limit):
         try:
             response = requests.delete(API_URI + relative_path, params=kwargs)
@@ -198,4 +207,4 @@ def delete(relative_path: str, endless_scan: bool = True, **kwargs):
                 text = text[1:-1]
             return text
         except ReqExc:
-            _handle_request_exception()
+            _handle_request_exception(i)
