@@ -6,6 +6,6 @@ from util.log import logger
 Fast API
 Separated from service.py to avoid circular dependencies with endpoint files importing the "app" instance. 
 """
-openapi_url = get_environment_variable(key="OPENAPI_URL", optional=True, default="/openapi.json")
-logger.info(f"API: Using openapi_url: {openapi_url}")
-app = fastapi.FastAPI(openapi_url=openapi_url)
+root_path = get_environment_variable(key="API_ROOT_PATH", optional=True, default="/")
+logger.info(f"API: Root-path set to: {root_path}")
+app = fastapi.FastAPI(root_path=root_path)
