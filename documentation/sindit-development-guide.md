@@ -8,6 +8,7 @@ For this project, a devcontainer-setup for Visual Studio Code is implemented. It
 - Docker and docker-compose installed
 
 ##### Development setup:
+Info: it is recommended not to run both a deployment and the development setup at the same directory (where you cloned this repository). Clone it twice, if you want to both develope and deploy on the same machine.
 
 1. Check out this repository on the execution device (remote or local)
 2. Open the folder on the development-client (local or with the VS Code remote development extension via SSH)
