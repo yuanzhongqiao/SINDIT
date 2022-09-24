@@ -124,20 +124,10 @@ class OpcuaRuntimeConnection(RuntimeConnection):
         """
         self._asyncua_treadloop.start()
 
-        # Try to initialize the connection
-        # Once it was started once, it can be reused even after losing the connection for some period
-        try:
-            self.__start_connection()
-        except Exception as exc:
-            logger.info(
-                f"Exception occured while connecting to OPC-UA: {exc}.\n Skipping the connection..."
-            )
-            return
-
         # Outer loop for restoring the whole connection after a timeout
         while self.thread_stop == False:
             try:
-
+                self.__start_connection()
                 self._opcua_client.connect()
                 self.__load_opcua_nodes()
 
@@ -203,6 +193,7 @@ class OpcuaRuntimeConnection(RuntimeConnection):
         """
         while self._opcua_client is None and self.thread_stop == False:
             try:
+                logger.info(f"Trying to connect to OPC UA: opc.tcp://{self.host}:{self.port}")
                 self._opcua_client = asyncua.sync.Client(
                     url=f"opc.tcp://{self.host}:{self.port}",
                     tloop=self._asyncua_treadloop,
