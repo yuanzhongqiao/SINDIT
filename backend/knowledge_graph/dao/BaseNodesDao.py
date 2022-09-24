@@ -12,6 +12,7 @@ from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
     KnowledgeGraphPersistenceService,
 )
 
+from util.log import logger
 from backend.knowledge_graph.knowledge_graph_metamodel_validator import (
     validate_result_nodes,
 )
@@ -62,7 +63,14 @@ class BaseNodeDao(object):
         :return:
         :raises GraphNotConformantToMetamodelError: If Graph not conformant
         """
+
         ogm_class = OGM_CLASS_FOR_NODE_TYPE.get(self.get_node_type(iri))
+
+        if ogm_class is None:
+            logger.error(
+                f"Missing OGM-class for {self.get_node_type(iri)} in OGM_CLASS_FOR_NODE_TYPE mapping."
+            )
+            return None
 
         node_matches = self.ps.repo_match(model=ogm_class, primary_value=iri)
 

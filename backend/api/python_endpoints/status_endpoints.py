@@ -37,6 +37,8 @@ def get_status():
     Returns:
         _type_: dict
     """
+    unconfirmed_detection = False
+
     status_dict = {
         "system_time": get_system_time(),
         "database_connections": get_db_connections_count(),
@@ -44,6 +46,7 @@ def get_status():
         "active_runtime_connections": get_rt_active_connections_count(),
         "assets_count": asset_endpoints.get_assets_count(),
         "timeseries_count": timeseries_endpoints.get_timeseries_nodes_count(),
+        "unconfirmed_annotation_detection": unconfirmed_detection,
     }
 
     return status_dict

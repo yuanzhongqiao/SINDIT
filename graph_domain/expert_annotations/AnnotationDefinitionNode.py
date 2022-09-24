@@ -1,19 +1,15 @@
 from dataclasses import dataclass
-from enum import Enum
-import json
+
 from typing import List
 
 from dataclasses_json import dataclass_json
-from py2neo.ogm import Property, RelatedTo, RelatedFrom
+from py2neo.ogm import Property, RelatedFrom
 
 from graph_domain.BaseNode import BaseNode
-from graph_domain.expert_annotations.AnnotationInstanceNode import (
-    AnnotationInstanceNodeDeep,
-)
-from graph_domain.main_digital_twin.DatabaseConnectionNode import DatabaseConnectionNode
-from graph_domain.main_digital_twin.RuntimeConnectionNode import RuntimeConnectionNode
-from graph_domain.similarities.TimeseriesClusterNode import TimeseriesClusterNode
-from graph_domain.main_digital_twin.UnitNode import UnitNode
+
+# from graph_domain.expert_annotations.AnnotationInstanceNode import (
+#     AnnotationInstanceNodeDeep,
+# )
 from graph_domain.factory_graph_types import (
     NodeTypes,
     RelationshipTypes,
@@ -46,9 +42,7 @@ class AnnotationDefinitionNodeFlat(BaseNode):
         super().validate_metamodel_conformance()
 
         if self.solution_proposal is None:
-            raise GraphNotConformantToMetamodelError(
-                self, f"Missing solution proposal."
-            )
+            raise GraphNotConformantToMetamodelError(self, "Missing solution proposal.")
 
 
 @dataclass
@@ -60,13 +54,13 @@ class AnnotationDefinitionNodeDeep(AnnotationDefinitionNodeFlat):
 
     __primarylabel__ = LABEL
 
-    _instances: List[AnnotationInstanceNodeDeep] = RelatedFrom(
-        AnnotationInstanceNodeDeep, RelationshipTypes.INSTANCE_OF.value
-    )
+    # _instances: List[AnnotationInstanceNodeDeep] = RelatedFrom(
+    #     AnnotationInstanceNodeDeep, RelationshipTypes.INSTANCE_OF.value
+    # )
 
-    @property
-    def instances(self) -> List[AnnotationInstanceNodeDeep]:
-        return [annotation for annotation in self._instances]
+    # @property
+    # def instances(self) -> List[AnnotationInstanceNodeDeep]:
+    #     return [annotation for annotation in self._instances]
 
     def validate_metamodel_conformance(self):
         """
@@ -75,5 +69,5 @@ class AnnotationDefinitionNodeDeep(AnnotationDefinitionNodeFlat):
         """
         super().validate_metamodel_conformance()
 
-        for instance in self.instances:
-            instance.validate_metamodel_conformance()
+        # for instance in self.instances:
+        #     instance.validate_metamodel_conformance()
