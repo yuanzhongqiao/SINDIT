@@ -1,0 +1,12 @@
+dependencies:
+- name: influxdb
+  repository: https://charts.bitnami.com/bitnami
+  version: 5.4.2
+- name: neo4j-standalone
+  repository: https://helm.neo4j.com/neo4j
+  version: 4.4.11
+- name: minio
+  repository: https://charts.bitnami.com/bitnami
+  version: 11.10.2
+digest: sha256:0444de05cf47479ee5500d07fcfc12c23fe8806c646b6a011dd0c7c217eed745
+generated: "2022-09-19T09:16:09.544221+02:00"
