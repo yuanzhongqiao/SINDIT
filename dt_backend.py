@@ -139,32 +139,32 @@ if __name__ == "__main__":
     #
     # TODO: remove this. Just for
     #
-    from backend.knowledge_graph.dao.AnnotationNodesDao import AnnotationNodesDao
-    from datetime import datetime
+    # from backend.knowledge_graph.dao.AnnotationNodesDao import AnnotationNodesDao
+    # from datetime import datetime
 
-    annotations_dao: AnnotationNodesDao = AnnotationNodesDao.instance()
+    # annotations_dao: AnnotationNodesDao = AnnotationNodesDao.instance()
 
-    detection_iri = annotations_dao.create_annotation_detection(
-        id_short="test-detection",
-        start_datetime=datetime.now() - timedelta(seconds=10),
-        end_datetime=datetime.now(),
-        caption="Test Detection",
-    )
+    # detection_iri = annotations_dao.create_annotation_detection(
+    #     id_short="test-detection",
+    #     start_datetime=datetime.now() - timedelta(seconds=10),
+    #     end_datetime=datetime.now(),
+    #     caption="Test Detection",
+    # )
 
-    annotations_dao.create_annotation_detection_definition_relationship(
-        detection_iri=detection_iri,
-        definition_iri="www.sintef.no/aas_identifiers/learning_factory/annotations/definitions/test_annotation_definition",
-    )
+    # annotations_dao.create_annotation_detection_definition_relationship(
+    #     detection_iri=detection_iri,
+    #     definition_iri="www.sintef.no/aas_identifiers/learning_factory/annotations/definitions/test_annotation_definition",
+    # )
 
-    annotations_dao.create_annotation_detection_asset_relationship(
-        detection_iri=detection_iri,
-        asset_iri="www.sintef.no/aas_identifiers/learning_factory/machines/vgr",
-    )
+    # annotations_dao.create_annotation_detection_asset_relationship(
+    #     detection_iri=detection_iri,
+    #     asset_iri="www.sintef.no/aas_identifiers/learning_factory/machines/vgr",
+    # )
 
-    annotations_dao.create_annotation_detection_instance_relationship(
-        detection_iri=detection_iri,
-        instance_iri="www.sintef.no/aas_identifiers/learning_factory/annotations/instances/test_annotation_definition_vgr_2022-09-23T12:43:27.807194",
-    )
+    # annotations_dao.create_annotation_detection_instance_relationship(
+    #     detection_iri=detection_iri,
+    #     instance_iri="www.sintef.no/aas_identifiers/learning_factory/annotations/instances/test_annotation_definition_vgr_2022-09-23T12:43:27.807194",
+    # )
 
     #
     #

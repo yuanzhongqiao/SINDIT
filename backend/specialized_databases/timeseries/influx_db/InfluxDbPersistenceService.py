@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client import InfluxDBClient, Point
 import pandas as pd
-from urllib3.exceptions import ReadTimeoutError, NewConnectionError, ConnectTimeoutError
+from urllib3.exceptions import NewConnectionError
 import warnings
 import subprocess
 from influxdb_client.client.warnings import MissingPivotFunction
@@ -198,6 +198,7 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
     def backup(self, backup_path: str):
         logger.info("Backing up InfluxDB...")
 
+        # pylint: disable=W1510
         subprocess.run(
             ["influx", "backup", backup_path, "--host", self.uri, "-t", self.key]
         )
@@ -219,6 +220,7 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
         logger.info("Finished zipping the safety backup.")
         # Delete everything:
         logger.info("Deleting everything...")
+        # pylint: disable=W1510
         subprocess.run(
             [
                 "influx",
@@ -240,3 +242,54 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
             ["influx", "restore", backup_path, "--host", self.uri, "-t", self.key]
         )
         logger.info("Finished restoring InfluxDB.")
+
+    # # override
+    # def stream(
+    #     self,
+    #     id_uri: str,
+    #     begin_time: datetime | None,
+    #     end_time: datetime | None,
+    #     aggregation_window_ms: int | None,
+    # ) -> pd.DataFrame:
+
+    #     self._query_api.query_stream()
+
+    #     range_query = self._timerange_query(begin_time, end_time)
+
+    #     if isinstance(aggregation_window_ms, int) and aggregation_window_ms != 0:
+    #         query = (
+    #             f'from(bucket: "{self.bucket}") \n'
+    #             f"{range_query} \n"
+    #             f'|> filter(fn: (r) => r["_measurement"] == "{id_uri}") \n'
+    #             f"|> aggregateWindow(every: {aggregation_window_ms}ms, fn: first, createEmpty: false)\n"
+    #             f'|> keep(columns: ["_time", "_value"]) \n'
+    #             '|> rename(columns: {_time: "time", _value: "value"})'
+    #         )
+    #     else:
+    #         query = (
+    #             f'from(bucket: "{self.bucket}") \n'
+    #             f"{range_query} \n"
+    #             f'|> filter(fn: (r) => r["_measurement"] == "{id_uri}") \n'
+    #             f'|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") \n'
+    #             f'|> keep(columns: ["_time", "{READING_FIELD_NAME}"]) \n'
+    #             '|> rename(columns: {_time: "time", reading: "value"})'
+    #         )
+
+    #     try:
+    #         df = self._query_api.query_data_frame(query=query)
+
+    #         # Dataframe cleanup
+    #         df.drop(columns=["result", "table"], axis=1, inplace=True)
+    #         # df.rename(
+    #         #     columns={"_time": "time", READING_FIELD_NAME: "value"}, inplace=True
+    #         # )
+    #         # df.rename(columns={"_time": "time", "_value": "value"}, inplace=True)
+
+    #         return df
+
+    #     except KeyError:
+    #         # id_uri not found
+    #         raise IdNotFoundException
+    #     except NewConnectionError:
+    #         # Skip this ts
+    #         return None
