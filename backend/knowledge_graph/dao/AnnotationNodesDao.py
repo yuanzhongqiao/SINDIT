@@ -4,6 +4,9 @@ from py2neo import NodeMatcher, Relationship
 from graph_domain.expert_annotations.AnnotationDefinitionNode import (
     AnnotationDefinitionNodeFlat,
 )
+from graph_domain.expert_annotations.AnnotationDetectionNode import (
+    AnnotationDetectionNodeFlat,
+)
 from graph_domain.expert_annotations.AnnotationInstanceNode import (
     AnnotationInstanceNodeFlat,
 )
@@ -26,6 +29,7 @@ from graph_domain.main_digital_twin.TimeseriesNode import TimeseriesNodeFlat
 # TODO: move to a global place
 IRI_PREFIX_GLOBAL = "www.sintef.no/aas_identifiers/learning_factory/"
 IRI_PREFIX_ANNOTATION_INSTANCE = IRI_PREFIX_GLOBAL + "annotations/instances/"
+IRI_PREFIX_ANNOTATION_DETECTION = IRI_PREFIX_GLOBAL + "annotations/detections/"
 IRI_PREFIX_ANNOTATION_DEFINITION = IRI_PREFIX_GLOBAL + "annotations/definitions/"
 IRI_PREFIX_ANNOTATION_TS_MATCHER = IRI_PREFIX_GLOBAL + "annotations/ts_matchers/"
 IRI_PREFIX_ANNOTATION_PRE_INDICATOR = IRI_PREFIX_GLOBAL + "annotations/pre_indicators/"
@@ -101,6 +105,32 @@ class AnnotationNodesDao(object):
 
         return iri
 
+    def create_annotation_detection(
+        self,
+        id_short: str,
+        start_datetime: datetime,
+        end_datetime: datetime,
+        caption: str | None = None,
+        description: str | None = None,
+        confirmed: bool = False,
+    ) -> str:
+        """Creates a new annotation detection"""
+        iri = IRI_PREFIX_ANNOTATION_DETECTION + id_short
+
+        # pylint: disable=unexpected-keyword-arg
+        instance = AnnotationDetectionNodeFlat(
+            id_short=id_short,
+            iri=iri,
+            caption=caption,
+            description=description,
+            occurance_start_date_time=start_datetime,
+            occurance_end_date_time=end_datetime,
+            # confirmation_date_time=datetime.now() if confirmed else None,
+        )
+        self.ps.graph_push(instance)
+
+        return iri
+
     def create_annotation_ts_matcher(self, id_short: str, caption: str) -> str:
         """Creates a new annotation instance"""
         iri = IRI_PREFIX_ANNOTATION_TS_MATCHER + id_short
@@ -169,6 +199,51 @@ class AnnotationNodesDao(object):
             RelationshipTypes.DETECTABLE_WITH.value,
             NodeMatcher(self.ps.graph)
             .match(NodeTypes.ANNOTATION_TS_MATCHER.value, iri=ts_matcher_iri)
+            .first(),
+        )
+        self.ps.graph_create(relationship)
+
+    def create_annotation_detection_definition_relationship(
+        self, detection_iri: str, definition_iri: str
+    ) -> str:
+
+        relationship = Relationship(
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ANNOTATION_DETECTION.value, iri=detection_iri)
+            .first(),
+            RelationshipTypes.DETECTED_OCCURANCE.value,
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ANNOTATION_DEFINITION.value, iri=definition_iri)
+            .first(),
+        )
+        self.ps.graph_create(relationship)
+
+    def create_annotation_detection_instance_relationship(
+        self, detection_iri: str, instance_iri: str
+    ) -> str:
+
+        relationship = Relationship(
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ANNOTATION_DETECTION.value, iri=detection_iri)
+            .first(),
+            RelationshipTypes.MATCHING_INSTANCE.value,
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ANNOTATION_INSTANCE.value, iri=instance_iri)
+            .first(),
+        )
+        self.ps.graph_create(relationship)
+
+    def create_annotation_detection_asset_relationship(
+        self, detection_iri: str, asset_iri: str
+    ) -> str:
+
+        relationship = Relationship(
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ASSET.value, iri=asset_iri)
+            .first(),
+            RelationshipTypes.DETECTED_ANNOTATION_OCCURANCE.value,
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ANNOTATION_DETECTION.value, iri=detection_iri)
             .first(),
         )
         self.ps.graph_create(relationship)

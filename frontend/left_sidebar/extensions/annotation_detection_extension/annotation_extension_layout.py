@@ -1,10 +1,7 @@
-from datetime import datetime
-from dash import html
 import dash_bootstrap_components as dbc
 from dash import html, dcc
 
 import dash_mantine_components as dmc
-import dash_daq as daq
 
 
 def get_layout():
