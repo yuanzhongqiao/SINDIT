@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import List
 
 from dataclasses_json import dataclass_json
-from py2neo.ogm import Property, Related, RelatedTo
+from py2neo.ogm import Property, Related
 
 from graph_domain.BaseNode import BaseNode
 from graph_domain.expert_annotations.AnnotationDefinitionNode import (
@@ -12,14 +12,8 @@ from graph_domain.expert_annotations.AnnotationDefinitionNode import (
 )
 from graph_domain.expert_annotations.AnnotationInstanceNode import (
     AnnotationInstanceNodeDeep,
-    AnnotationInstanceNodeFlat,
 )
-from graph_domain.expert_annotations.AnnotationPreIndicatorNode import (
-    AnnotationPreIndicatorNodeDeep,
-)
-from graph_domain.expert_annotations.AnnotationTimeseriesMatcherNode import (
-    AnnotationTimeseriesMatcherNodeDeep,
-)
+
 
 from graph_domain.factory_graph_types import (
     NodeTypes,
@@ -129,7 +123,7 @@ class AnnotationDetectionNodeDeep(AnnotationDetectionNodeFlat):
 
     @property
     def matching_instance(self) -> AnnotationInstanceNodeDeep:
-        if len(self._definition) > 0:
+        if len(self._matching_instance) > 0:
             return [matching_instance for matching_instance in self._matching_instance][
                 0
             ]

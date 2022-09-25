@@ -116,3 +116,6 @@ class AssetNodeDeep(AssetNodeFlat):
 
         for annotation in self.scanned_annotations:
             annotation.validate_metamodel_conformance()
+
+        for detection in self.annotation_detections:
+            detection.validate_metamodel_conformance()
