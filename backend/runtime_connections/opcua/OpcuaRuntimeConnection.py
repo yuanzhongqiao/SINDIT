@@ -191,9 +191,14 @@ class OpcuaRuntimeConnection(RuntimeConnection):
         Blocking until the connection is successfull!
         :return:
         """
+        if self._opcua_client is not None:
+            self._opcua_client.disconnect()
+            self._opcua_client = None
         while self._opcua_client is None and self.thread_stop == False:
             try:
-                logger.info(f"Trying to connect to OPC UA: opc.tcp://{self.host}:{self.port}")
+                logger.info(
+                    f"Trying to connect to OPC UA: opc.tcp://{self.host}:{self.port}"
+                )
                 self._opcua_client = asyncua.sync.Client(
                     url=f"opc.tcp://{self.host}:{self.port}",
                     tloop=self._asyncua_treadloop,
