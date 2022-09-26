@@ -4,6 +4,7 @@ from py2neo import NodeMatcher, Relationship
 from graph_domain.expert_annotations.AnnotationDefinitionNode import (
     AnnotationDefinitionNodeFlat,
 )
+from dateutil import tz
 from graph_domain.expert_annotations.AnnotationDetectionNode import (
     AnnotationDetectionNodeFlat,
 )
@@ -11,6 +12,8 @@ from graph_domain.expert_annotations.AnnotationInstanceNode import (
     AnnotationInstanceNodeDeep,
     AnnotationInstanceNodeFlat,
 )
+
+from util.environment_and_configuration import ConfigGroups, get_configuration
 from graph_domain.expert_annotations.AnnotationTimeseriesMatcherNode import (
     AnnotationTimeseriesMatcherNodeFlat,
 )
@@ -204,17 +207,17 @@ class AnnotationNodesDao(object):
         )
         self.ps.graph_create(relationship)
 
-    def create_annotation_detection_definition_relationship(
-        self, detection_iri: str, definition_iri: str
+    def create_annotation_detection_timeseries_relationship(
+        self, detection_iri: str, timeseries_iri: str
     ) -> str:
 
         relationship = Relationship(
             NodeMatcher(self.ps.graph)
             .match(NodeTypes.ANNOTATION_DETECTION.value, iri=detection_iri)
             .first(),
-            RelationshipTypes.DETECTED_OCCURANCE.value,
+            RelationshipTypes.MATCHING_TIMESERIES.value,
             NodeMatcher(self.ps.graph)
-            .match(NodeTypes.ANNOTATION_DEFINITION.value, iri=definition_iri)
+            .match(NodeTypes.TIMESERIES_INPUT.value, iri=timeseries_iri)
             .first(),
         )
         self.ps.graph_create(relationship)
@@ -360,6 +363,12 @@ class AnnotationNodesDao(object):
             f"MATCH (n:{NodeTypes.ANNOTATION_INSTANCE.value}) WHERE n.iri = '{instance_iri}' DETACH DELETE n"
         )
 
+    def delete_annotation_detection(self, detection_iri):
+        """Deletes a detection and the attached relationships."""
+        self.ps.graph_run(
+            f"MATCH (n:{NodeTypes.ANNOTATION_DETECTION.value}) WHERE n.iri = '{detection_iri}' DETACH DELETE n"
+        )
+
     @validate_result_nodes
     def get_matcher_annotation_instance(self, matcher_iri):
         """Returns the instance node that the matcher is related to"""
@@ -409,3 +418,14 @@ class AnnotationNodesDao(object):
         """Returns the instances related to the given annotation definition"""
 
         return len(self.get_annotation_instance_for_definition(definition_iri))
+
+    def set_detection_confirmation_date_time(self, detection_iri):
+
+        detection_matches = self.ps.repo_match(model=AnnotationDetectionNodeFlat)
+
+        detection_node: AnnotationDetectionNodeFlat = detection_matches.first()
+
+        detection_node.confirmation_date_time = datetime.now().astimezone(
+            tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+        )
+        self.ps.graph_push(detection_node)

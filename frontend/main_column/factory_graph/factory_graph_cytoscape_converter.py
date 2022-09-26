@@ -394,14 +394,15 @@ def get_cytoscape_elements(
                     RelationshipTypes.DETECTED_ANNOTATION_OCCURANCE.value,
                 )
             )
-            # Connected Definition (exists already because of occurance scan)
-            cytoscape_elements.append(
-                _create_cytoscape_relationship(
-                    detection.iri,
-                    detection.definition.iri,
-                    RelationshipTypes.DETECTED_OCCURANCE.value,
+            # Connected Timeseries (exists already because of occurance scan)
+            for matched_ts in detection.matched_ts:
+                cytoscape_elements.append(
+                    _create_cytoscape_relationship(
+                        detection.iri,
+                        matched_ts.iri,
+                        RelationshipTypes.MATCHING_TIMESERIES.value,
+                    )
                 )
-            )
             # Matching instance
             cytoscape_elements.append(
                 _create_cytoscape_relationship(

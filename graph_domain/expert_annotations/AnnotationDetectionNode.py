@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import List
 
 from dataclasses_json import dataclass_json
-from py2neo.ogm import Property, Related
+from py2neo.ogm import Property, Related, RelatedTo
 
 from graph_domain.BaseNode import BaseNode
 from graph_domain.expert_annotations.AnnotationDefinitionNode import (
@@ -22,6 +22,7 @@ from graph_domain.factory_graph_types import (
 from backend.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
 )
+from graph_domain.main_digital_twin.TimeseriesNode import TimeseriesNodeDeep
 from util.datetime_utils import (
     datetime_to_neo4j_str,
     neo4j_str_or_datetime_to_datetime,
@@ -105,18 +106,14 @@ class AnnotationDetectionNodeDeep(AnnotationDetectionNodeFlat):
 
     __primarylabel__ = LABEL
 
-    # The OGM framework does not allow constraining to only one item!
-    # Can only be one unit (checked by metamodel validator)
-    _definition: List[AnnotationDefinitionNodeDeep] = Related(
-        AnnotationDefinitionNodeDeep, RelationshipTypes.DETECTED_OCCURANCE.value
+    _matched_ts: List[TimeseriesNodeDeep] = RelatedTo(
+        TimeseriesNodeDeep,
+        RelationshipTypes.MATCHING_TIMESERIES.value,
     )
 
     @property
-    def definition(self) -> AnnotationDefinitionNodeDeep:
-        if len(self._definition) > 0:
-            return [definition for definition in self._definition][0]
-        else:
-            return None
+    def matched_ts(self) -> List[TimeseriesNodeDeep]:
+        return [match for match in self._matched_ts]
 
     # The OGM framework does not allow constraining to only one item!
     # Can only be one unit (checked by metamodel validator)
@@ -140,16 +137,13 @@ class AnnotationDetectionNodeDeep(AnnotationDetectionNodeFlat):
         """
         super().validate_metamodel_conformance()
 
-        if len(self._definition) < 1:
+        if len(self._matched_ts) < 1:
             raise GraphNotConformantToMetamodelError(
-                self, "Missing annotation definition."
+                self, "Missing matched timeseries."
             )
 
-        if len(self._definition) > 1:
-            raise GraphNotConformantToMetamodelError(
-                self, "Only one annotation definition per detection."
-            )
-        self.definition.validate_metamodel_conformance()
+        for ts in self.matched_ts:
+            ts.validate_metamodel_conformance()
 
         if len(self._matching_instance) < 1:
             raise GraphNotConformantToMetamodelError(self, "Missing matching instance.")

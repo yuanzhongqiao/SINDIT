@@ -47,8 +47,7 @@ class AnnotationInstanceArguments(BaseModel):
     description: str | None = None
 
 
-@app.post("/annotation/instance")
-async def post_annotation_instance(instance: AnnotationInstanceArguments):
+def create_annotation_instance(instance: AnnotationInstanceArguments):
     logger.info(f"Creating new annotation instance: {instance.id_short}...")
     instance_iri = ANNOTATIONS_DAO.create_annotation_instance(
         id_short=instance.id_short,
@@ -82,6 +81,11 @@ async def post_annotation_instance(instance: AnnotationInstanceArguments):
     )
 
     return instance_iri
+
+
+@app.post("/annotation/instance")
+async def post_annotation_instance(instance: AnnotationInstanceArguments):
+    return create_annotation_instance(instance)
 
 
 @app.delete("/annotation/definition")
@@ -208,8 +212,7 @@ async def delete_annotation_detection(detection_iri: str):
 
     logger.info(f"Deleting annotation detection: {detection_iri}...")
 
-    # ANNOTATIONS_DAO.delete_annotation_detection(detection_iri)
-    # TODO
+    ANNOTATIONS_DAO.delete_annotation_detection(detection_iri)
 
 
 class AnnotationDetectionConfirmationArguments(BaseModel):
@@ -228,4 +231,21 @@ async def confirm_annotation_detection(
 
     logger.info(f"Confirming annotation detection: {detection.detection_iri}...")
 
+    ANNOTATIONS_DAO.set_detection_confirmation_date_time(
+        detection_iri=detection.detection_iri
+    )
+
+    # create_annotation_instance(AnnotationInstanceArguments(
+    #     id_short="",
+    #     asset_iri="",
+    #     definition_iri="",
+    #     ts_iri_list=[],
+    #     start_datetime=None,
+    #     end_datetime=None,
+    #     caption="",
+    #     description=""
+    # ))
+
     # TODO
+    # create ts-matchers
+    # create
