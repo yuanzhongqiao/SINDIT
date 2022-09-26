@@ -158,3 +158,62 @@ async def get_annotation_instance_count_for_definition(definition_iri: str):
     :return:
     """
     return ANNOTATIONS_DAO.get_annotation_instance_count_for_definition(definition_iri)
+
+
+@app.get("/annotation/detection/details")
+async def get_current_annotation_detection_details():
+    """
+    Returns details of the currently detected annotation
+    (or of one of them, if multiple unconfirmed yet).
+    :param iri:
+    :return:
+    """
+    details_dict = {
+        "iri": "test-iri",
+        "asset_iri": "asset-iri",
+        "asset_caption": "asset-caption",
+        "occurance_start": datetime.now(),
+        "occurance_end": datetime.now(),
+        "definition_iri": "def iri",
+        "definition_caption": "def cap",
+        "definition_description": None,
+        "instance_iri": "inst iri",
+        "instance_caption": "inst cap",
+        "instance_description": "inst desc",
+        "solution_proposal": "solution",
+    }
+
+    return details_dict
+
+
+@app.delete("/annotation/detection")
+async def delete_annotation_detection(detection_iri: str):
+    """Deletes a detection and the relationships
+
+    Args:
+        instance_iri (str): _description_
+    """
+
+    logger.info(f"Deleting annotation detection: {detection_iri}...")
+
+    # ANNOTATIONS_DAO.delete_annotation_detection(detection_iri)
+    # TODO
+
+
+class AnnotationDetectionConfirmationArguments(BaseModel):
+    detection_iri: str
+
+
+@app.post("/annotation/detection/confirm")
+async def confirm_annotation_detection(
+    detection: AnnotationDetectionConfirmationArguments,
+):
+    """Confirms a detection.
+
+    Args:
+        instance_iri (str): _description_
+    """
+
+    logger.info(f"Confirming annotation detection: {detection.detection_iri}...")
+
+    # TODO

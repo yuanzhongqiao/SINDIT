@@ -3,6 +3,9 @@ from dash import html, dcc
 from frontend.left_sidebar.extensions.annotation_detection_extension.annotation_creation import (
     annotation_creation_layout,
 )
+from frontend.left_sidebar.extensions.annotation_detection_extension.annotation_detection_confirmation import (
+    annotation_confirmation_layout,
+)
 
 import dash_mantine_components as dmc
 
@@ -19,6 +22,7 @@ def get_layout():
             ),
             dbc.CardBody(
                 children=[
+                    annotation_confirmation_layout.get_layout(),
                     dbc.Collapse(
                         id="annotation-information-collapse",
                         class_name="annotations-extension-vertical-collapse",

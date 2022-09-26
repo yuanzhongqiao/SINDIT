@@ -37,7 +37,7 @@ def get_status():
     Returns:
         _type_: dict
     """
-    unconfirmed_detection = False
+    unconfirmed_detection = True
 
     status_dict = {
         "system_time": get_system_time(),

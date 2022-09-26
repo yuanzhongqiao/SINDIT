@@ -29,12 +29,13 @@ DATETIME_STRF_FORMAT = "%Y_%m_%d_%H_%M_%S_%f"
 @app.callback(
     Output("annotation-information-collapse", "is_open"),
     Output("annotation-create-collapse", "is_open"),
+    Output("annotation-confirmation-collapse", "is_open"),
     Input("create-annotation-button", "n_clicks"),
     Input("confirm-cancel-annotation-creation", "submit_n_clicks"),
     Input("annotation-creation-saved", "data"),
     State("annotation-creation-store-step", "data"),
     Input("status-unconfirmed-annotation-detection", "modified_timestamp"),
-    Input("status-unconfirmed-annotation-detection", "data"),
+    State("status-unconfirmed-annotation-detection", "data"),
     prevent_initial_call=False,
 )
 def annotation_create_collapse(
@@ -42,18 +43,18 @@ def annotation_create_collapse(
 ):
     trigger_id = ctx.triggered_id
     if new_detection is not None and new_detection:
-        return True, False
+        return False, False, True
     elif trigger_id == "create-annotation-button":
-        return False, True
+        return False, True, False
     elif trigger_id in [
         "confirm-cancel-annotation-creation",
         "annotation-creation-saved",
     ]:
-        return True, False
+        return True, False, False
     elif step is not None:
-        return False, True
+        return False, True, False
     else:
-        return True, False
+        return True, False, False
 
 
 ##########################################
