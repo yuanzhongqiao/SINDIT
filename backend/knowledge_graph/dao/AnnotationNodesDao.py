@@ -8,6 +8,7 @@ from graph_domain.expert_annotations.AnnotationDetectionNode import (
     AnnotationDetectionNodeFlat,
 )
 from graph_domain.expert_annotations.AnnotationInstanceNode import (
+    AnnotationInstanceNodeDeep,
     AnnotationInstanceNodeFlat,
 )
 from graph_domain.expert_annotations.AnnotationTimeseriesMatcherNode import (
@@ -388,3 +389,23 @@ class AnnotationNodesDao(object):
         )
 
         return matches.first()
+
+    @validate_result_nodes
+    def get_annotation_instance_for_definition(self, definition_iri):
+        """Returns the instances related to the given annotation definition"""
+        matches = self.ps.repo_match(model=AnnotationInstanceNodeFlat).where(
+            "(_)-[:"
+            + RelationshipTypes.INSTANCE_OF.value
+            + "]->(:"
+            + NodeTypes.ANNOTATION_DEFINITION.value
+            + ' {iri: "'
+            + definition_iri
+            + '"}) '
+        )
+
+        return matches.all()
+
+    def get_annotation_instance_count_for_definition(self, definition_iri):
+        """Returns the instances related to the given annotation definition"""
+
+        return len(self.get_annotation_instance_for_definition(definition_iri))

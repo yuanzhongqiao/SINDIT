@@ -46,8 +46,11 @@ class AnnotationDetectionNodeFlat(BaseNode):
     )
 
     @property
-    def confirmation_date_time(self) -> datetime:
-        return neo4j_str_or_datetime_to_datetime(self._confirmation_date_time)
+    def confirmation_date_time(self) -> datetime | None:
+        if self._confirmation_date_time is not None:
+            return neo4j_str_or_datetime_to_datetime(self._confirmation_date_time)
+        else:
+            return None
 
     @confirmation_date_time.setter
     def confirmation_date_time(self, value):

@@ -158,12 +158,12 @@ if __name__ == "__main__":
 
     # annotations_dao.create_annotation_detection_asset_relationship(
     #     detection_iri=detection_iri,
-    #     asset_iri="www.sintef.no/aas_identifiers/learning_factory/machines/vgr",
+    #     asset_iri="www.sintef.no/aas_identifiers/learning_factory/machines/hbw",
     # )
 
     # annotations_dao.create_annotation_detection_instance_relationship(
     #     detection_iri=detection_iri,
-    #     instance_iri="www.sintef.no/aas_identifiers/learning_factory/annotations/instances/test_annotation_definition_vgr_2022-09-23T12:43:27.807194",
+    #     instance_iri="www.sintef.no/aas_identifiers/learning_factory/annotations/instances/test_annotation_definition_hbw_2022-09-18T20:30:29.263466",
     # )
 
     #

@@ -80,5 +80,13 @@ class BaseNodeDao(object):
         types_table = self.ps.graph_run(
             f'MATCH (n) WHERE n.iri = "{iri}" RETURN labels(n)[0]'
         ).to_table()
-
-        return types_table[0][0]
+        if (
+            types_table is not None
+            and len(types_table) > 0
+            and types_table[0] is not None
+            and len(types_table[0]) > 0
+        ):
+            return types_table[0][0]
+        else:
+            logger.warning(f"Node type could not be queried for {iri}")
+            return None

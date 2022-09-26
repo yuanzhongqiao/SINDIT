@@ -12,6 +12,9 @@ from frontend.right_sidebar.node_data_tab.file_visualization import (
 from graph_domain.expert_annotations.AnnotationDefinitionNode import (
     AnnotationDefinitionNodeFlat,
 )
+from graph_domain.expert_annotations.AnnotationDetectionNode import (
+    AnnotationDetectionNodeFlat,
+)
 from graph_domain.expert_annotations.AnnotationInstanceNode import (
     AnnotationInstanceNodeFlat,
 )
@@ -79,6 +82,40 @@ def get_visualized_attributes_for_node_type(node: BaseNode) -> List[Tuple[str, s
             (
                 "Annotation created at",
                 node.creation_date_time.strftime(STRF_DATETIME_FORMAT),
+            )
+        )
+        attributes_list.append(
+            (
+                "Start of the Situation",
+                node.occurance_start_date_time.strftime(STRF_DATETIME_FORMAT),
+            )
+        )
+        attributes_list.append(
+            (
+                "End of the Situation",
+                node.occurance_end_date_time.strftime(STRF_DATETIME_FORMAT),
+            )
+        )
+    elif isinstance(node, AnnotationPreIndicatorNodeFlat):
+        attributes_list.append(
+            (
+                "Start of the Indication",
+                node.indicator_start_date_time.strftime(STRF_DATETIME_FORMAT),
+            )
+        )
+        attributes_list.append(
+            (
+                "End of the Indication",
+                node.indicator_end_date_time.strftime(STRF_DATETIME_FORMAT),
+            )
+        )
+    elif isinstance(node, AnnotationDetectionNodeFlat):
+        attributes_list.append(
+            (
+                "Annotation confirmed at",
+                node.confirmation_date_time.strftime(STRF_DATETIME_FORMAT)
+                if node.confirmation_date_time is not None
+                else "Not yet confirmed or declined.",
             )
         )
         attributes_list.append(

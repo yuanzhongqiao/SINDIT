@@ -112,7 +112,7 @@ async def delete_annotation_instance(instance_iri: str):
         logger.info(f"Deleting time-series matcher: {matcher.id_short}")
         ANNOTATIONS_DAO.delete_annotation_ts_matcher(matcher.iri)
 
-    logger.info(f"Deleting annotation definition: {instance_iri}...")
+    logger.info(f"Deleting annotation instance: {instance_iri}...")
     ANNOTATIONS_DAO.delete_annotation_instance(instance_iri)
 
 
@@ -136,3 +136,25 @@ async def get_ts_matcher_annotation_instance(iri: str):
     :return:
     """
     return ANNOTATIONS_DAO.get_matcher_annotation_instance(iri)
+
+
+@app.get("/annotation/instance")
+async def get_annotation_instance_for_definition(definition_iri: str):
+    """
+    Returns the list of annotation instances with the given definition
+    :raises IdNotFoundException: If the file is not found
+    :param iri:
+    :return:
+    """
+    return ANNOTATIONS_DAO.get_annotation_instance_for_definition(definition_iri)
+
+
+@app.get("/annotation/instance/count")
+async def get_annotation_instance_count_for_definition(definition_iri: str):
+    """
+    Returns the count of annotation instances with the given definition
+    :raises IdNotFoundException: If the file is not found
+    :param iri:
+    :return:
+    """
+    return ANNOTATIONS_DAO.get_annotation_instance_count_for_definition(definition_iri)
