@@ -8,7 +8,7 @@ from frontend import api_client
 from graph_domain.main_digital_twin.AssetNode import AssetNodeFlat
 from requests.exceptions import RequestException
 from dash.exceptions import PreventUpdate
-from frontend.left_sidebar.extensions.annotation_detection_extension.annotation_extension_callbacks import (
+from frontend.left_sidebar.extensions.annotation_detection_extension.annotation_creation.annotation_creation_callbacks import (
     CreationSteps,
 )
 from frontend.main_column.factory_graph.factory_graph_layout import (

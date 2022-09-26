@@ -6,7 +6,7 @@ from dash.exceptions import PreventUpdate
 from dash import html
 from frontend import api_client
 from frontend.app import app
-from frontend.left_sidebar.extensions.annotation_detection_extension.annotation_extension_callbacks import (
+from frontend.left_sidebar.extensions.annotation_detection_extension.annotation_creation.annotation_creation_callbacks import (
     CreationSteps,
 )
 from frontend.main_column.factory_graph.GraphSelectedElement import GraphSelectedElement
