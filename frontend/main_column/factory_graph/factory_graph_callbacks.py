@@ -88,6 +88,8 @@ def update_factory_graph(
     Input("annotation-creation-saved", "modified_timestamp"),
     Input("annotation-deleted", "modified_timestamp"),
     Input("import-finished", "data"),
+    Input("annotation-detection-declined", "data"),
+    Input("annotation-detection-confirmed", "data"),
     prevent_initial_call=True,
 )
 def factory_graph_update_trigger(
@@ -100,11 +102,15 @@ def factory_graph_update_trigger(
     annotation_created_full_reload,
     annotation_deleted_full_reload,
     import_finished,
+    detection_declined,
+    detection_confirmed,
 ):
     if ctx.triggered_id in [
         "annotation-creation-saved",
         "annotation-deleted",
         "import-finished",
+        "annotation-detection-declined",
+        "annotation-detection-confirmed",
     ]:
         logger.info("Reloading graph from backend after writing to the graph...")
         return 2

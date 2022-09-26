@@ -36,13 +36,27 @@ DATETIME_STRF_FORMAT = "%Y_%m_%d_%H_%M_%S_%f"
     State("annotation-creation-store-step", "data"),
     Input("status-unconfirmed-annotation-detection", "modified_timestamp"),
     State("status-unconfirmed-annotation-detection", "data"),
+    Input("annotation-detection-confirmed", "modified_timestamp"),
+    Input("annotation-detection-declined", "modified_timestamp"),
     prevent_initial_call=False,
 )
 def annotation_create_collapse(
-    n_clicks_create, n_clicks_cancel, n_clicks_save, step, _, new_detection
+    n_clicks_create,
+    n_clicks_cancel,
+    n_clicks_save,
+    step,
+    detection_time_stamp,
+    new_detection,
+    detection_confirmed,
+    detection_declined,
 ):
     trigger_id = ctx.triggered_id
-    if new_detection is not None and new_detection:
+    if trigger_id in [
+        "annotation-detection-confirmed",
+        "annotation-detection-declined",
+    ]:
+        return True, False, False
+    elif new_detection is not None and new_detection:
         return False, False, True
     elif trigger_id == "create-annotation-button":
         return False, True, False

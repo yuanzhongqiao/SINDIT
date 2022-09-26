@@ -10,6 +10,9 @@ def get_layout():
         class_name="annotations-extension-vertical-collapse",
         is_open=False,
         children=[
+            dcc.Store(id="annotation-detection-details-store", storage_type="memory"),
+            dcc.Store(id="annotation-detection-confirmed", storage_type="memory"),
+            dcc.Store(id="annotation-detection-declined", storage_type="memory"),
             html.Div(
                 id="annotations-confirm-container",
                 className="annotations-extension-main-container",

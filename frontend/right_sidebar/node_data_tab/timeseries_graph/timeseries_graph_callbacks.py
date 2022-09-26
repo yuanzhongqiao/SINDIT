@@ -81,6 +81,8 @@ def timeseries_graph_interval(n, realtime_toggle, pseudo_element_input):
     Input("annotation-creation-time-selector-end", "value"),
     Input("annotation-creation-store-range-start", "data"),
     Input("annotation-creation-store-range-end", "data"),
+    Input("annotation-detection-details-store", "data"),
+    Input("annotation-detection-show-situation-input", "value"),
 )
 def update_timeseries_graph(
     n,
@@ -99,6 +101,8 @@ def update_timeseries_graph(
     annotation_selected_end_time,
     annotation_selected_range_start_str,
     annotation_selected_range_end_str,
+    annotation_detection_details,
+    annotation_detection_show,
 ):
     if selected_el_json is None:
         # Cancel if nothing selected
@@ -137,6 +141,27 @@ def update_timeseries_graph(
             type=NodeTypes.TIMESERIES_INPUT.value,
             is_node=True,
         )
+    elif (
+        annotation_detection_details is not None
+        and True in annotation_detection_show
+        and selected_el.iri
+        in annotation_detection_details.get("detected_timeseries_iris")
+    ):
+        # Showing a newly detected occurance of an annotation
+        # Set annotation_viewer mode:
+        annotation_mode_range_selected = True
+        annotation_mode_view_defined = True
+        annotation_creation_mode_active = False
+        annotation_viewer_mode = True
+        annotation_selected_range_start_str = None
+        annotation_selected_range_end_str = None
+        selected_range_start = datetime.fromisoformat(
+            annotation_detection_details.get("occurance_start")
+        )
+        selected_range_end = datetime.fromisoformat(
+            annotation_detection_details.get("occurance_end")
+        )
+
     else:
         annotation_mode_range_selected = False
         annotation_mode_view_defined = False
@@ -148,6 +173,7 @@ def update_timeseries_graph(
             annotation_creation_step is not None
             and annotation_creation_step > CreationSteps.RANGE_SELECTION.value
         )
+
     if (
         annotation_creation_mode_active
         and annotation_selected_start_date is not None

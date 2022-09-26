@@ -1,8 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
+from dateutil import tz
 from fastapi import HTTPException
 from typing import List
 from backend.api.api import app
+from util.environment_and_configuration import ConfigGroups, get_configuration
 from backend.knowledge_graph.dao.AnnotationNodesDao import AnnotationNodesDao
 from pydantic import BaseModel
 from backend.knowledge_graph.dao.TimeseriesNodesDao import TimeseriesNodesDao
@@ -169,11 +171,16 @@ async def get_current_annotation_detection_details():
     :return:
     """
     details_dict = {
-        "iri": "test-iri",
-        "asset_iri": "asset-iri",
+        "iri": "www.sintef.no/aas_identifiers/learning_factory/annotations/detections/test-detection",
+        "asset_iri": "www.sintef.no/aas_identifiers/learning_factory/machines/hbw",
         "asset_caption": "asset-caption",
-        "occurance_start": datetime.now(),
-        "occurance_end": datetime.now(),
+        "occurance_start": datetime.now().astimezone(
+            tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+        )
+        - timedelta(minutes=5),
+        "occurance_end": datetime.now().astimezone(
+            tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+        ),
         "definition_iri": "def iri",
         "definition_caption": "def cap",
         "definition_description": None,
@@ -181,6 +188,11 @@ async def get_current_annotation_detection_details():
         "instance_caption": "inst cap",
         "instance_description": "inst desc",
         "solution_proposal": "solution",
+        "detected_timeseries_iris": [
+            "www.sintef.no/aas_identifiers/learning_factory/sensors/hbw_actual_pos_vertical",
+            "www.sintef.no/aas_identifiers/learning_factory/sensors/factory_humidity_raw",
+        ],
+        "original_annotated_asset_iri": "www.sintef.no/aas_identifiers/learning_factory/machines/vgr",
     }
 
     return details_dict
