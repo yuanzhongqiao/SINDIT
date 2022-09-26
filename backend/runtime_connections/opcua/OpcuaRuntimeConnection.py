@@ -151,7 +151,6 @@ class OpcuaRuntimeConnection(RuntimeConnection):
                             )
 
                     time.sleep(self.sampling_rate / 1000)
-                    raise Exception()
 
             except asyncio.exceptions.TimeoutError:
                 self.active = False
