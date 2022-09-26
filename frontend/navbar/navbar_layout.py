@@ -17,7 +17,7 @@ def get_layout():
                         dbc.Col(
                             html.Img(
                                 # src=app.get_asset_url("sintef_white.png"),
-                                src=app.get_asset_url("sindit_logo_text_large.png"),
+                                src=app.get_asset_url("sindit_logo_text.svg"),
                                 height="32px",
                             )
                         ),
