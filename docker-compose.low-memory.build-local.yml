@@ -40,3 +40,11 @@ services:
 
     mem_limit: 1500M
     entrypoint: gunicorn dt_frontend:server -b :8050 --timeout 1800 --workers 1
+
+volumes:
+  sindit-minio-s3-volume:
+  sindit-neo4j-conf-volume:
+  sindit-neo4j-logs-volume:
+  sindit-neo4j-data-volume:
+  sindit-influx-db-data-volume:
+  sindit-influx-db-config-volume:
