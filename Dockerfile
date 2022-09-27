@@ -8,18 +8,18 @@ COPY container-requirements-initializer.sh ./
 COPY requirements.txt ./
 RUN ./container-requirements-initializer.sh
 
-COPY assets .
-COPY backend .
-COPY environment_and_configuration .
-COPY frontend .
-COPY graph_domain .
-COPY learning_factory_instance .
-COPY util .
-COPY dt_backend.py .
-COPY dt_frontend.py .
-COPY init_learning_factory_from_cypher_file.py .
-COPY learning_factory_continuous_ordering.py .
-COPY similarity* .
+COPY assets ./
+COPY backend ./
+COPY environment_and_configuration ./
+COPY frontend ./
+COPY graph_domain ./
+COPY learning_factory_instance ./
+COPY util ./
+COPY dt_backend.py ./
+COPY dt_frontend.py ./
+COPY init_learning_factory_from_cypher_file.py ./
+COPY learning_factory_continuous_ordering.py ./
+COPY similarity* ./
 
 EXPOSE 8050
 EXPOSE 8000
