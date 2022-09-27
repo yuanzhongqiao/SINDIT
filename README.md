@@ -62,13 +62,17 @@ More information about the similarity measures will follow soon.
 
 Information about this package will follow soon.
 
-## Installation & Requirements
+## Installation, Requirements & How to Run
 
 This project is set up using Docker and Docker-Compose. 
 
 For developers, a Devcontainer-setup for Visual Studio Code is implemented. It can be used together with SSH remote development if needed.
 
-Please find the details on how to develop or deploy SINDIT [here](documentation/sindit-development-guide.md).
+Please take into account that the application with all its required database-systems has some increased memory requirements.
+
+If you want to try SINDIT, please find the details on the requirements and how to develop or run SINDIT [here](documentation/sindit-development-guide.md).
+
+That file also contains information about the exposed API and interfaces.
 
 ## FAQ
 
@@ -82,9 +86,9 @@ You can find the source code of the old version under [Release v1.0.0](https://g
 
 ## Blame & Contact
 
-- Timo Peter [timo.peter@sintef.no]([timo.peter@sintef.no](mailto:timo.peter@sintef.no))
+- Timo Peter [timo.peter@sintef.no](mailto:timo.peter@sintef.no)
 
-- Maryna Waszak [maryna.waszak@sintef.no]([maryna.waszak@sintef.no](mailto:maryna.waszak@sintef.no))
+- An Ngoc Lam [an.lam@sintef.no](mailto:an.lam@sintef.no)
 
 ---
 
