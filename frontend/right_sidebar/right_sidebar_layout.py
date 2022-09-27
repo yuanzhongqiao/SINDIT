@@ -19,7 +19,7 @@ def get_layout():
                 children=[
                     dbc.CardHeader(
                         id="right-sidebar-card-header",
-                        children=[html.Div("Selected element")],
+                        children=[html.Div("Selected Element")],
                     ),
                     dbc.CardBody(
                         id="right-sidebar-card-body",

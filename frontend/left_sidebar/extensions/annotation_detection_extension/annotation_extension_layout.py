@@ -44,7 +44,7 @@ def get_layout():
                                     ),
                                     html.Div(
                                         className="node-information-attribute-header",
-                                        children="Sum of Active Scans for New Occurances:",
+                                        children="Total Amount of Active Detectors:",
                                         style={"margin-top": "10px"},
                                     ),
                                     html.Div(
