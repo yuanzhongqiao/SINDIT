@@ -4,6 +4,10 @@ from dateutil import tz
 from fastapi import HTTPException
 from typing import List
 from backend.api.api import app
+from backend.knowledge_graph.dao.BaseNodesDao import BaseNodeDao
+from graph_domain.expert_annotations.AnnotationDetectionNode import (
+    AnnotationDetectionNodeFlat,
+)
 from util.environment_and_configuration import ConfigGroups, get_configuration
 from backend.knowledge_graph.dao.AnnotationNodesDao import AnnotationNodesDao
 from pydantic import BaseModel
@@ -16,6 +20,9 @@ from util.log import logger
 
 ANNOTATIONS_DAO: AnnotationNodesDao = AnnotationNodesDao.instance()
 TIMESERIES_NODES_DAO: TimeseriesNodesDao = TimeseriesNodesDao.instance()
+BASE_NODE_DAO: BaseNodeDao = BaseNodeDao.instance()
+
+DATETIME_STRF_FORMAT = "%Y_%m_%d_%H_%M_%S_%f"
 
 
 class AnnotationDefinitionArguments(BaseModel):
@@ -166,40 +173,64 @@ async def get_annotation_instance_count_for_definition(definition_iri: str):
     return ANNOTATIONS_DAO.get_annotation_instance_count_for_definition(definition_iri)
 
 
+def get_annotation_detection_details(detection_iri: None | str = None):
+    """
+    Returns details of the currently detected annotation or the given one
+    (or of one of them, if multiple unconfirmed yet).
+    :param iri:
+    :return:
+    """
+    if detection_iri is None:
+        detection_node: AnnotationDetectionNodeFlat = (
+            ANNOTATIONS_DAO.get_oldest_unconfirmed_detection()
+        )
+        if detection_node is None:
+            logger.info(
+                "Annotation detection details for current detection "
+                "ordered when there was no new detection!"
+            )
+            return None
+    else:
+        detection_node: AnnotationDetectionNodeFlat = BASE_NODE_DAO.get_generic_node(
+            detection_iri
+        )
+
+    matched_ts_nodes = ANNOTATIONS_DAO.get_matched_ts_for_detection(detection_node.iri)
+    asset = ANNOTATIONS_DAO.get_asset_for_detection(detection_node.iri)
+    instance = ANNOTATIONS_DAO.get_annotation_instance_for_detection(detection_node.iri)
+    definition = ANNOTATIONS_DAO.get_annotation_definition_for_instance(instance.iri)
+    orig_asset = ANNOTATIONS_DAO.get_asset_for_annotation_instance(instance.iri)
+
+    details_dict = {
+        "iri": detection_node.iri,
+        "asset_iri": asset.iri,
+        "asset_caption": asset.caption,
+        "occurance_start": detection_node.occurance_start_date_time,
+        "occurance_end": detection_node.occurance_end_date_time,
+        "definition_iri": definition.iri,
+        "definition_caption": definition.caption,
+        "definition_description": definition.description,
+        "instance_iri": instance.iri,
+        "instance_id_short": instance.id_short,
+        "instance_caption": instance.caption,
+        "instance_description": instance.description,
+        "solution_proposal": definition.solution_proposal,
+        "detected_timeseries_iris": [ts.iri for ts in matched_ts_nodes],
+        "original_annotated_asset_iri": orig_asset.iri,
+    }
+
+    return details_dict
+
+
 @app.get("/annotation/detection/details")
-async def get_current_annotation_detection_details():
+async def get_current_annotation_detection_details_endpoint():
     """
     Returns details of the currently detected annotation
     (or of one of them, if multiple unconfirmed yet).
     :param iri:
     :return:
     """
-    details_dict = {
-        "iri": "www.sintef.no/aas_identifiers/learning_factory/annotations/detections/test-detection",
-        "asset_iri": "www.sintef.no/aas_identifiers/learning_factory/machines/hbw",
-        "asset_caption": "asset-caption",
-        "occurance_start": datetime.now().astimezone(
-            tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
-        )
-        - timedelta(minutes=5),
-        "occurance_end": datetime.now().astimezone(
-            tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
-        ),
-        "definition_iri": "def iri",
-        "definition_caption": "def cap",
-        "definition_description": None,
-        "instance_iri": "inst iri",
-        "instance_caption": "inst cap",
-        "instance_description": "inst desc",
-        "solution_proposal": "solution",
-        "detected_timeseries_iris": [
-            "www.sintef.no/aas_identifiers/learning_factory/sensors/hbw_actual_pos_vertical",
-            "www.sintef.no/aas_identifiers/learning_factory/sensors/factory_humidity_raw",
-        ],
-        "original_annotated_asset_iri": "www.sintef.no/aas_identifiers/learning_factory/machines/vgr",
-    }
-
-    return details_dict
+    return get_annotation_detection_details()
 
 
 @app.delete("/annotation/detection")
@@ -235,17 +266,31 @@ async def confirm_annotation_detection(
         detection_iri=detection.detection_iri
     )
 
-    # create_annotation_instance(AnnotationInstanceArguments(
-    #     id_short="",
-    #     asset_iri="",
-    #     definition_iri="",
-    #     ts_iri_list=[],
-    #     start_datetime=None,
-    #     end_datetime=None,
-    #     caption="",
-    #     description=""
-    # ))
+    details_dict = get_annotation_detection_details(detection.detection_iri)
+    caption = f"Confirmed Occurance of: {details_dict.get('instance_caption')}"
+    description = (
+        f"This annotation instance has been automatically created when "
+        f"the related detection of the instance '{details_dict.get('instance_caption')}' has been confirmed."
+    )
+    timestamp = datetime.now().astimezone(
+        tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+    )
+    id_short = f"confirmed_occurance_of_{details_dict.get('instance_id_short')}_at_{timestamp.strftime(DATETIME_STRF_FORMAT)}"
 
-    # TODO
-    # create ts-matchers
-    # create
+    instance_iri = create_annotation_instance(
+        AnnotationInstanceArguments(
+            id_short=id_short,
+            asset_iri=details_dict.get("asset_iri"),
+            definition_iri=details_dict.get("definition_iri"),
+            ts_iri_list=details_dict.get("detected_timeseries_iris"),
+            start_datetime=details_dict.get("occurance_start"),
+            end_datetime=details_dict.get("occurance_end"),
+            caption=caption,
+            description=description,
+        )
+    )
+
+    # Relationship to detection
+    ANNOTATIONS_DAO.create_confirmed_detection_instance_relationship(
+        detection_iri=details_dict.get("iri"), instance_iri=instance_iri
+    )

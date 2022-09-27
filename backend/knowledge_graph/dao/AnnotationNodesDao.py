@@ -12,6 +12,7 @@ from graph_domain.expert_annotations.AnnotationInstanceNode import (
     AnnotationInstanceNodeDeep,
     AnnotationInstanceNodeFlat,
 )
+from graph_domain.main_digital_twin.AssetNode import AssetNodeFlat
 
 from util.environment_and_configuration import ConfigGroups, get_configuration
 from graph_domain.expert_annotations.AnnotationTimeseriesMatcherNode import (
@@ -252,6 +253,21 @@ class AnnotationNodesDao(object):
         )
         self.ps.graph_create(relationship)
 
+    def create_confirmed_detection_instance_relationship(
+        self, detection_iri: str, instance_iri: str
+    ) -> str:
+
+        relationship = Relationship(
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ANNOTATION_INSTANCE.value, iri=instance_iri)
+            .first(),
+            RelationshipTypes.CREATED_OUT_OF.value,
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ANNOTATION_DETECTION.value, iri=detection_iri)
+            .first(),
+        )
+        self.ps.graph_create(relationship)
+
     def create_annotation_ts_match_relationship(
         self, ts_matcher_iri: str, ts_iri: str, original_annotation: bool
     ) -> str:
@@ -429,3 +445,87 @@ class AnnotationNodesDao(object):
             tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
         )
         self.ps.graph_push(detection_node)
+
+    @validate_result_nodes
+    def get_oldest_unconfirmed_detection(self) -> AnnotationDetectionNodeFlat | None:
+        matches = (
+            self.ps.repo_match(model=AnnotationDetectionNodeFlat)
+            .where("not exists(_.confirmation_date_time)")
+            .order_by("_.confirmation_date_time ASC")
+        )
+
+        return matches.first()
+
+    @validate_result_nodes
+    def get_matched_ts_for_detection(self, detection_iri) -> List[TimeseriesNodeFlat]:
+        matches = self.ps.repo_match(model=TimeseriesNodeFlat).where(
+            "(_)<-[:"
+            + RelationshipTypes.MATCHING_TIMESERIES.value
+            + "]-(:"
+            + NodeTypes.ANNOTATION_DETECTION.value
+            + ' {iri: "'
+            + detection_iri
+            + '"})'
+        )
+
+        return matches.all()
+
+    @validate_result_nodes
+    def get_asset_for_detection(self, detection_iri) -> AssetNodeFlat:
+        matches = self.ps.repo_match(model=AssetNodeFlat).where(
+            "(_)-[:"
+            + RelationshipTypes.DETECTED_ANNOTATION_OCCURANCE.value
+            + "]->(:"
+            + NodeTypes.ANNOTATION_DETECTION.value
+            + ' {iri: "'
+            + detection_iri
+            + '"})'
+        )
+
+        return matches.first()
+
+    @validate_result_nodes
+    def get_annotation_instance_for_detection(
+        self, detection_iri
+    ) -> AnnotationInstanceNodeFlat:
+        matches = self.ps.repo_match(model=AnnotationInstanceNodeFlat).where(
+            "(_)<-[:"
+            + RelationshipTypes.MATCHING_INSTANCE.value
+            + "]-(:"
+            + NodeTypes.ANNOTATION_DETECTION.value
+            + ' {iri: "'
+            + detection_iri
+            + '"})'
+        )
+
+        return matches.first()
+
+    @validate_result_nodes
+    def get_annotation_definition_for_instance(
+        self, instance_iri
+    ) -> AnnotationDefinitionNodeFlat:
+        matches = self.ps.repo_match(model=AnnotationDefinitionNodeFlat).where(
+            "(_)<-[:"
+            + RelationshipTypes.INSTANCE_OF.value
+            + "]-(:"
+            + NodeTypes.ANNOTATION_INSTANCE.value
+            + ' {iri: "'
+            + instance_iri
+            + '"})'
+        )
+
+        return matches.first()
+
+    @validate_result_nodes
+    def get_asset_for_annotation_instance(self, instance_iri) -> AssetNodeFlat:
+        matches = self.ps.repo_match(model=AssetNodeFlat).where(
+            "(_)-[:"
+            + RelationshipTypes.ANNOTATION.value
+            + "]->(:"
+            + NodeTypes.ANNOTATION_INSTANCE.value
+            + ' {iri: "'
+            + instance_iri
+            + '"})'
+        )
+
+        return matches.first()

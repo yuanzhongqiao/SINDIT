@@ -411,6 +411,15 @@ def get_cytoscape_elements(
                     RelationshipTypes.MATCHING_INSTANCE.value,
                 )
             )
+            # Instance created out of the detection
+            if detection.resulting_instance is not None:
+                cytoscape_elements.append(
+                    _create_cytoscape_relationship(
+                        detection.resulting_instance.iri,
+                        detection.iri,
+                        RelationshipTypes.CREATED_OUT_OF.value,
+                    )
+                )
 
     # asset similarity relationships:
     for similarity in asset_similarities:

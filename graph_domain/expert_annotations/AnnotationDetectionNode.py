@@ -7,9 +7,7 @@ from dataclasses_json import dataclass_json
 from py2neo.ogm import Property, Related, RelatedTo
 
 from graph_domain.BaseNode import BaseNode
-from graph_domain.expert_annotations.AnnotationDefinitionNode import (
-    AnnotationDefinitionNodeDeep,
-)
+
 from graph_domain.expert_annotations.AnnotationInstanceNode import (
     AnnotationInstanceNodeDeep,
 )
@@ -130,6 +128,19 @@ class AnnotationDetectionNodeDeep(AnnotationDetectionNodeFlat):
         else:
             return None
 
+    # The OGM framework does not allow constraining to only one item!
+    # Can only be one unit (checked by metamodel validator)
+    _resulting_instance: List[AnnotationInstanceNodeDeep] = Related(
+        AnnotationInstanceNodeDeep, RelationshipTypes.CREATED_OUT_OF.value
+    )
+
+    @property
+    def resulting_instance(self) -> AnnotationInstanceNodeDeep | None:
+        if len(self._resulting_instance) > 0:
+            return [instance for instance in self._resulting_instance][0]
+        else:
+            return None
+
     def validate_metamodel_conformance(self):
         """
         Used to validate if the current node (self) and its child elements is conformant to the defined metamodel.
@@ -153,3 +164,11 @@ class AnnotationDetectionNodeDeep(AnnotationDetectionNodeFlat):
                 self, "A detection can only refer to one matching instance."
             )
         self.matching_instance.validate_metamodel_conformance()
+
+        if len(self._resulting_instance) > 1:
+            raise GraphNotConformantToMetamodelError(
+                self, "Only one instance can be created out of a detection."
+            )
+
+        if len(self._resulting_instance) == 1:
+            self.resulting_instance.validate_metamodel_conformance()
