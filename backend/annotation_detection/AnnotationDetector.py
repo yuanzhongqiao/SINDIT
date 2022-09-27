@@ -43,12 +43,8 @@ class AnnotationDetector:
     def __init__(
         self,
         scanned_timeseries_iris: Dict[str, str],
-        scanned_asset_iri: str,
-        scanned_asset_id_short: str,
-        scanned_asset_caption: str,
-        scanned_annotation_instance_iri: str,
-        scanned_annotation_instance_id_short: str,
-        scanned_annotation_instance_caption: str,
+        scanned_asset: AssetNodeFlat,
+        scanned_annotation_instance: AnnotationInstanceNodeFlat,
         persistence_services: Dict[str, SpecializedDatabasePersistenceService],
     ) -> None:
 
@@ -57,26 +53,22 @@ class AnnotationDetector:
 
         # Dict: annotated ts iri -> scanned ts iri
         self.scanned_timeseries_iris: Dict[str, str] = scanned_timeseries_iris
-        self.scanned_asset_iri: str = scanned_asset_iri
-        self.scanned_asset_id_short: str = scanned_asset_id_short
-        self.scanned_asset_caption: str = scanned_asset_caption
-        self.scanned_annotation_instance_iri: str = scanned_annotation_instance_iri
-        self.scanned_annotation_instance_id_short: str = (
-            scanned_annotation_instance_id_short
-        )
-        self.scanned_annotation_instance_caption: str = (
-            scanned_annotation_instance_caption
+        self.scanned_asset: AssetNodeFlat = scanned_asset
+        self.scanned_annotation_instance: AnnotationInstanceNodeFlat = (
+            scanned_annotation_instance
         )
         # Connections
         self.annotations_dao: AnnotationNodesDao = AnnotationNodesDao.instance()
         self.persistence_services = persistence_services
         # Scanner thread:
         self.detector_thread = Thread(target=self._detector_loop)
+        # Get original timeseries excerpt:
+        self.original_ts_range = None  # TODO
 
     def _detector_loop(self):
         while not self.stop_signal:
             logger.info(
-                f"Scanning {self.scanned_asset_caption} for occurances of {self.scanned_annotation_instance_caption}"
+                f"Scanning {self.scanned_asset.caption} for occurances of {self.scanned_annotation_instance.caption}"
             )
             self.active = True
             time.sleep(20)
@@ -126,25 +118,21 @@ class AnnotationDetector:
 
         return cls(
             scanned_timeseries_iris=matched_ts_dict,
-            scanned_asset_iri=asset.iri,
-            scanned_asset_id_short=asset.id_short,
-            scanned_asset_caption=asset.caption,
-            scanned_annotation_instance_iri=instance.iri,
-            scanned_annotation_instance_id_short=instance.id_short,
-            scanned_annotation_instance_caption=instance.caption,
+            scanned_asset=asset,
+            scanned_annotation_instance=instance,
             persistence_services=persistence_services_per_ts,
         )
 
     def start_detection(self):
         logger.info(
-            f"Starting detection of {self.scanned_annotation_instance_caption} on {self.scanned_asset_caption}"
+            f"Starting detection of {self.scanned_annotation_instance.caption} on {self.scanned_asset.caption}"
         )
         self.stop_signal = False
         self.detector_thread.start()
 
     def stop_detection(self):
         logger.info(
-            f"Stopping detection of {self.scanned_annotation_instance_caption} on {self.scanned_asset_caption}"
+            f"Stopping detection of {self.scanned_annotation_instance.caption} on {self.scanned_asset.caption}"
         )
         self.stop_signal = True
         self.detector_thread.join()
@@ -155,8 +143,8 @@ class AnnotationDetector:
 
     def _create_new_detection(self, start_date_time: datetime, end_date_time: datetime):
 
-        id_short = f"{self.scanned_annotation_instance_id_short}"
-        caption = f"{self.scanned_annotation_instance_caption}"
+        id_short = f"{self.scanned_annotation_instance.id_short}"
+        caption = f"{self.scanned_annotation_instance.caption}"
 
         detection_iri = self.annotations_dao.create_annotation_detection(
             id_short=id_short,
@@ -166,8 +154,7 @@ class AnnotationDetector:
         )
 
         # Relationships to the scanned timeseries:
-        for orig_ts_iri in self.annotated_timeseries_iris:
-            matched_ts_iri = self.scanned_timeseries_iris.get(orig_ts_iri)
+        for matched_ts_iri in self.scanned_timeseries_iris.values():
             self.annotations_dao.create_annotation_detection_timeseries_relationship(
                 detection_iri=detection_iri,
                 timeseries_iri=matched_ts_iri,
@@ -176,11 +163,11 @@ class AnnotationDetector:
         # Relationship to the scanned asset:
         self.annotations_dao.create_annotation_detection_asset_relationship(
             detection_iri=detection_iri,
-            asset_iri=self.scanned_asset_iri,
+            asset_iri=self.scanned_asset.iri,
         )
 
         # Relationship to the matched instance
         self.annotations_dao.create_annotation_detection_instance_relationship(
             detection_iri=detection_iri,
-            instance_iri=self.scanned_annotation_instance_iri,
+            instance_iri=self.scanned_annotation_instance.iri,
         )
