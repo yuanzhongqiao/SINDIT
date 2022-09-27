@@ -32,7 +32,46 @@ def get_layout():
                                 id="annotations-information-container",
                                 className="annotations-extension-main-container",
                                 children=[
-                                    "Domain expert annotations information coming soon...",
+                                    html.Div(
+                                        className="node-information-attribute-header",
+                                        children="Count of Annotations:",
+                                        style={"margin-top": "10px"},
+                                    ),
+                                    html.Div(
+                                        className="node-information-attribute-content",
+                                        id="annotations-info-total-count",
+                                        children="",
+                                    ),
+                                    html.Div(
+                                        className="node-information-attribute-header",
+                                        children="Sum of Active Scans for New Occurances:",
+                                        style={"margin-top": "10px"},
+                                    ),
+                                    html.Div(
+                                        className="node-information-attribute-content",
+                                        id="annotations-info-scan-sum",
+                                        children="",
+                                    ),
+                                    html.Div(
+                                        className="node-information-attribute-header",
+                                        children="Currently Unconfirmed Detections:",
+                                        style={"margin-top": "10px"},
+                                    ),
+                                    html.Div(
+                                        className="node-information-attribute-content",
+                                        id="annotations-info-unconfirmed-detections",
+                                        children="",
+                                    ),
+                                    html.Div(
+                                        className="node-information-attribute-header",
+                                        children="Total Amount of Confirmed Detections:",
+                                        style={"margin-top": "10px"},
+                                    ),
+                                    html.Div(
+                                        className="node-information-attribute-content",
+                                        id="annotations-info-confirmed-detections",
+                                        children="",
+                                    ),
                                 ],
                             ),
                             html.Div(

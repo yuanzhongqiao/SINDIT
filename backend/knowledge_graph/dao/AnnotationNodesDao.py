@@ -435,6 +435,15 @@ class AnnotationNodesDao(object):
 
         return len(self.get_annotation_instance_for_definition(definition_iri))
 
+    @validate_result_nodes
+    def get_annotation_instances(self):
+        matches = self.ps.repo_match(model=AnnotationInstanceNodeFlat)
+
+        return matches.all()
+
+    def get_annotation_instance_count(self):
+        return len(self.get_annotation_instances())
+
     def set_detection_confirmation_date_time(self, detection_iri):
 
         detection_matches = self.ps.repo_match(model=AnnotationDetectionNodeFlat)
@@ -529,3 +538,25 @@ class AnnotationNodesDao(object):
         )
 
         return matches.first()
+
+    @validate_result_nodes
+    def get_confirmed_annotation_detections(self):
+        matches = self.ps.repo_match(model=AnnotationDetectionNodeFlat).where(
+            "exists(_.confirmation_date_time)"
+        )
+
+        return matches.all()
+
+    @validate_result_nodes
+    def get_unconfirmed_annotation_detections(self):
+        matches = self.ps.repo_match(model=AnnotationDetectionNodeFlat).where(
+            "not exists(_.confirmation_date_time)"
+        )
+
+        return matches.all()
+
+    def get_annotation_detections_count(self, confirmed: bool = False):
+        if confirmed:
+            return len(self.get_confirmed_annotation_detections())
+        else:
+            return len(self.get_unconfirmed_annotation_detections())

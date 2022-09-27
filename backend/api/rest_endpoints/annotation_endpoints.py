@@ -294,3 +294,24 @@ async def confirm_annotation_detection(
     ANNOTATIONS_DAO.create_confirmed_detection_instance_relationship(
         detection_iri=details_dict.get("iri"), instance_iri=instance_iri
     )
+
+
+@app.get("/annotation/status")
+async def get_annotation_status():
+    """Combined status endpoint. Should be preferred to use less API calls.
+
+    Returns:
+        _type_: dict
+    """
+    status_dict = {
+        "total_annotations_count": ANNOTATIONS_DAO.get_annotation_instance_count(),
+        "sum_of_scans": "?",  # TODO
+        "unconfirmed_detections": ANNOTATIONS_DAO.get_annotation_detections_count(
+            confirmed=False
+        ),
+        "confirmed_detections": ANNOTATIONS_DAO.get_annotation_detections_count(
+            confirmed=True
+        ),
+    }
+
+    return status_dict

@@ -15,14 +15,15 @@ logger.info("Initializing annotation extension callbacks...")
 
 HIDE = "hide-content"
 SHOW = ""
-
+SIDEBAR_SHOWN = "collapsable-horizontal"
+SIDEBAR_HIDDEN = "collapsable-horizontal collapsed-horizontal"
 LIST_RESULT_PREFIX = "↪ "
 
 DATETIME_STRF_FORMAT = "%Y_%m_%d_%H_%M_%S_%f"
 
 
 ##########################################
-# Navigation:
+# Navigation and info:
 ##########################################
 
 
@@ -69,6 +70,29 @@ def annotation_create_collapse(
         return False, True, False
     else:
         return True, False, False
+
+
+@app.callback(
+    Output("annotations-info-total-count", "children"),
+    Output("annotations-info-scan-sum", "children"),
+    Output("annotations-info-unconfirmed-detections", "children"),
+    Output("annotations-info-confirmed-detections", "children"),
+    Input("annotation-information-collapse", "is_open"),
+    Input("left-sidebar-collapse-annotations", "className"),
+    prevent_initial_call=False,
+)
+def annotation_info(info_open, sidebar_open_classname):
+    if info_open and sidebar_open_classname == SIDEBAR_SHOWN:
+        status_dict = api_client.get_json("/annotation/status")
+        if status_dict is not None:
+            return (
+                status_dict.get("total_annotations_count"),
+                status_dict.get("sum_of_scans"),
+                status_dict.get("unconfirmed_detections"),
+                status_dict.get("confirmed_detections"),
+            )
+
+    return None, None, None, None
 
 
 ##########################################
