@@ -15,12 +15,12 @@ services:
 
     hostname: sindit-influx-db-devcontainer
     container_name: sindit_influx_db_devcontainer
-    mem_limit: 3G
+    mem_limit: 1G
     ports:
       - '8086:8086'
     volumes:
-      - ./docker_mounted_storage_devcontainer/sindit_influx_db/data:/var/lib/influxdb2
-      - ./docker_mounted_storage_devcontainer/sindit_influx_db/config:/etc/influxdb2
+      - sindit-devcontainer-influx-db-data-volume:/var/lib/influxdb2
+      - sindit-devcontainer-influx-db-config-volume:/etc/influxdb2
 
   sindit_neo4j_kg_devcontainer:
     extends:
@@ -36,9 +36,9 @@ services:
       - 7476:7474
       - 7689:7687
     volumes:
-      - ./docker_mounted_storage_devcontainer/sindit_neo4j_kg/conf:/var/lib/neo4j/conf/
-      - ./docker_mounted_storage_devcontainer/sindit_neo4j_kg/logs:/logs
-      - ./docker_mounted_storage_devcontainer/sindit_neo4j_kg/data:/data
+      - sindit-devcontainer-neo4j-conf-volume:/var/lib/neo4j/conf/
+      - sindit-devcontainer-neo4j-logs-volumes:/logs
+      - sindit-devcontainer-neo4j-data-volume:/data
 
   sindit_minio_s3_devcontainer:
     extends:
@@ -49,9 +49,17 @@ services:
 
     hostname: sindit-minio-s3-devcontainer
     container_name: sindit_minio_s3_devcontainer
-    mem_limit: 3G
+    mem_limit: 1G
     ports:
       - "9001:9000"
       - "9098:9099"
     volumes:
-      - ./docker_mounted_storage_devcontainer/sindit_minio_s3_data:/data
+      - sindit-devcontainer-minio-s3-volume:/data
+
+volumes:
+  sindit-devcontainer-minio-s3-volume:
+  sindit-devcontainer-neo4j-conf-volume:
+  sindit-devcontainer-neo4j-logs-volume:
+  sindit-devcontainer-neo4j-data-volume:
+  sindit-devcontainer-influx-db-data-volume:
+  sindit-devcontainer-influx-db-config-volume:

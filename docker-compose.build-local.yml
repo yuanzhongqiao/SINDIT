@@ -36,7 +36,7 @@ services:
       - "9097:9099"
 
   sindit_dt_backend:
-    image: ghcr.io/sintef-9012/sindit:latest
+    build: .
     hostname: sindit-dt-backend
     container_name: sindit_dt_backend
     mem_limit: 2G
@@ -61,7 +61,7 @@ services:
       - "host.docker.internal:host-gateway"
 
   sindit_dt_frontend:
-    image: ghcr.io/sintef-9012/sindit:latest
+    build: .
     hostname: sindit-dt-frontend
     container_name: sindit_dt_frontend
     mem_limit: 2G
