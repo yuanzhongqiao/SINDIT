@@ -23,3 +23,11 @@ services:
       file: docker-compose.dev.yml
       service: sindit_minio_s3
     mem_limit: 500M
+
+volumes:
+  sindit-devcontainer-minio-s3-volume:
+  sindit-devcontainer-neo4j-conf-volume:
+  sindit-devcontainer-neo4j-logs-volume:
+  sindit-devcontainer-neo4j-data-volume:
+  sindit-devcontainer-influx-db-data-volume:
+  sindit-devcontainer-influx-db-config-volume:

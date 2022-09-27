@@ -84,3 +84,11 @@ services:
       timeout: 60s
       retries: 500
     entrypoint: gunicorn dt_frontend:server -b :8050 --timeout 1800 --workers 4
+
+volumes:
+  sindit-minio-s3-volume:
+  sindit-neo4j-conf-volume:
+  sindit-neo4j-logs-volume:
+  sindit-neo4j-data-volume:
+  sindit-influx-db-data-volume:
+  sindit-influx-db-config-volume:
