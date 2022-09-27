@@ -1,4 +1,5 @@
 from typing import Dict, List
+from backend.knowledge_graph.dao.TimeseriesNodesDao import TimeseriesNodesDao
 from graph_domain.main_digital_twin.RuntimeConnectionNode import (
     RuntimeConnectionNode,
     RuntimeConnectionTypes,
@@ -59,14 +60,15 @@ class RuntimeConnectionContainer:
 
         self.connections: Dict[str, RuntimeConnection] = {}
 
-    def refresh_connection_inputs_and_handlers(
-        self, updated_ts_nodes_deep: List[TimeseriesNodeDeep]
-    ):
+    def refresh_connection_inputs_and_handlers(self):
         """Refreshes the inputs and handlers, creating new ones if available in the graph, or deleting old ones.
 
         Args:
             timeseries_nodes_deep (List[TimeseriesNodeDeep]): _description_
         """
+        timeseries_nodes_dao: TimeseriesNodesDao = TimeseriesNodesDao.instance()
+        updated_ts_nodes_deep = timeseries_nodes_dao.get_all_timeseries_nodes_deep()
+
         #
         # Check if ts inputs or connections have been removed:
         #

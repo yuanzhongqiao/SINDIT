@@ -74,6 +74,20 @@ class TimeseriesNodesDao(object):
         return timeseries_flat_matches.all()
 
     @validate_result_nodes
+    def get_timeseries_of_asset(self, asset_iri) -> List[TimeseriesNodeFlat]:
+        matches = self.ps.repo_match(model=TimeseriesNodeFlat).where(
+            "(_)<-[:"
+            + RelationshipTypes.HAS_TIMESERIES.value
+            + "]-(:"
+            + NodeTypes.ASSET.value
+            + ' {iri: "'
+            + asset_iri
+            + '"})'
+        )
+
+        return matches.all()
+
+    @validate_result_nodes
     def get_all_timeseries_nodes_deep(self):
         """
         Queries all timeseries nodes. Follows relationships to build nested objects for related nodes (e.g. connections)

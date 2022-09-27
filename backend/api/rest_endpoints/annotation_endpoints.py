@@ -3,6 +3,9 @@ import json
 from dateutil import tz
 from fastapi import HTTPException
 from typing import List
+from backend.annotation_detection.AnnotationDetectorContainer import (
+    AnnotationDetectorContainer,
+)
 from backend.api.api import app
 from backend.knowledge_graph.dao.BaseNodesDao import BaseNodeDao
 from graph_domain.expert_annotations.AnnotationDetectionNode import (
@@ -305,7 +308,7 @@ async def get_annotation_status():
     """
     status_dict = {
         "total_annotations_count": ANNOTATIONS_DAO.get_annotation_instance_count(),
-        "sum_of_scans": "?",  # TODO
+        "sum_of_scans": AnnotationDetectorContainer.instance().get_active_detectors_count(),
         "unconfirmed_detections": ANNOTATIONS_DAO.get_annotation_detections_count(
             confirmed=False
         ),

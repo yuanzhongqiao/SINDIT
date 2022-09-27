@@ -401,7 +401,7 @@ class AnnotationNodesDao(object):
         return matches.first()
 
     @validate_result_nodes
-    def get_matcher_original_annotated_ts(self, matcher_iri):
+    def get_matcher_original_annotated_ts(self, matcher_iri) -> TimeseriesNodeFlat:
         """Returns the timeseries node that the matcher is related to"""
         matches = self.ps.repo_match(model=TimeseriesNodeFlat).where(
             "(_)<-[:"
@@ -416,6 +416,20 @@ class AnnotationNodesDao(object):
         return matches.first()
 
     @validate_result_nodes
+    def get_matched_ts_for_matcher(self, matcher_iri) -> List[TimeseriesNodeFlat]:
+        matches = self.ps.repo_match(model=TimeseriesNodeFlat).where(
+            "(_)<-[:"
+            + RelationshipTypes.TS_MATCH.value
+            + "]-(:"
+            + NodeTypes.ANNOTATION_TS_MATCHER.value
+            + ' {iri: "'
+            + matcher_iri
+            + '"}) '
+        )
+
+        return matches.all()
+
+    @validate_result_nodes
     def get_annotation_instance_for_definition(self, definition_iri):
         """Returns the instances related to the given annotation definition"""
         matches = self.ps.repo_match(model=AnnotationInstanceNodeFlat).where(
@@ -425,6 +439,26 @@ class AnnotationNodesDao(object):
             + NodeTypes.ANNOTATION_DEFINITION.value
             + ' {iri: "'
             + definition_iri
+            + '"}) '
+        )
+
+        return matches.all()
+
+    @validate_result_nodes
+    def get_scanned_assets_for_annotation_instance(
+        self, instance_iri
+    ) -> List[AssetNodeFlat]:
+        matches = self.ps.repo_match(model=AssetNodeFlat).where(
+            "(_)-[:"
+            + RelationshipTypes.OCCURANCE_SCAN.value
+            + "]->(:"
+            + NodeTypes.ANNOTATION_DEFINITION.value
+            + ")<-[:"
+            + RelationshipTypes.INSTANCE_OF.value
+            + "]-(:"
+            + NodeTypes.ANNOTATION_INSTANCE.value
+            + ' {iri: "'
+            + instance_iri
             + '"}) '
         )
 
@@ -560,3 +594,19 @@ class AnnotationNodesDao(object):
             return len(self.get_confirmed_annotation_detections())
         else:
             return len(self.get_unconfirmed_annotation_detections())
+
+    @validate_result_nodes
+    def get_matchers_for_annotation_instance(
+        self, instance_iri
+    ) -> AnnotationTimeseriesMatcherNodeFlat:
+        matches = self.ps.repo_match(model=AnnotationTimeseriesMatcherNodeFlat).where(
+            "(_)<-[:"
+            + RelationshipTypes.DETECTABLE_WITH.value
+            + "]-(:"
+            + NodeTypes.ANNOTATION_INSTANCE.value
+            + ' {iri: "'
+            + instance_iri
+            + '"})'
+        )
+
+        return matches.all()

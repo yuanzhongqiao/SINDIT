@@ -12,6 +12,9 @@ import uvicorn
 
 from dateutil import tz
 from threading import Thread
+from backend.annotation_detection.AnnotationDetectorContainer import (
+    AnnotationDetectorContainer,
+)
 from util.environment_and_configuration import (
     ConfigGroups,
     get_configuration,
@@ -89,24 +92,26 @@ def init_database_data_if_not_available():
         logger.info("Finished initilization.")
 
 
-def refresh_ts_inputs():
-    timeseries_nodes_dao: TimeseriesNodesDao = TimeseriesNodesDao.instance()
+def refresh_workers():
     runtime_con_container: RuntimeConnectionContainer = (
         RuntimeConnectionContainer.instance()
     )
-    timeseries_deep_nodes = timeseries_nodes_dao.get_all_timeseries_nodes_deep()
+    detectors_container: AnnotationDetectorContainer = (
+        AnnotationDetectorContainer.instance()
+    )
+    runtime_con_container.refresh_connection_inputs_and_handlers()
+    detectors_container.refresh_annotation_detectors()
 
-    runtime_con_container.refresh_connection_inputs_and_handlers(timeseries_deep_nodes)
 
-
-def refresh_time_series_thread_loop():
+def refresh_workers_thread_loop():
 
     while True:
         time.sleep(120)
-        logger.info("Refreshing time-series inputs and connections...")
-        refresh_ts_inputs()
+        logger.info("Refreshing worker services...")
 
-        logger.info("Done refreshing time-series inputs and connections.")
+        refresh_workers()
+
+        logger.info("Done refreshing worker services.")
 
 
 # #############################################################################
@@ -130,13 +135,15 @@ if __name__ == "__main__":
     )
     logger.info("Done initializing specialized databases.")
 
-    logger.info("Loading time-series inputs and connections...")
-    refresh_ts_inputs()
-    logger.info("Done loading time-series inputs and connections.")
+    logger.info(
+        "Loading worker services: time-series inputs and connections as well as annotation detectors..."
+    )
+    refresh_workers()
+    logger.info("Done loading worker services.")
 
-    # Thread checking regulary, if timeseries inputs and runtime-connections have been added / removed
-    ts_refresh_thread = Thread(target=refresh_time_series_thread_loop)
-    ts_refresh_thread.start()
+    # Thread checking regulary, if timeseries inputs, runtime-connections and annotation detectors have been added / removed
+    workers_refresh_thread = Thread(target=refresh_workers_thread_loop)
+    workers_refresh_thread.start()
 
     # Start cleanup thread deleting obsolete backups:
     start_storage_cleanup_thread()
