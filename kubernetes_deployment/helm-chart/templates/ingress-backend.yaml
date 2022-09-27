@@ -18,13 +18,11 @@ metadata:
   name: {{ $fullName }}-backend
   labels:
     {{- include "sindit.labels" . | nindent 4 }}
-  {{- with .Values.ingressBackend.annotations }}
   annotations:
-    {{- toYaml . | nindent 4 }}
+    {{ .Values.ingressBackend.annotations | toYaml | nindent 4 }}
     {{- if .Values.ingressBackend.traefik }}
     traefik.ingress.kubernetes.io/router.middlewares: {{.Release.Namespace}}-{{ $fullName }}-stripprefix-backend-middleware@kubernetescrd
     {{- end }}
-  {{- end }}
 spec:
   {{- if and .Values.ingressBackend.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
   ingressClassName: {{ .Values.ingressBackend.className }}

@@ -48,7 +48,7 @@ spec:
               value: neo4j
             - name: NEO4J_DB_USER
               value: neo4j
-            - name: NEO4J_DB_PASSWORD
+            - name: NEO4J_DB_PW
               valueFrom:
                 secretKeyRef:
                   name: {{ include "sindit.fullname" . }}
@@ -81,22 +81,27 @@ spec:
                 secretKeyRef:
                   name: {{ include "sindit.fullname" . }}
                   key: minio-s3-password
+            - name: API_ROOT_PATH
+              value: {{ .Values.api.apiRootPath | quote }}
+            - name: OPENAPI_URL
+              value: {{ .Values.api.openApiUrl | quote }}
           ports:
             - name: backend
               containerPort: 8000
               protocol: TCP
           livenessProbe:
-            initialDelaySeconds: 600
+            initialDelaySeconds: 30
             timeoutSeconds: 60
             httpGet:
               path: /system_time
               port: backend
           readinessProbe:
-            initialDelaySeconds: 600
+            initialDelaySeconds: 30
             timeoutSeconds: 60
             httpGet:
               path: /system_time
               port: backend
+
           resources:
             {{- toYaml .Values.resources.backend | nindent 12 }}
       {{- with .Values.nodeSelector }}

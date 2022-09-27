@@ -22,7 +22,7 @@ Additional details about the factory can be found at [fischertechnik](https://ww
 
 ### SINDIT Digital Twin Platform
 
-![](documentation/img/dt_dashboard_zoomed.png)
+![](documentation/img/dt_dashboard.png)
 
 The core of SINDIT is a universal Digital Twin platform, that holds all relevant information
 about the assets from a connected factory and is synchronized in real-time to the

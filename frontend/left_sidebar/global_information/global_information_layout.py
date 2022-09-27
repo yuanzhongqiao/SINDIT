@@ -1,4 +1,4 @@
-from dash import html
+from dash import html, dcc
 import dash_bootstrap_components as dbc
 
 
@@ -15,6 +15,10 @@ def get_layout():
                 html.Div(
                     id="global-information-container",
                     children=[
+                        dcc.Store(
+                            id="status-unconfirmed-annotation-detection",
+                            storage_type="memory",
+                        ),
                         dbc.Table(
                             [
                                 html.Tr(
@@ -77,9 +81,3 @@ def get_layout():
         ],
         style={"margin-bottom": "1rem"},
     )
-
-
-# def get_content():
-#     return html.Div("Will contain connection status etc...")
-#     # TODO: connection status, time, node count, edge count...
-#     # Directly load from the API as this will be reloaded frequently

@@ -60,23 +60,13 @@ class OpcuaRuntimeConnection(RuntimeConnection):
         Use the polling-based variant instead for a reliable connection!
         :return:
         """
-        self._asyncua_treadloop.start()
-
-        # Try to initialize the connection
-        # Once it was started once, it can be reused even after losing the connection for some period
-        try:
-            self.__start_connection()
-        except Exception as exc:
-            logger.info(
-                f"Exception occured while connecting to OPC-UA: {exc}.\n Skipping the connection..."
-            )
-            return
 
         subscription = None
 
         # Outer loop for restoring the whole connection after a timeout
         while self.thread_stop == False:
             try:
+                self.__start_connection()
                 self._opcua_client.connect()
                 self.__load_opcua_nodes()
 
@@ -122,22 +112,11 @@ class OpcuaRuntimeConnection(RuntimeConnection):
         Main OPCUA thread based on the subscription API. Only samples data changes, not handling every period
         :return:
         """
-        self._asyncua_treadloop.start()
-
-        # Try to initialize the connection
-        # Once it was started once, it can be reused even after losing the connection for some period
-        try:
-            self.__start_connection()
-        except Exception as exc:
-            logger.info(
-                f"Exception occured while connecting to OPC-UA: {exc}.\n Skipping the connection..."
-            )
-            return
 
         # Outer loop for restoring the whole connection after a timeout
         while self.thread_stop == False:
             try:
-
+                self.__start_connection()
                 self._opcua_client.connect()
                 self.__load_opcua_nodes()
 
@@ -201,8 +180,19 @@ class OpcuaRuntimeConnection(RuntimeConnection):
         Blocking until the connection is successfull!
         :return:
         """
+        if self._opcua_client is not None:
+            self._opcua_client.disconnect()
+            del self._opcua_client
+            self._opcua_client = None
+            self._asyncua_treadloop.stop()
+            del self._asyncua_treadloop
+            self._asyncua_treadloop = asyncua.sync.ThreadLoop()
         while self._opcua_client is None and self.thread_stop == False:
             try:
+                self._asyncua_treadloop.start()
+                logger.info(
+                    f"Trying to connect to OPC UA: opc.tcp://{self.host}:{self.port}"
+                )
                 self._opcua_client = asyncua.sync.Client(
                     url=f"opc.tcp://{self.host}:{self.port}",
                     tloop=self._asyncua_treadloop,
@@ -219,6 +209,9 @@ class OpcuaRuntimeConnection(RuntimeConnection):
         Loads all specified nodes with the currently active connection
         :return:
         """
+        if self._nodes is not None and len(self._nodes) > 0:
+            del self._nodes
+            self._nodes: List[asyncua.sync.SyncNode] = []
         timeseries_input: OpcuaTimeseriesInput
         for timeseries_input in self.timeseries_inputs.values():
             self._nodes.append(

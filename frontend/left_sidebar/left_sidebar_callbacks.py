@@ -33,12 +33,25 @@ class CollapsableContainers(Enum):
     Input("similarity-pipeline-collapse-button", "n_clicks"),
     Input("annotation-detection-collapse-button", "n_clicks"),
     State("left-sidebar-collapsable-store", "data"),
+    Input("status-unconfirmed-annotation-detection", "modified_timestamp"),
+    State("status-unconfirmed-annotation-detection", "data"),
     prevent_initial_call=True,
 )
-def select_similarity_pipeline_sidebar(n_clicks_sim, n_clicks_an, store):
-
+def select_extension_sidebar(n_clicks_sim, n_clicks_an, store, _, new_detection):
     button_clicked = ctx.triggered_id
-    if button_clicked == "similarity-pipeline-collapse-button":
+
+    if (
+        new_detection is not None
+        and new_detection
+        and button_clicked
+        not in [
+            "similarity-pipeline-collapse-button",
+            "annotation-detection-collapse-button",
+        ]
+    ):
+        logger.info("New unconfirmed annotation detection!")
+        return CollapsableContainers.ANNOTATIONS.value
+    elif button_clicked == "similarity-pipeline-collapse-button":
         if store == CollapsableContainers.PIPELINE.value:
             return CollapsableContainers.MAIN.value
         else:
@@ -66,6 +79,7 @@ def left_sidebar_collapse(store):
     :param selected_el:
     :return:
     """
+
     if store is None or store == CollapsableContainers.MAIN.value:
         return (
             SIDEBAR_SHOWN,

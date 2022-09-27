@@ -2,11 +2,14 @@ from dataclasses import dataclass
 from typing import List
 
 from dataclasses_json import dataclass_json
-from py2neo.ogm import Model, Property, RelatedTo
+from py2neo.ogm import RelatedTo
 
 from graph_domain.BaseNode import BaseNode
 from graph_domain.expert_annotations.AnnotationDefinitionNode import (
     AnnotationDefinitionNodeDeep,
+)
+from graph_domain.expert_annotations.AnnotationDetectionNode import (
+    AnnotationDetectionNodeDeep,
 )
 from graph_domain.expert_annotations.AnnotationInstanceNode import (
     AnnotationInstanceNodeDeep,
@@ -86,6 +89,15 @@ class AssetNodeDeep(AssetNodeFlat):
     def scanned_annotations(self) -> List[AnnotationDefinitionNodeDeep]:
         return [annotation for annotation in self._scanned_annotations]
 
+    _annotation_detections: List[AnnotationDetectionNodeDeep] = RelatedTo(
+        AnnotationDetectionNodeDeep,
+        RelationshipTypes.DETECTED_ANNOTATION_OCCURANCE.value,
+    )
+
+    @property
+    def annotation_detections(self) -> List[AnnotationDetectionNodeDeep]:
+        return [detection for detection in self._annotation_detections]
+
     def validate_metamodel_conformance(self):
         """
         Used to validate if the current node (self) and its child elements is conformant to the defined metamodel.
@@ -104,3 +116,6 @@ class AssetNodeDeep(AssetNodeFlat):
 
         for annotation in self.scanned_annotations:
             annotation.validate_metamodel_conformance()
+
+        for detection in self.annotation_detections:
+            detection.validate_metamodel_conformance()

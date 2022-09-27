@@ -181,7 +181,7 @@ def _get_ts_matchers_with_sub_elements(
     return cytoscape_elements
 
 
-def _get_annotation_with_sub_elements(
+def _get_annotation_instance_with_sub_elements(
     annotation_instance: AnnotationInstanceNodeDeep,
     associated_asset: AssetNodeFlat | None = None,
 ) -> List:
@@ -189,6 +189,22 @@ def _get_annotation_with_sub_elements(
     cytoscape_elements.append(
         _create_cytoscape_node(
             annotation_instance, NodeTypes.ANNOTATION_INSTANCE.value, associated_asset
+        )
+    )
+
+    # Definition
+    cytoscape_elements.append(
+        _create_cytoscape_node(
+            annotation_instance.definition,
+            NodeTypes.ANNOTATION_DEFINITION.value,
+            associated_asset,
+        )
+    )
+    cytoscape_elements.append(
+        _create_cytoscape_relationship(
+            annotation_instance.iri,
+            annotation_instance.definition.iri,
+            RelationshipTypes.INSTANCE_OF.value,
         )
     )
 
@@ -339,7 +355,7 @@ def get_cytoscape_elements(
         # Own Annotations:
         for annotation in asset.annotations:
             cytoscape_elements.extend(
-                _get_annotation_with_sub_elements(annotation, asset)
+                _get_annotation_instance_with_sub_elements(annotation, asset)
             )
             cytoscape_elements.append(
                 _create_cytoscape_relationship(
@@ -363,16 +379,45 @@ def get_cytoscape_elements(
                     RelationshipTypes.OCCURANCE_SCAN.value,
                 )
             )
-            # Instances:
-            for instance in annotation.instances:
-                cytoscape_elements.extend(
-                    _get_annotation_with_sub_elements(instance, asset)
+
+        # Detections:
+        for detection in asset.annotation_detections:
+            cytoscape_elements.append(
+                _create_cytoscape_node(
+                    detection, NodeTypes.ANNOTATION_DETECTION.value, asset
                 )
+            )
+            cytoscape_elements.append(
+                _create_cytoscape_relationship(
+                    asset.iri,
+                    detection.iri,
+                    RelationshipTypes.DETECTED_ANNOTATION_OCCURANCE.value,
+                )
+            )
+            # Connected Timeseries (exists already because of occurance scan)
+            for matched_ts in detection.matched_ts:
                 cytoscape_elements.append(
                     _create_cytoscape_relationship(
-                        annotation.iri,
-                        instance.iri,
-                        RelationshipTypes.INSTANCE_OF.value,
+                        detection.iri,
+                        matched_ts.iri,
+                        RelationshipTypes.MATCHING_TIMESERIES.value,
+                    )
+                )
+            # Matching instance
+            cytoscape_elements.append(
+                _create_cytoscape_relationship(
+                    detection.iri,
+                    detection.matching_instance.iri,
+                    RelationshipTypes.MATCHING_INSTANCE.value,
+                )
+            )
+            # Instance created out of the detection
+            if detection.resulting_instance is not None:
+                cytoscape_elements.append(
+                    _create_cytoscape_relationship(
+                        detection.resulting_instance.iri,
+                        detection.iri,
+                        RelationshipTypes.CREATED_OUT_OF.value,
                     )
                 )
 
@@ -387,7 +432,8 @@ def get_cytoscape_elements(
             )
         )
 
-    # TODO: maybe change the thickness of the relationship-representations according to the rank of similarity
+    # TODO: maybe change the thickness of the relationship-representations
+    # according to the rank of similarity
 
     # Remove duplicates and join filter attibute(s) of copies (e.g. related asset iris):
     temporary_elements_dict = {

@@ -1,13 +1,15 @@
 from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
-import json
+
 from typing import List
 
 from dataclasses_json import dataclass_json
-from py2neo.ogm import Property, RelatedTo
+from py2neo.ogm import Property, Related
 
 from graph_domain.BaseNode import BaseNode
+from graph_domain.expert_annotations.AnnotationDefinitionNode import (
+    AnnotationDefinitionNodeDeep,
+)
 
 from graph_domain.expert_annotations.AnnotationPreIndicatorNode import (
     AnnotationPreIndicatorNodeDeep,
@@ -15,10 +17,7 @@ from graph_domain.expert_annotations.AnnotationPreIndicatorNode import (
 from graph_domain.expert_annotations.AnnotationTimeseriesMatcherNode import (
     AnnotationTimeseriesMatcherNodeDeep,
 )
-from graph_domain.main_digital_twin.DatabaseConnectionNode import DatabaseConnectionNode
-from graph_domain.main_digital_twin.RuntimeConnectionNode import RuntimeConnectionNode
-from graph_domain.similarities.TimeseriesClusterNode import TimeseriesClusterNode
-from graph_domain.main_digital_twin.UnitNode import UnitNode
+
 from graph_domain.factory_graph_types import (
     NodeTypes,
     RelationshipTypes,
@@ -29,7 +28,6 @@ from backend.exceptions.GraphNotConformantToMetamodelError import (
 from util.datetime_utils import (
     datetime_to_neo4j_str,
     neo4j_str_or_datetime_to_datetime,
-    neo4j_str_to_datetime,
 )
 
 LABEL = NodeTypes.ANNOTATION_INSTANCE.value
@@ -86,16 +84,16 @@ class AnnotationInstanceNodeFlat(BaseNode):
         super().validate_metamodel_conformance()
 
         if self.creation_date_time is None:
-            raise GraphNotConformantToMetamodelError(self, f"Missing creation date.")
+            raise GraphNotConformantToMetamodelError(self, "Missing creation date.")
 
         if self.occurance_start_date_time is None:
             raise GraphNotConformantToMetamodelError(
-                self, f"Missing occurance start date."
+                self, "Missing occurance start date."
             )
 
         if self.occurance_end_date_time is None:
             raise GraphNotConformantToMetamodelError(
-                self, f"Missing occurance end date."
+                self, "Missing occurance end date."
             )
 
 
@@ -108,7 +106,20 @@ class AnnotationInstanceNodeDeep(AnnotationInstanceNodeFlat):
 
     __primarylabel__ = LABEL
 
-    _pre_indicators: List[AnnotationPreIndicatorNodeDeep] = RelatedTo(
+    # The OGM framework does not allow constraining to only one item!
+    # Can only be one unit (checked by metamodel validator)
+    _definition: List[AnnotationDefinitionNodeDeep] = Related(
+        AnnotationDefinitionNodeDeep, RelationshipTypes.INSTANCE_OF.value
+    )
+
+    @property
+    def definition(self) -> AnnotationDefinitionNodeDeep:
+        if len(self._definition) > 0:
+            return [definition for definition in self._definition][0]
+        else:
+            return None
+
+    _pre_indicators: List[AnnotationPreIndicatorNodeDeep] = Related(
         AnnotationPreIndicatorNodeDeep, RelationshipTypes.PRE_INDICATABLE_WITH.value
     )
 
@@ -116,7 +127,7 @@ class AnnotationInstanceNodeDeep(AnnotationInstanceNodeFlat):
     def pre_indicators(self) -> List[AnnotationPreIndicatorNodeDeep]:
         return [indicator for indicator in self._pre_indicators]
 
-    _ts_matchers: List[AnnotationTimeseriesMatcherNodeDeep] = RelatedTo(
+    _ts_matchers: List[AnnotationTimeseriesMatcherNodeDeep] = Related(
         AnnotationTimeseriesMatcherNodeDeep,
         RelationshipTypes.DETECTABLE_WITH.value,
     )
@@ -131,6 +142,17 @@ class AnnotationInstanceNodeDeep(AnnotationInstanceNodeFlat):
         Raises GraphNotConformantToMetamodelError if there are inconsistencies
         """
         super().validate_metamodel_conformance()
+
+        if len(self._definition) < 1:
+            raise GraphNotConformantToMetamodelError(
+                self, "Missing annotation definition."
+            )
+
+        if len(self._definition) > 1:
+            raise GraphNotConformantToMetamodelError(
+                self, "Only one annotation definition per instance."
+            )
+        self.definition.validate_metamodel_conformance()
 
         for pre_ind in self.pre_indicators:
             pre_ind.validate_metamodel_conformance()

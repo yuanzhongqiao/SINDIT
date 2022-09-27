@@ -12,6 +12,12 @@ factory:
     host: "opcua"
     port: 4840
 
+api:
+  host: "http://sindit-backend"
+  apiRootPath: /api
+  openApiUrl: /openapi.json
+  port: 80
+
 image:
   repository: ghcr.io/sintef-9012/sindit
   pullPolicy: IfNotPresent
@@ -73,6 +79,7 @@ ingressFrontend:
 
 ingressBackend:
   enabled: false
+  traefik: false
   className: ""
   annotations:
     {}

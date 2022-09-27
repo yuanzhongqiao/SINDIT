@@ -32,14 +32,14 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["python", "dt_frontend.py"]
+          command: ["gunicorn", "dt_frontend:server", "-b", ":8050", "--timeout", "1800", "--workers", "4"]
           env:
             - name: PYTHONUNBUFFERED
               value: "1"
             - name: FAST_API_HOST
-              value: {{ .Values.ApiHost | default "/api" | quote }}
+              value: {{ .Values.api.host | default "http://sindit-backend" | quote }}
             - name: FAST_API_PORT
-              value: {{ .Values.ApiPort | default "8000" | quote }}
+              value: {{ .Values.api.port | default "80" | quote }}
             - name: FRONTEND_PRODUCTION
               value: "true"
             - name: FRONTEND_HOST

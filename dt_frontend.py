@@ -28,6 +28,16 @@ from frontend.left_sidebar.extensions.annotation_detection_extension import (
 )
 
 # noinspection PyUnresolvedReferences
+from frontend.left_sidebar.extensions.annotation_detection_extension.annotation_creation import (
+    annotation_creation_callbacks,
+)
+
+# noinspection PyUnresolvedReferences
+from frontend.left_sidebar.extensions.annotation_detection_extension.annotation_detection_confirmation import (
+    annotation_confirmation_callbacks,
+)
+
+# noinspection PyUnresolvedReferences
 from frontend.left_sidebar.visibility_settings import visibility_settings_callbacks
 
 # noinspection PyUnresolvedReferences

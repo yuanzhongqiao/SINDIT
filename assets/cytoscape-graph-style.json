@@ -144,6 +144,13 @@
         }
     },
     {
+        "selector": ".ANNOTATION_DETECTION",
+        "style": {
+            "background-color": "#9b5c44",
+            "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/search/wght500/48px.svg"
+        }
+    },
+    {
         "selector": ":selected",
         "style": {
             "background-color": "#449b87"

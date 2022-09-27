@@ -1,14 +1,14 @@
 import json
 from frontend.app import app
 from dash.dependencies import Input, Output, State
-
+from dash import ctx
 from frontend.main_column.factory_graph.GraphSelectedElement import GraphSelectedElement
 from typing import List
 from frontend import api_client
 from graph_domain.main_digital_twin.AssetNode import AssetNodeFlat
 from requests.exceptions import RequestException
 from dash.exceptions import PreventUpdate
-from frontend.left_sidebar.extensions.annotation_detection_extension.annotation_extension_callbacks import (
+from frontend.left_sidebar.extensions.annotation_detection_extension.annotation_creation.annotation_creation_callbacks import (
     CreationSteps,
 )
 from frontend.main_column.factory_graph.factory_graph_layout import (
@@ -30,6 +30,7 @@ logger.info("Initializing visibility settings callbacks...")
     Input("asset-multi-select-dropdown", "value"),
     State("annotation-creation-store-asset", "data"),
     State("annotation-creation-store-ts-list", "data"),
+    Input("annotation-detection-details-store", "data"),
 )
 def change_graph_visibility_options(
     active_switches,
@@ -37,6 +38,7 @@ def change_graph_visibility_options(
     selected_assets,
     annotation_creation_asset_json,
     annotation_creation_ts_list_json,
+    detection_details,
 ):
     """
     Toggles the visibility of element types in the main graph
@@ -103,6 +105,32 @@ def change_graph_visibility_options(
         # Use regular user-based visibility settings:
         deactivated_switches = [
             switch for switch in NODE_TYPE_STRINGS if switch not in active_switches
+        ]
+
+    # Filter, if new detection:
+    if detection_details is not None and ctx.triggered_id not in [
+        "asset-multi-select-dropdown",
+        "visibility-switches-input",
+    ]:
+        # Only showdetected asset and original annotated one
+        selected_assets = [
+            detection_details.get("asset_iri"),
+            detection_details.get("original_annotated_asset_iri"),
+        ]
+        # Show ts, the asset and annotation types:
+        deactivated_switches = [
+            switch
+            for switch in NODE_TYPE_STRINGS
+            if switch
+            not in [
+                NodeTypes.TIMESERIES_INPUT.value,
+                NodeTypes.ASSET.value,
+                NodeTypes.ANNOTATION_DEFINITION.value,
+                NodeTypes.ANNOTATION_INSTANCE.value,
+                NodeTypes.ANNOTATION_TS_MATCHER.value,
+                NodeTypes.ANNOTATION_DETECTION.value,
+                NodeTypes.ANNOTATION_PRE_INDICATOR.value,
+            ]
         ]
 
     for inactive_switch in deactivated_switches:
