@@ -2,6 +2,7 @@ from enum import Enum
 from dash import html, ctx
 from dash.dependencies import Input, Output, State
 
+from dash.exceptions import PreventUpdate
 from frontend.app import app
 from frontend.main_column.factory_graph.GraphSelectedElement import GraphSelectedElement
 from frontend.right_sidebar.node_data_tab import node_data_layout
@@ -56,11 +57,13 @@ def select_extension_sidebar(n_clicks_sim, n_clicks_an, store, _, new_detection)
             return CollapsableContainers.MAIN.value
         else:
             return CollapsableContainers.PIPELINE.value
-    else:
+    elif button_clicked == "annotation-detection-collapse-button":
         if store == CollapsableContainers.ANNOTATIONS.value:
             return CollapsableContainers.MAIN.value
         else:
             return CollapsableContainers.ANNOTATIONS.value
+    else:
+        raise PreventUpdate
 
 
 @app.callback(
