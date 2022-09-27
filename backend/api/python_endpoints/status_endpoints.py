@@ -1,6 +1,7 @@
 from datetime import datetime
 from backend.api.python_endpoints import asset_endpoints
 from backend.api.python_endpoints import timeseries_endpoints
+from backend.knowledge_graph.dao.AnnotationNodesDao import AnnotationNodesDao
 from backend.knowledge_graph.dao.BaseNodesDao import BaseNodeDao
 from backend.knowledge_graph.dao.DatabaseConnectionsDao import DatabaseConnectionsDao
 from backend.knowledge_graph.dao.RuntimeConnectionsDao import RuntimeConnectionsDao
@@ -9,6 +10,7 @@ from backend.runtime_connections.RuntimeConnectionContainer import (
 )
 
 BASE_NODE_DAO: BaseNodeDao = BaseNodeDao.instance()
+ANNOTATIONS_DAO: AnnotationNodesDao = AnnotationNodesDao.instance()
 DB_CON_DAO: DatabaseConnectionsDao = DatabaseConnectionsDao.instance()
 RT_CON_DAO: RuntimeConnectionsDao = RuntimeConnectionsDao.instance()
 
@@ -37,7 +39,9 @@ def get_status():
     Returns:
         _type_: dict
     """
-    unconfirmed_detection = False
+    unconfirmed_detection = (
+        ANNOTATIONS_DAO.get_oldest_unconfirmed_detection() is not None
+    )
 
     status_dict = {
         "system_time": get_system_time(),

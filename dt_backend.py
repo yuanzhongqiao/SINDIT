@@ -10,7 +10,12 @@ from datetime import timedelta
 import time
 import uvicorn
 
+from dateutil import tz
 from threading import Thread
+from util.environment_and_configuration import (
+    ConfigGroups,
+    get_configuration,
+)
 from backend.api.api import app
 from backend.cleanup_thread import start_storage_cleanup_thread
 from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
@@ -146,24 +151,33 @@ if __name__ == "__main__":
 
     # detection_iri = annotations_dao.create_annotation_detection(
     #     id_short="test-detection",
-    #     start_datetime=datetime.now() - timedelta(seconds=10),
-    #     end_datetime=datetime.now(),
+    #     start_datetime=datetime.now().astimezone(
+    #         tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+    #     )
+    #     - timedelta(minutes=10),
+    #     end_datetime=datetime.now().astimezone(
+    #         tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+    #     ),
     #     caption="Test Detection",
     # )
 
-    # annotations_dao.create_annotation_detection_definition_relationship(
+    # annotations_dao.create_annotation_detection_timeseries_relationship(
     #     detection_iri=detection_iri,
-    #     definition_iri="www.sintef.no/aas_identifiers/learning_factory/annotations/definitions/test_annotation_definition",
+    #     timeseries_iri="www.sintef.no/aas_identifiers/learning_factory/sensors/hbw_actual_pos_vertical",
+    # )
+    # annotations_dao.create_annotation_detection_timeseries_relationship(
+    #     detection_iri=detection_iri,
+    #     timeseries_iri="www.sintef.no/aas_identifiers/learning_factory/sensors/factory_humidity_raw",
     # )
 
     # annotations_dao.create_annotation_detection_asset_relationship(
     #     detection_iri=detection_iri,
-    #     asset_iri="www.sintef.no/aas_identifiers/learning_factory/machines/vgr",
+    #     asset_iri="www.sintef.no/aas_identifiers/learning_factory/machines/hbw",
     # )
 
     # annotations_dao.create_annotation_detection_instance_relationship(
     #     detection_iri=detection_iri,
-    #     instance_iri="www.sintef.no/aas_identifiers/learning_factory/annotations/instances/test_annotation_definition_vgr_2022-09-23T12:43:27.807194",
+    #     instance_iri="www.sintef.no/aas_identifiers/learning_factory/annotations/instances/test_annotation_definition_hbw_2022-09-18T20:30:29.263466",
     # )
 
     #

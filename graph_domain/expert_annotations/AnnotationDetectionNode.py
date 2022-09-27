@@ -4,12 +4,10 @@ from datetime import datetime
 from typing import List
 
 from dataclasses_json import dataclass_json
-from py2neo.ogm import Property, Related
+from py2neo.ogm import Property, Related, RelatedTo
 
 from graph_domain.BaseNode import BaseNode
-from graph_domain.expert_annotations.AnnotationDefinitionNode import (
-    AnnotationDefinitionNodeDeep,
-)
+
 from graph_domain.expert_annotations.AnnotationInstanceNode import (
     AnnotationInstanceNodeDeep,
 )
@@ -22,6 +20,7 @@ from graph_domain.factory_graph_types import (
 from backend.exceptions.GraphNotConformantToMetamodelError import (
     GraphNotConformantToMetamodelError,
 )
+from graph_domain.main_digital_twin.TimeseriesNode import TimeseriesNodeDeep
 from util.datetime_utils import (
     datetime_to_neo4j_str,
     neo4j_str_or_datetime_to_datetime,
@@ -46,8 +45,11 @@ class AnnotationDetectionNodeFlat(BaseNode):
     )
 
     @property
-    def confirmation_date_time(self) -> datetime:
-        return neo4j_str_or_datetime_to_datetime(self._confirmation_date_time)
+    def confirmation_date_time(self) -> datetime | None:
+        if self._confirmation_date_time is not None:
+            return neo4j_str_or_datetime_to_datetime(self._confirmation_date_time)
+        else:
+            return None
 
     @confirmation_date_time.setter
     def confirmation_date_time(self, value):
@@ -102,18 +104,14 @@ class AnnotationDetectionNodeDeep(AnnotationDetectionNodeFlat):
 
     __primarylabel__ = LABEL
 
-    # The OGM framework does not allow constraining to only one item!
-    # Can only be one unit (checked by metamodel validator)
-    _definition: List[AnnotationDefinitionNodeDeep] = Related(
-        AnnotationDefinitionNodeDeep, RelationshipTypes.DETECTED_OCCURANCE.value
+    _matched_ts: List[TimeseriesNodeDeep] = RelatedTo(
+        TimeseriesNodeDeep,
+        RelationshipTypes.MATCHING_TIMESERIES.value,
     )
 
     @property
-    def definition(self) -> AnnotationDefinitionNodeDeep:
-        if len(self._definition) > 0:
-            return [definition for definition in self._definition][0]
-        else:
-            return None
+    def matched_ts(self) -> List[TimeseriesNodeDeep]:
+        return [match for match in self._matched_ts]
 
     # The OGM framework does not allow constraining to only one item!
     # Can only be one unit (checked by metamodel validator)
@@ -130,6 +128,19 @@ class AnnotationDetectionNodeDeep(AnnotationDetectionNodeFlat):
         else:
             return None
 
+    # The OGM framework does not allow constraining to only one item!
+    # Can only be one unit (checked by metamodel validator)
+    _resulting_instance: List[AnnotationInstanceNodeDeep] = Related(
+        AnnotationInstanceNodeDeep, RelationshipTypes.CREATED_OUT_OF.value
+    )
+
+    @property
+    def resulting_instance(self) -> AnnotationInstanceNodeDeep | None:
+        if len(self._resulting_instance) > 0:
+            return [instance for instance in self._resulting_instance][0]
+        else:
+            return None
+
     def validate_metamodel_conformance(self):
         """
         Used to validate if the current node (self) and its child elements is conformant to the defined metamodel.
@@ -137,16 +148,13 @@ class AnnotationDetectionNodeDeep(AnnotationDetectionNodeFlat):
         """
         super().validate_metamodel_conformance()
 
-        if len(self._definition) < 1:
+        if len(self._matched_ts) < 1:
             raise GraphNotConformantToMetamodelError(
-                self, "Missing annotation definition."
+                self, "Missing matched timeseries."
             )
 
-        if len(self._definition) > 1:
-            raise GraphNotConformantToMetamodelError(
-                self, "Only one annotation definition per detection."
-            )
-        self.definition.validate_metamodel_conformance()
+        for ts in self.matched_ts:
+            ts.validate_metamodel_conformance()
 
         if len(self._matching_instance) < 1:
             raise GraphNotConformantToMetamodelError(self, "Missing matching instance.")
@@ -156,3 +164,11 @@ class AnnotationDetectionNodeDeep(AnnotationDetectionNodeFlat):
                 self, "A detection can only refer to one matching instance."
             )
         self.matching_instance.validate_metamodel_conformance()
+
+        if len(self._resulting_instance) > 1:
+            raise GraphNotConformantToMetamodelError(
+                self, "Only one instance can be created out of a detection."
+            )
+
+        if len(self._resulting_instance) == 1:
+            self.resulting_instance.validate_metamodel_conformance()

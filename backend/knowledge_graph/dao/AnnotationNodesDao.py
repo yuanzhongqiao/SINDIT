@@ -4,12 +4,17 @@ from py2neo import NodeMatcher, Relationship
 from graph_domain.expert_annotations.AnnotationDefinitionNode import (
     AnnotationDefinitionNodeFlat,
 )
+from dateutil import tz
 from graph_domain.expert_annotations.AnnotationDetectionNode import (
     AnnotationDetectionNodeFlat,
 )
 from graph_domain.expert_annotations.AnnotationInstanceNode import (
+    AnnotationInstanceNodeDeep,
     AnnotationInstanceNodeFlat,
 )
+from graph_domain.main_digital_twin.AssetNode import AssetNodeFlat
+
+from util.environment_and_configuration import ConfigGroups, get_configuration
 from graph_domain.expert_annotations.AnnotationTimeseriesMatcherNode import (
     AnnotationTimeseriesMatcherNodeFlat,
 )
@@ -203,17 +208,17 @@ class AnnotationNodesDao(object):
         )
         self.ps.graph_create(relationship)
 
-    def create_annotation_detection_definition_relationship(
-        self, detection_iri: str, definition_iri: str
+    def create_annotation_detection_timeseries_relationship(
+        self, detection_iri: str, timeseries_iri: str
     ) -> str:
 
         relationship = Relationship(
             NodeMatcher(self.ps.graph)
             .match(NodeTypes.ANNOTATION_DETECTION.value, iri=detection_iri)
             .first(),
-            RelationshipTypes.DETECTED_OCCURANCE.value,
+            RelationshipTypes.MATCHING_TIMESERIES.value,
             NodeMatcher(self.ps.graph)
-            .match(NodeTypes.ANNOTATION_DEFINITION.value, iri=definition_iri)
+            .match(NodeTypes.TIMESERIES_INPUT.value, iri=timeseries_iri)
             .first(),
         )
         self.ps.graph_create(relationship)
@@ -242,6 +247,21 @@ class AnnotationNodesDao(object):
             .match(NodeTypes.ASSET.value, iri=asset_iri)
             .first(),
             RelationshipTypes.DETECTED_ANNOTATION_OCCURANCE.value,
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ANNOTATION_DETECTION.value, iri=detection_iri)
+            .first(),
+        )
+        self.ps.graph_create(relationship)
+
+    def create_confirmed_detection_instance_relationship(
+        self, detection_iri: str, instance_iri: str
+    ) -> str:
+
+        relationship = Relationship(
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ANNOTATION_INSTANCE.value, iri=instance_iri)
+            .first(),
+            RelationshipTypes.CREATED_OUT_OF.value,
             NodeMatcher(self.ps.graph)
             .match(NodeTypes.ANNOTATION_DETECTION.value, iri=detection_iri)
             .first(),
@@ -359,6 +379,12 @@ class AnnotationNodesDao(object):
             f"MATCH (n:{NodeTypes.ANNOTATION_INSTANCE.value}) WHERE n.iri = '{instance_iri}' DETACH DELETE n"
         )
 
+    def delete_annotation_detection(self, detection_iri):
+        """Deletes a detection and the attached relationships."""
+        self.ps.graph_run(
+            f"MATCH (n:{NodeTypes.ANNOTATION_DETECTION.value}) WHERE n.iri = '{detection_iri}' DETACH DELETE n"
+        )
+
     @validate_result_nodes
     def get_matcher_annotation_instance(self, matcher_iri):
         """Returns the instance node that the matcher is related to"""
@@ -388,3 +414,149 @@ class AnnotationNodesDao(object):
         )
 
         return matches.first()
+
+    @validate_result_nodes
+    def get_annotation_instance_for_definition(self, definition_iri):
+        """Returns the instances related to the given annotation definition"""
+        matches = self.ps.repo_match(model=AnnotationInstanceNodeFlat).where(
+            "(_)-[:"
+            + RelationshipTypes.INSTANCE_OF.value
+            + "]->(:"
+            + NodeTypes.ANNOTATION_DEFINITION.value
+            + ' {iri: "'
+            + definition_iri
+            + '"}) '
+        )
+
+        return matches.all()
+
+    def get_annotation_instance_count_for_definition(self, definition_iri):
+        """Returns the instances related to the given annotation definition"""
+
+        return len(self.get_annotation_instance_for_definition(definition_iri))
+
+    @validate_result_nodes
+    def get_annotation_instances(self):
+        matches = self.ps.repo_match(model=AnnotationInstanceNodeFlat)
+
+        return matches.all()
+
+    def get_annotation_instance_count(self):
+        return len(self.get_annotation_instances())
+
+    def set_detection_confirmation_date_time(self, detection_iri):
+
+        detection_matches = self.ps.repo_match(model=AnnotationDetectionNodeFlat)
+
+        detection_node: AnnotationDetectionNodeFlat = detection_matches.first()
+
+        detection_node.confirmation_date_time = datetime.now().astimezone(
+            tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+        )
+        self.ps.graph_push(detection_node)
+
+    @validate_result_nodes
+    def get_oldest_unconfirmed_detection(self) -> AnnotationDetectionNodeFlat | None:
+        matches = (
+            self.ps.repo_match(model=AnnotationDetectionNodeFlat)
+            .where("not exists(_.confirmation_date_time)")
+            .order_by("_.confirmation_date_time ASC")
+        )
+
+        return matches.first()
+
+    @validate_result_nodes
+    def get_matched_ts_for_detection(self, detection_iri) -> List[TimeseriesNodeFlat]:
+        matches = self.ps.repo_match(model=TimeseriesNodeFlat).where(
+            "(_)<-[:"
+            + RelationshipTypes.MATCHING_TIMESERIES.value
+            + "]-(:"
+            + NodeTypes.ANNOTATION_DETECTION.value
+            + ' {iri: "'
+            + detection_iri
+            + '"})'
+        )
+
+        return matches.all()
+
+    @validate_result_nodes
+    def get_asset_for_detection(self, detection_iri) -> AssetNodeFlat:
+        matches = self.ps.repo_match(model=AssetNodeFlat).where(
+            "(_)-[:"
+            + RelationshipTypes.DETECTED_ANNOTATION_OCCURANCE.value
+            + "]->(:"
+            + NodeTypes.ANNOTATION_DETECTION.value
+            + ' {iri: "'
+            + detection_iri
+            + '"})'
+        )
+
+        return matches.first()
+
+    @validate_result_nodes
+    def get_annotation_instance_for_detection(
+        self, detection_iri
+    ) -> AnnotationInstanceNodeFlat:
+        matches = self.ps.repo_match(model=AnnotationInstanceNodeFlat).where(
+            "(_)<-[:"
+            + RelationshipTypes.MATCHING_INSTANCE.value
+            + "]-(:"
+            + NodeTypes.ANNOTATION_DETECTION.value
+            + ' {iri: "'
+            + detection_iri
+            + '"})'
+        )
+
+        return matches.first()
+
+    @validate_result_nodes
+    def get_annotation_definition_for_instance(
+        self, instance_iri
+    ) -> AnnotationDefinitionNodeFlat:
+        matches = self.ps.repo_match(model=AnnotationDefinitionNodeFlat).where(
+            "(_)<-[:"
+            + RelationshipTypes.INSTANCE_OF.value
+            + "]-(:"
+            + NodeTypes.ANNOTATION_INSTANCE.value
+            + ' {iri: "'
+            + instance_iri
+            + '"})'
+        )
+
+        return matches.first()
+
+    @validate_result_nodes
+    def get_asset_for_annotation_instance(self, instance_iri) -> AssetNodeFlat:
+        matches = self.ps.repo_match(model=AssetNodeFlat).where(
+            "(_)-[:"
+            + RelationshipTypes.ANNOTATION.value
+            + "]->(:"
+            + NodeTypes.ANNOTATION_INSTANCE.value
+            + ' {iri: "'
+            + instance_iri
+            + '"})'
+        )
+
+        return matches.first()
+
+    @validate_result_nodes
+    def get_confirmed_annotation_detections(self):
+        matches = self.ps.repo_match(model=AnnotationDetectionNodeFlat).where(
+            "exists(_.confirmation_date_time)"
+        )
+
+        return matches.all()
+
+    @validate_result_nodes
+    def get_unconfirmed_annotation_detections(self):
+        matches = self.ps.repo_match(model=AnnotationDetectionNodeFlat).where(
+            "not exists(_.confirmation_date_time)"
+        )
+
+        return matches.all()
+
+    def get_annotation_detections_count(self, confirmed: bool = False):
+        if confirmed:
+            return len(self.get_confirmed_annotation_detections())
+        else:
+            return len(self.get_unconfirmed_annotation_detections())
