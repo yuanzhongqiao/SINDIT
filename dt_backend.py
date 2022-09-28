@@ -70,6 +70,8 @@ from util.environment_and_configuration import (
     get_environment_variable_int,
 )
 
+import util.inter_process_cache as cache
+
 
 # #############################################################################
 # Setup sensor connections and timeseries persistence
@@ -117,6 +119,8 @@ def refresh_workers_thread_loop():
 # #############################################################################
 # Launch backend
 # #############################################################################
+
+
 if __name__ == "__main__":
 
     logger.info("Initializing Knowledge Graph...")
@@ -148,48 +152,11 @@ if __name__ == "__main__":
     # Start cleanup thread deleting obsolete backups:
     start_storage_cleanup_thread()
 
-    #
-    # TODO: remove this. Just for
-    #
-    # from backend.knowledge_graph.dao.AnnotationNodesDao import AnnotationNodesDao
-    # from datetime import datetime
+    # Start getting the connectivity status for runtime connections
+    RuntimeConnectionContainer.instance().start_active_connections_status_thread()
+    # Start getting the connectivity status for runtime connections
 
-    # annotations_dao: AnnotationNodesDao = AnnotationNodesDao.instance()
-
-    # detection_iri = annotations_dao.create_annotation_detection(
-    #     id_short="test-detection",
-    #     start_datetime=datetime.now().astimezone(
-    #         tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
-    #     )
-    #     - timedelta(minutes=10),
-    #     end_datetime=datetime.now().astimezone(
-    #         tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
-    #     ),
-    #     caption="Test Detection",
-    # )
-
-    # annotations_dao.create_annotation_detection_timeseries_relationship(
-    #     detection_iri=detection_iri,
-    #     timeseries_iri="www.sintef.no/aas_identifiers/learning_factory/sensors/hbw_actual_pos_vertical",
-    # )
-    # annotations_dao.create_annotation_detection_timeseries_relationship(
-    #     detection_iri=detection_iri,
-    #     timeseries_iri="www.sintef.no/aas_identifiers/learning_factory/sensors/factory_humidity_raw",
-    # )
-
-    # annotations_dao.create_annotation_detection_asset_relationship(
-    #     detection_iri=detection_iri,
-    #     asset_iri="www.sintef.no/aas_identifiers/learning_factory/machines/hbw",
-    # )
-
-    # annotations_dao.create_annotation_detection_instance_relationship(
-    #     detection_iri=detection_iri,
-    #     instance_iri="www.sintef.no/aas_identifiers/learning_factory/annotations/instances/test_annotation_definition_hbw_2022-09-18T20:30:29.263466",
-    # )
-
-    #
-    #
-    #
+    AnnotationDetectorContainer.instance().start_active_detectors_status_thread()
 
     # Run fast API
     # noinspection PyTypeChecker
@@ -197,8 +164,6 @@ if __name__ == "__main__":
         "dt_backend:app",
         host=get_environment_variable("FAST_API_HOST"),
         port=get_environment_variable_int("FAST_API_PORT"),
-        # workers=4,
-        # # TODO: decide whether to introduce inter-process communication
-        # (e.g. for runtime-connection status) and to activate workers!
+        workers=4,
         access_log=False,
     )

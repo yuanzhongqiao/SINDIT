@@ -1,3 +1,4 @@
+import time
 from typing import Dict, List, Tuple
 from backend.annotation_detection.AnnotationDetector import AnnotationDetector
 from backend.knowledge_graph.dao.AnnotationNodesDao import AnnotationNodesDao
@@ -33,6 +34,8 @@ from backend.exceptions.EnvironmentalVariableNotFoundError import (
 )
 
 from util.log import logger
+from threading import Thread
+from util.inter_process_cache import memcache
 
 # Maps node-types to the connection / input classes
 RT_CONNECTION_MAPPING = {
@@ -66,6 +69,13 @@ class AnnotationDetectorContainer:
 
         # Dict: (instance_iri, asset_iri) -> AnnotationDetector
         self.detectors: Dict[Tuple[str, str], AnnotationDetector] = {}
+        self._active_detectors_status_thread = None
+
+    def start_active_detectors_status_thread(self):
+        self._active_detectors_status_thread = Thread(
+            target=self._active_detectors_write_to_cache_loop
+        )
+        self._active_detectors_status_thread.start()
 
     def refresh_annotation_detectors(self):
         """Refreshes the annotation detectors, creating new ones if available in the graph, or deleting old ones."""
@@ -124,3 +134,11 @@ class AnnotationDetectorContainer:
         return len(
             [True for detector in self.detectors.values() if detector.is_active()]
         )
+
+    def _active_detectors_write_to_cache_loop(self):
+        while True:
+            memcache.set(
+                "active_annotation_detectors_count", self.get_active_detectors_count()
+            )
+
+            time.sleep(3)

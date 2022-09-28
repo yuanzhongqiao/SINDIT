@@ -8,6 +8,7 @@ from backend.knowledge_graph.dao.RuntimeConnectionsDao import RuntimeConnections
 from backend.runtime_connections.RuntimeConnectionContainer import (
     RuntimeConnectionContainer,
 )
+from util.inter_process_cache import memcache
 
 BASE_NODE_DAO: BaseNodeDao = BaseNodeDao.instance()
 ANNOTATIONS_DAO: AnnotationNodesDao = AnnotationNodesDao.instance()
@@ -30,7 +31,7 @@ def get_rt_connections_count():
 
 
 def get_rt_active_connections_count():
-    return RT_CON_CONTAINER.get_active_connections_count()
+    return int(memcache.get("active_runtime_connections_count"))
 
 
 def get_status():

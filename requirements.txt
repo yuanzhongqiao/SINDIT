@@ -19,7 +19,7 @@ python-dotenv~=0.20.0
 uvicorn~=0.17.6
 gunicorn
 pyi40aas
-
+pymemcache # inter-process communication
 influxdb-client  # InfluxDB v2
 asyncua~=0.9.94
 paho-mqtt~=1.6.1

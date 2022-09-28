@@ -5,6 +5,9 @@ apt-get update
 
 apt-get install -y curl wget
 
+# Inter-process communication
+apt-get install memcached
+
 # git required for the pke keyphrase extraction library (git pip link)
 apt-get install -y git
 

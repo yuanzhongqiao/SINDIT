@@ -1,9 +1,12 @@
+from threading import Thread
+import time
 from typing import Dict, List
 from backend.knowledge_graph.dao.TimeseriesNodesDao import TimeseriesNodesDao
 from graph_domain.main_digital_twin.RuntimeConnectionNode import (
     RuntimeConnectionNode,
     RuntimeConnectionTypes,
 )
+from util.inter_process_cache import memcache
 from graph_domain.main_digital_twin.TimeseriesNode import (
     TimeseriesNodeDeep,
 )
@@ -60,6 +63,13 @@ class RuntimeConnectionContainer:
         RuntimeConnectionContainer.__instance = self
 
         self.connections: Dict[str, RuntimeConnection] = {}
+        self._active_connections_status_thread = None
+
+    def start_active_connections_status_thread(self):
+        self._active_connections_status_thread = Thread(
+            target=self._active_connections_write_to_cache_loop
+        )
+        self._active_connections_status_thread.start()
 
     def refresh_connection_inputs_and_handlers(self):
         """Refreshes the inputs and handlers, creating new ones if available in the graph, or deleting old ones.
@@ -67,6 +77,7 @@ class RuntimeConnectionContainer:
         Args:
             timeseries_nodes_deep (List[TimeseriesNodeDeep]): _description_
         """
+
         timeseries_nodes_dao: TimeseriesNodesDao = TimeseriesNodesDao.instance()
         updated_ts_nodes_deep = timeseries_nodes_dao.get_all_timeseries_nodes_deep()
 
@@ -216,3 +227,11 @@ class RuntimeConnectionContainer:
     def get_active_connections_count(self) -> int:
 
         return len([True for con in self.connections.values() if con.is_active()])
+
+    def _active_connections_write_to_cache_loop(self):
+        while True:
+            memcache.set(
+                "active_runtime_connections_count", self.get_active_connections_count()
+            )
+
+            time.sleep(3)
