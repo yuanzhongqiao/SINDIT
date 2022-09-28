@@ -16,7 +16,9 @@ from frontend.main_column.factory_graph.factory_graph_layout import (
 )
 from graph_domain.factory_graph_types import (
     NODE_TYPE_STRINGS,
+    PSEUDO_NODE_TYPE_STRINGS,
     NodeTypes,
+    PseudoNodeTypes,
 )
 from util.log import logger
 
@@ -135,6 +137,7 @@ def change_graph_visibility_options(
 
     for inactive_switch in deactivated_switches:
         # Hide nodes from that type:
+
         invisibility_styles.append(
             {"selector": f".{inactive_switch}", "style": {"display": "none"}}
         )
