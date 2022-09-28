@@ -1,6 +1,9 @@
 import time
 from typing import Dict, List, Tuple
 from backend.annotation_detection.AnnotationDetector import AnnotationDetector
+from backend.annotation_detection.EuclidianDistanceAnnotationDetector import (
+    EuclidianDistanceAnnotationDetector,
+)
 from backend.knowledge_graph.dao.AnnotationNodesDao import AnnotationNodesDao
 from graph_domain.expert_annotations.AnnotationInstanceNode import (
     AnnotationInstanceNodeDeep,
@@ -121,8 +124,10 @@ class AnnotationDetectorContainer:
         ]
 
         for new_tuple in new_detector_tuples:
-            new_detector = AnnotationDetector.from_annotation_instance_and_asset(
-                instance_iri=new_tuple[0], asset_iri=new_tuple[1]
+            new_detector = (
+                EuclidianDistanceAnnotationDetector.from_annotation_instance_and_asset(
+                    instance_iri=new_tuple[0], asset_iri=new_tuple[1]
+                )
             )
 
             self.detectors[new_tuple] = new_detector

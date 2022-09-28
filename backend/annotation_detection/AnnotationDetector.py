@@ -49,7 +49,7 @@ DATETIME_STRF_FORMAT_CAPTION = "%d.%m.%Y, %H:%M:%S"
 DATETIME_STRF_FORMAT_ID = "%Y_%m_%d_%H_%M_%S_%f"
 
 
-class AnnotationDetector:
+class AnnotationDetector(abc.ABC):
     """
     Annotation detector scanning the related time-series inputs of one asset for occurances of a annotation instance
     """
@@ -76,7 +76,7 @@ class AnnotationDetector:
         self.persistence_services = persistence_services
 
         # Get original timeseries excerpt:
-        self.original_ts_ranges: Dict[str, pd.DataFrame] = dict()
+        self.original_ts_dataframes: Dict[str, pd.DataFrame] = dict()
         for ts_iri in self.scanned_timeseries_iris.keys():
             service: TimeseriesPersistenceService = self.persistence_services.get(
                 ts_iri
@@ -86,9 +86,19 @@ class AnnotationDetector:
                 begin_time=self.scanned_annotation_instance.occurance_start_date_time,
                 end_time=self.scanned_annotation_instance.occurance_end_date_time,
             )
-            self.original_ts_ranges[ts_iri] = dataframe
+            self.original_ts_dataframes[ts_iri] = dataframe
+
+        self._prepare_original_dataset()
 
         self.runtime_con_container = RuntimeConnectionContainer.instance()
+
+    @abc.abstractmethod
+    def _handle_new_reading(self, reading):
+        pass
+
+    @abc.abstractmethod
+    def _prepare_original_dataset(self):
+        pass
 
     def _detector_loop(self):
         active = True
@@ -102,7 +112,7 @@ class AnnotationDetector:
                 )
                 return
             try:
-                input = self.detector_input_queue.get(block=True, timeout=3)
+                reading = self.detector_input_queue.get(block=True, timeout=3)
             except Empty:
                 if active and self.detector_active_status_queue.qsize() == 0:
                     try:
@@ -113,9 +123,8 @@ class AnnotationDetector:
                 active = False
                 continue
 
-            # logger.info(
-            #     f"New input for scanning {self.scanned_asset.caption} for occurances of {self.scanned_annotation_instance.caption}: {input}"
-            # )
+            self._handle_new_reading(reading)
+
             if not active and self.detector_active_status_queue.qsize() == 0:
                 try:
                     self.detector_active_status_queue.get_nowait()
