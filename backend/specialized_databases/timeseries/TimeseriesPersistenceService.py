@@ -14,7 +14,7 @@ class TimeseriesPersistenceService(SpecializedDatabasePersistenceService):
 
     @abc.abstractmethod
     def write_measurement(
-        self, id_uri: str, value: float | bool | str, reading_time: datetime = None
+        self, iri: str, value: float | bool | str, reading_time: datetime = None
     ):
         """
         Writes the given value to the standard bucket into the measurement according to the id_uri into a field
@@ -30,10 +30,10 @@ class TimeseriesPersistenceService(SpecializedDatabasePersistenceService):
     @abc.abstractmethod
     def read_period_to_dataframe(
         self,
-        id_uri: str,
+        iri: str,
         begin_time: datetime,
         end_time: datetime,
-        aggregation_window_ms: int | None,
+        aggregation_window_ms: int | None = None,
     ) -> pd.DataFrame:
         """
         Reads all measurements from the sensor with the given ID in the time period
@@ -47,7 +47,7 @@ class TimeseriesPersistenceService(SpecializedDatabasePersistenceService):
 
     @abc.abstractmethod
     def count_entries_for_period(
-        self, id_uri: str, begin_time: datetime, end_time: datetime
+        self, iri: str, begin_time: datetime, end_time: datetime
     ) -> int:
         """
         Counts the measurement entries from the sensor with the given ID in the time period

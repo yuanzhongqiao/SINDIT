@@ -14,11 +14,16 @@ from backend.knowledge_graph.dao.TimeseriesNodesDao import TimeseriesNodesDao
 from backend.runtime_connections.RuntimeConnectionContainer import (
     RuntimeConnectionContainer,
 )
+from backend.api.python_endpoints import timeseries_endpoints
+import pandas as pd
 from backend.specialized_databases.DatabasePersistenceServiceContainer import (
     DatabasePersistenceServiceContainer,
 )
 from backend.specialized_databases.SpecializedDatabasePersistenceService import (
     SpecializedDatabasePersistenceService,
+)
+from backend.specialized_databases.timeseries.TimeseriesPersistenceService import (
+    TimeseriesPersistenceService,
 )
 from graph_domain.expert_annotations.AnnotationInstanceNode import (
     AnnotationInstanceNodeFlat,
@@ -71,7 +76,17 @@ class AnnotationDetector:
         self.persistence_services = persistence_services
 
         # Get original timeseries excerpt:
-        self.original_ts_range = None  # TODO
+        self.original_ts_ranges: Dict[str, pd.DataFrame] = dict()
+        for ts_iri in self.scanned_timeseries_iris.keys():
+            service: TimeseriesPersistenceService = self.persistence_services.get(
+                ts_iri
+            )
+            dataframe = service.read_period_to_dataframe(
+                iri=ts_iri,
+                begin_time=self.scanned_annotation_instance.occurance_start_date_time,
+                end_time=self.scanned_annotation_instance.occurance_end_date_time,
+            )
+            self.original_ts_ranges[ts_iri] = dataframe
 
         self.runtime_con_container = RuntimeConnectionContainer.instance()
 
@@ -90,7 +105,10 @@ class AnnotationDetector:
                 input = self.detector_input_queue.get(block=True, timeout=3)
             except Empty:
                 if active and self.detector_active_status_queue.qsize() == 0:
-                    self.detector_active_status_queue.get()
+                    try:
+                        self.detector_active_status_queue.get_nowait()
+                    except Empty:
+                        pass
                     self.detector_active_status_queue.put(False)
                 active = False
                 continue
@@ -99,7 +117,10 @@ class AnnotationDetector:
             #     f"New input for scanning {self.scanned_asset.caption} for occurances of {self.scanned_annotation_instance.caption}: {input}"
             # )
             if not active and self.detector_active_status_queue.qsize() == 0:
-                self.detector_active_status_queue.get()
+                try:
+                    self.detector_active_status_queue.get_nowait()
+                except Empty:
+                    pass
                 self.detector_active_status_queue.put(True)
                 active = False
 
@@ -142,9 +163,7 @@ class AnnotationDetector:
         for ts_iri in all_relevant_ts_iris:
             persistence_services_per_ts[
                 ts_iri
-            ] = DatabasePersistenceServiceContainer.instance().get_persistence_service(
-                ts_iri
-            )
+            ] = timeseries_endpoints.get_related_timeseries_database_service(ts_iri)
 
         return cls(
             scanned_timeseries_iris=matched_ts_dict,

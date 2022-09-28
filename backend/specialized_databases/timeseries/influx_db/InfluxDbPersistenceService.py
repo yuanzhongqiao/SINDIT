@@ -50,7 +50,7 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
 
     # override
     def write_measurement(
-        self, id_uri: str, value: float | bool | str, reading_time: datetime = None
+        self, iri: str, value: float | bool | str, reading_time: datetime = None
     ):
         """
         Writes the given value to the standard bucket into the measurement according to the id_uri into a field
@@ -62,7 +62,7 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
         :return:
         """
 
-        record = Point(measurement_name=id_uri).field(
+        record = Point(measurement_name=iri).field(
             field=READING_FIELD_NAME, value=value
         )
         if reading_time is not None:
@@ -105,10 +105,10 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
     # override
     def read_period_to_dataframe(
         self,
-        id_uri: str,
+        iri: str,
         begin_time: datetime | None,
         end_time: datetime | None,
-        aggregation_window_ms: int | None,
+        aggregation_window_ms: int | None = None,
     ) -> pd.DataFrame:
         """
         Reads all measurements from the sensor with the given ID in the time period
@@ -124,7 +124,7 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
             query = (
                 f'from(bucket: "{self.bucket}") \n'
                 f"{range_query} \n"
-                f'|> filter(fn: (r) => r["_measurement"] == "{id_uri}") \n'
+                f'|> filter(fn: (r) => r["_measurement"] == "{iri}") \n'
                 f"|> aggregateWindow(every: {aggregation_window_ms}ms, fn: first, createEmpty: false)\n"
                 f'|> keep(columns: ["_time", "_value"]) \n'
                 '|> rename(columns: {_time: "time", _value: "value"})'
@@ -133,7 +133,7 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
             query = (
                 f'from(bucket: "{self.bucket}") \n'
                 f"{range_query} \n"
-                f'|> filter(fn: (r) => r["_measurement"] == "{id_uri}") \n'
+                f'|> filter(fn: (r) => r["_measurement"] == "{iri}") \n'
                 f'|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") \n'
                 f'|> keep(columns: ["_time", "{READING_FIELD_NAME}"]) \n'
                 '|> rename(columns: {_time: "time", reading: "value"})'
@@ -141,7 +141,8 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
 
         try:
             df = self._query_api.query_data_frame(query=query)
-
+            if df.empty:
+                return None
             # Dataframe cleanup
             df.drop(columns=["result", "table"], axis=1, inplace=True)
             # df.rename(
@@ -160,7 +161,7 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
 
     # override
     def count_entries_for_period(
-        self, id_uri: str, begin_time: datetime, end_time: datetime
+        self, iri: str, begin_time: datetime, end_time: datetime
     ) -> int:
         """
         Counts the measurement entries from the sensor with the given ID in the time period
@@ -176,7 +177,7 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
         query = (
             f'from(bucket: "{self.bucket}") \n'
             f"{range_query} \n"
-            f'|> filter(fn: (r) => r["_measurement"] == "{id_uri}") \n'
+            f'|> filter(fn: (r) => r["_measurement"] == "{iri}") \n'
             f'|> count(column: "_value") \n'
             f'|> keep(columns: ["_value"])'
         )
