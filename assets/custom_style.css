@@ -718,3 +718,8 @@ body {
 .node-information-attribute-header {
     font-weight: bold;
 }
+
+.node-information-attribute-content {
+    max-height: 100px;
+    overflow: scroll;
+}
