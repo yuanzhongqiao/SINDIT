@@ -76,6 +76,7 @@ class AnnotationDetector:
         self.runtime_con_container = RuntimeConnectionContainer.instance()
 
     def _detector_loop(self):
+        active = True
         while True:
             if (
                 self.detector_stop_queue.qsize() > 0
@@ -88,11 +89,19 @@ class AnnotationDetector:
             try:
                 input = self.detector_input_queue.get(block=True, timeout=3)
             except Empty:
+                if active and self.detector_active_status_queue.qsize() == 0:
+                    self.detector_active_status_queue.get()
+                    self.detector_active_status_queue.put(False)
+                active = False
                 continue
 
-            logger.info(
-                f"New input for scanning {self.scanned_asset.caption} for occurances of {self.scanned_annotation_instance.caption}: {input}"
-            )
+            # logger.info(
+            #     f"New input for scanning {self.scanned_asset.caption} for occurances of {self.scanned_annotation_instance.caption}: {input}"
+            # )
+            if not active and self.detector_active_status_queue.qsize() == 0:
+                self.detector_active_status_queue.get()
+                self.detector_active_status_queue.put(True)
+                active = False
 
     @classmethod
     def from_annotation_instance_and_asset(cls, instance_iri: str, asset_iri: str):
@@ -151,12 +160,22 @@ class AnnotationDetector:
         # Scanner process and inter-process communication:
         self.detector_input_queue: Queue = Queue()
         self.detector_stop_queue: Queue = Queue()
+        self.detector_active_status_queue: Queue = Queue()
         self.detector_process: Process = Process(
             target=self._detector_loop,
-            # args=(self.detector_new_reading_queue, self.detector_output_queue),
         )
         self.detector_process.start()
+
+        # Register handlers in order to receive new time-series data
+        rt_con_container = RuntimeConnectionContainer.instance()
+        for ts_iri in self.scanned_timeseries_iris.values():
+            ts_input = rt_con_container.get_timeseries_input_by_iri(ts_iri)
+            ts_input.register_handler(self._reading_handler)
+
         self.active = True
+
+    def _reading_handler(self, ts_iri, reading_value, reading_time):
+        self.detector_input_queue.put((ts_iri, reading_value, reading_time))
 
     def stop_detection(self):
         logger.info(
@@ -174,11 +193,18 @@ class AnnotationDetector:
         del self.detector_input_queue
         self.detector_stop_queue.close()
         del self.detector_stop_queue
+        self.detector_active_status_queue.close()
+        del self.detector_active_status_queue
         logger.info(
             f"Detection of {self.scanned_annotation_instance.caption} on {self.scanned_asset.caption} stopped succesfully."
         )
 
     def is_active(self) -> bool:
+
+        # check, if new active message:
+        if self.detector_active_status_queue.qsize() > 0:
+            self.active = self.detector_active_status_queue.get()
+
         return self.active
 
     def _create_new_detection(self, start_date_time: datetime, end_date_time: datetime):

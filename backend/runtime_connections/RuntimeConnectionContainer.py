@@ -220,9 +220,16 @@ class RuntimeConnectionContainer:
         inputs = []
         con: RuntimeConnection
         for con in self.connections.values():
-            inputs.extend(con.timeseries_inputs)
+            inputs.extend(con.timeseries_inputs.values())
 
         return inputs
+
+    def get_timeseries_input_by_iri(self, iri: str):
+        ts_input_list = [
+            ts_input for ts_input in self.get_all_inputs() if ts_input.iri == iri
+        ]
+        if len(ts_input_list) > 0:
+            return ts_input_list[0]
 
     def get_active_connections_count(self) -> int:
 
