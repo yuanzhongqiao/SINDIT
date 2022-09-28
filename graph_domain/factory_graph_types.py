@@ -49,12 +49,18 @@ class RelationshipTypes(Enum):
 
 
 class PseudoNodeTypes(Enum):
-    ASSET_SIMILARITY_PSEUDO_NODE = "ASSET_SIMILARITY_PSEUDO_NODE"
+    """Pseudo node types are relationship-types mapped to a virtual node type in order to be able to select them in graph visibility settings
+
+    Args:
+        Enum (_type_): _description_
+    """
+
+    ASSET_SIMILARITY_PSEUDO_NODE = RelationshipTypes.ASSET_SIMILARITY.value
 
 
-NODE_TYPE_STRINGS = [nd_type.value for nd_type in NodeTypes] + [
-    nd_type.value for nd_type in PseudoNodeTypes
-]
+PSEUDO_NODE_TYPE_STRINGS = [nd_type.value for nd_type in PseudoNodeTypes]
+NODE_TYPE_STRINGS = [nd_type.value for nd_type in NodeTypes] + PSEUDO_NODE_TYPE_STRINGS
+
 RELATIONSHIP_TYPE_STRINGS = [rl_type.value for rl_type in RelationshipTypes]
 ELEMENT_TYPE_STRINGS = list(chain(NODE_TYPE_STRINGS, RELATIONSHIP_TYPE_STRINGS))
 
