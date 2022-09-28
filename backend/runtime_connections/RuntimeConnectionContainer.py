@@ -28,6 +28,7 @@ from backend.specialized_databases.timeseries.influx_db.InfluxDbPersistenceServi
 )
 from util.log import logger
 
+
 # Maps node-types to the connection / input classes
 RT_CONNECTION_MAPPING = {
     RuntimeConnectionTypes.MQTT.value: MqttRuntimeConnection,

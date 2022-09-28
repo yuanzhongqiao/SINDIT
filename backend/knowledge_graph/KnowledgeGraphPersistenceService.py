@@ -113,7 +113,7 @@ class KnowledgeGraphPersistenceService(object):
                 self._connect()
 
     def graph_create(self, subgraph: Any) -> None:
-        """Executes the graph.push command
+        """Executes the graph.create command
         Handles connection errors.
         """
         while True:

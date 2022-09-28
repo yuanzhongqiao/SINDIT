@@ -1,5 +1,7 @@
 from __future__ import annotations
+from multiprocessing import Queue, Process
 import abc
+from queue import Empty
 from re import A
 from threading import Thread
 import time
@@ -9,6 +11,9 @@ from backend.exceptions.EnvironmentalVariableNotFoundError import (
 )
 from backend.knowledge_graph.dao.BaseNodesDao import BaseNodeDao
 from backend.knowledge_graph.dao.TimeseriesNodesDao import TimeseriesNodesDao
+from backend.runtime_connections.RuntimeConnectionContainer import (
+    RuntimeConnectionContainer,
+)
 from backend.specialized_databases.DatabasePersistenceServiceContainer import (
     DatabasePersistenceServiceContainer,
 )
@@ -64,18 +69,30 @@ class AnnotationDetector:
         # Connections
         self.annotations_dao: AnnotationNodesDao = AnnotationNodesDao.instance()
         self.persistence_services = persistence_services
-        # Scanner thread:
-        self.detector_thread = Thread(target=self._detector_loop)
+
         # Get original timeseries excerpt:
         self.original_ts_range = None  # TODO
 
+        self.runtime_con_container = RuntimeConnectionContainer.instance()
+
     def _detector_loop(self):
-        while not self.stop_signal:
+        while True:
+            if (
+                self.detector_stop_queue.qsize() > 0
+                and self.detector_stop_queue.get() == True
+            ):
+                logger.info(
+                    f"Stopping process scanning {self.scanned_asset.caption} for occurances of {self.scanned_annotation_instance.caption}"
+                )
+                return
+            try:
+                input = self.detector_input_queue.get(block=True, timeout=3)
+            except Empty:
+                continue
+
             logger.info(
-                f"Scanning {self.scanned_asset.caption} for occurances of {self.scanned_annotation_instance.caption}"
+                f"New input for scanning {self.scanned_asset.caption} for occurances of {self.scanned_annotation_instance.caption}: {input}"
             )
-            self.active = True
-            time.sleep(20)
 
     @classmethod
     def from_annotation_instance_and_asset(cls, instance_iri: str, asset_iri: str):
@@ -131,16 +148,35 @@ class AnnotationDetector:
         logger.info(
             f"Starting detection of {self.scanned_annotation_instance.caption} on {self.scanned_asset.caption}"
         )
-        self.stop_signal = False
-        self.detector_thread.start()
+        # Scanner process and inter-process communication:
+        self.detector_input_queue: Queue = Queue()
+        self.detector_stop_queue: Queue = Queue()
+        self.detector_process: Process = Process(
+            target=self._detector_loop,
+            # args=(self.detector_new_reading_queue, self.detector_output_queue),
+        )
+        self.detector_process.start()
+        self.active = True
 
     def stop_detection(self):
         logger.info(
             f"Stopping detection of {self.scanned_annotation_instance.caption} on {self.scanned_asset.caption}"
         )
-        self.stop_signal = True
-        self.detector_thread.join()
+        # send stop signal
+        self.detector_stop_queue.put(True)
+        # wait for stop
+        self.detector_process.join()
         self.active = False
+        # quit
+        self.detector_process.terminate()
+        # quit queues
+        self.detector_input_queue.close()
+        del self.detector_input_queue
+        self.detector_stop_queue.close()
+        del self.detector_stop_queue
+        logger.info(
+            f"Detection of {self.scanned_annotation_instance.caption} on {self.scanned_asset.caption} stopped succesfully."
+        )
 
     def is_active(self) -> bool:
         return self.active

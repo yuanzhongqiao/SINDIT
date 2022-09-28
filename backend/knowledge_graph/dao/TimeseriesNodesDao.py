@@ -120,7 +120,7 @@ class TimeseriesNodesDao(object):
         node: Node = matcher.match(iri=iri).first()
         reduced_feature_list_str = json.dumps(reduced_feature_list)
         node.update(reduced_feature_list=reduced_feature_list_str)
-        self.ps.graph_create(node)
+        self.ps.graph_push(node)
 
     def create_ts_cluster(
         self, iri: str, id_short: str, description: str | None = None
