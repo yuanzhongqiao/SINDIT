@@ -35,6 +35,10 @@ from util.environment_and_configuration import (
 from util.log import logger
 
 
+DATETIME_STRF_FORMAT_CAPTION = "%d.%m.%Y, %H:%M:%S"
+DATETIME_STRF_FORMAT_ID = "%Y_%m_%d_%H_%M_%S_%f"
+
+
 class AnnotationDetector:
     """
     Annotation detector scanning the related time-series inputs of one asset for occurances of a annotation instance
@@ -143,8 +147,14 @@ class AnnotationDetector:
 
     def _create_new_detection(self, start_date_time: datetime, end_date_time: datetime):
 
-        id_short = f"{self.scanned_annotation_instance.id_short}"
-        caption = f"{self.scanned_annotation_instance.caption}"
+        id_short = (
+            f"detection_of_{self.scanned_annotation_instance.id_short}_on_"
+            f"{self.scanned_asset.caption}_at_{end_date_time.strftime(DATETIME_STRF_FORMAT_ID)}"
+        )
+        caption = (
+            f"Detection of {self.scanned_annotation_instance.caption} on "
+            f"{self.scanned_asset.caption} at {end_date_time.strftime(DATETIME_STRF_FORMAT_CAPTION)}"
+        )
 
         detection_iri = self.annotations_dao.create_annotation_detection(
             id_short=id_short,
