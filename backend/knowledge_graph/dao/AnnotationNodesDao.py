@@ -658,3 +658,7 @@ class AnnotationNodesDao(object):
         )
 
         return matches.all()
+
+    def get_detection_precision_sum_for_instance(self, instance_iri):
+        matchers = self.get_matchers_for_annotation_instance(instance_iri)
+        return sum([m.detection_precision for m in matchers])

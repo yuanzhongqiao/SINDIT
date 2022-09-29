@@ -71,7 +71,7 @@ class AnnotationDetectorContainer:
         AnnotationDetectorContainer.__instance = self
 
         # Dict: (instance_iri, asset_iri) -> AnnotationDetector
-        self.detectors: Dict[Tuple[str, str], AnnotationDetector] = {}
+        self.detectors: Dict[Tuple[str, str, float], AnnotationDetector] = {}
         self._active_detectors_status_thread = None
 
     def start_active_detectors_status_thread(self):
@@ -87,11 +87,18 @@ class AnnotationDetectorContainer:
             AnnotationInstanceNodeFlat
         ] = annotations_dao.get_annotation_instances(only_active_scanned_instances=True)
 
-        updated_detector_tuples: List[Tuple[str, str]] = []
+        updated_detector_tuples: List[Tuple[str, str, float]] = []
         for instance in updated_instance_nodes_flat:
             updated_detector_tuples.extend(
                 [
-                    (instance.iri, asset.iri)
+                    # Precision sum used so that the detectors will be reinstantiated if one of the values was changed (sum as to only use one value in the tuple)
+                    (
+                        instance.iri,
+                        asset.iri,
+                        annotations_dao.get_detection_precision_sum_for_instance(
+                            instance.iri
+                        ),
+                    )
                     for asset in annotations_dao.get_scanned_assets_for_annotation_instance(
                         instance.iri
                     )

@@ -28,6 +28,10 @@ from backend.specialized_databases.timeseries.TimeseriesPersistenceService impor
 from graph_domain.expert_annotations.AnnotationInstanceNode import (
     AnnotationInstanceNodeFlat,
 )
+from graph_domain.expert_annotations.AnnotationTimeseriesMatcherNode import (
+    AnnotationTimeseriesMatcherNodeDeep,
+    AnnotationTimeseriesMatcherNodeFlat,
+)
 from graph_domain.main_digital_twin.AssetNode import AssetNodeDeep, AssetNodeFlat
 from util.environment_and_configuration import (
     ConfigGroups,
@@ -90,6 +94,18 @@ class AnnotationDetector(abc.ABC):
                 end_time=self.scanned_annotation_instance.occurance_end_date_time,
             )
             self.original_ts_dataframes[ts_iri] = dataframe
+
+        # Detection precision
+        self.scanned_timeseries_detection_precisions_relative: Dict[str, float] = dict()
+        annotations_dao = AnnotationNodesDao.instance()
+        matcher: AnnotationTimeseriesMatcherNodeFlat
+        for matcher in annotations_dao.get_matchers_for_annotation_instance(
+            self.scanned_annotation_instance.iri
+        ):
+            ts_iri = annotations_dao.get_matcher_original_annotated_ts(matcher.iri).iri
+            self.scanned_timeseries_detection_precisions_relative[
+                ts_iri
+            ] = matcher.detection_precision
 
         self._prepare_original_dataset()
 
