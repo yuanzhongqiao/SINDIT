@@ -189,10 +189,7 @@ def get_annotation_detection_details(detection_iri: None | str = None):
             ANNOTATIONS_DAO.get_oldest_unconfirmed_detection()
         )
         if detection_node is None:
-            logger.info(
-                "Annotation detection details for current detection "
-                "ordered when there was no new detection!"
-            )
+            # not yet open -> skip
             return None
     else:
         detection_node: AnnotationDetectionNodeFlat = BASE_NODE_DAO.get_generic_node(

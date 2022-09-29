@@ -174,7 +174,9 @@ class RuntimeConnectionContainer:
                 )
             )
 
-            ts_input.register_handler(handler_method=ts_service.write_measurement)
+            ts_input.register_handler(
+                handler_method=ts_service.write_measurement, handler_id=ts_service.iri
+            )
 
             if not new_connection:
                 self.connections.get(ts_node.runtime_connection.iri).timeseries_inputs[

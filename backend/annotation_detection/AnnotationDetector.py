@@ -71,6 +71,9 @@ class AnnotationDetector(abc.ABC):
         self.scanned_annotation_instance: AnnotationInstanceNodeFlat = (
             scanned_annotation_instance
         )
+        self.input_handler_id = (
+            f"detector_{self.scanned_asset.iri}_{self.scanned_annotation_instance.iri}"
+        )
         # Connections
         self.annotations_dao: AnnotationNodesDao = AnnotationNodesDao.instance()
         self.persistence_services = persistence_services
@@ -198,7 +201,9 @@ class AnnotationDetector(abc.ABC):
         rt_con_container = RuntimeConnectionContainer.instance()
         for ts_iri in self.scanned_timeseries_iris.values():
             ts_input = rt_con_container.get_timeseries_input_by_iri(ts_iri)
-            ts_input.register_handler(self._reading_handler)
+            ts_input.register_handler(
+                self._reading_handler, handler_id=self.input_handler_id
+            )
 
         self.active = True
 
@@ -209,6 +214,12 @@ class AnnotationDetector(abc.ABC):
         logger.info(
             f"Stopping detection of {self.scanned_annotation_instance.caption} on {self.scanned_asset.caption}"
         )
+        # stop handlers
+        rt_con_container = RuntimeConnectionContainer.instance()
+        for ts_iri in self.scanned_timeseries_iris.values():
+            ts_input = rt_con_container.get_timeseries_input_by_iri(ts_iri)
+            ts_input.remove_handler(handler_id=self.input_handler_id)
+
         # send stop signal
         self.detector_stop_queue.put(True)
         # wait for stop

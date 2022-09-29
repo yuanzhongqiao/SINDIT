@@ -32,11 +32,31 @@ class EuclidianDistanceAnnotationDetector(AnnotationDetector):
         if len(ts_array) > self.original_ts_lens_mapped_to_scans.get(reading_iri):
             ts_array = np.delete(ts_array, 0)
 
-            print(len(ts_array))
-
-        # TODO: if not equal amount of entries -> skip?
         self.current_ts_arrays[reading_iri] = ts_array
-        pass
+        # print(len(ts_array))
+
+        if all(
+            [
+                len(current_reading[1])
+                == self.original_ts_lens_mapped_to_scans.get(current_reading[0])
+                for current_reading in self.current_ts_arrays.items()
+            ]
+        ):
+            current_combined_array = np.concatenate(
+                [
+                    self.current_ts_arrays.get(self.scanned_timeseries_iris.get(iri))
+                    for iri in self.original_ts_iris_ordered
+                ],
+                axis=0,
+            )
+
+            euclidian_distance = np.linalg.norm(
+                self.original_ts_combined_array - current_combined_array
+            )
+
+            print(
+                f"Matching {self.scanned_annotation_instance.caption} on {self.scanned_asset.caption}. Euclidian distance: {euclidian_distance}"
+            )
 
     # override
     def _prepare_original_dataset(self):
@@ -62,9 +82,11 @@ class EuclidianDistanceAnnotationDetector(AnnotationDetector):
                 self.scanned_timeseries_iris.get(ts_df[0])
             ] = self.original_ts_lens.get(ts_df[0])
 
-        self.original_ts_iris_ordered = [t[0] for t in self.original_ts_arrays]
+        self.original_ts_iris_ordered = [iri for iri in self.original_ts_arrays.keys()]
+        self.original_ts_iris_ordered.sort()
         self.original_ts_combined_array = np.concatenate(
-            [ts_array for ts_array in self.original_ts_arrays.values()], axis=0
+            [self.original_ts_arrays.get(iri) for iri in self.original_ts_iris_ordered],
+            axis=0,
         )
 
         # Map the arrays and lengths directly to the iris of the scanned ts:
