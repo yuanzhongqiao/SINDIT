@@ -57,6 +57,16 @@ async def patch_annotation_instance_toggle_occurance_scan(
     ANNOTATIONS_DAO.toggle_annotation_instance_occurance_scan(instance_iri, active)
 
 
+@app.patch("/annotation/ts_matcher/detection_precision")
+async def patch_annotation_matcher_detection_precision(
+    matcher_iri: str, detection_precision: float
+):
+    logger.info(
+        f"Changing scan precision to {detection_precision} for annotation matcher: {matcher_iri}..."
+    )
+    ANNOTATIONS_DAO.change_matcher_precision(matcher_iri, detection_precision)
+
+
 class AnnotationInstanceArguments(BaseModel):
     id_short: str
     asset_iri: str

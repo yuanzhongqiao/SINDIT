@@ -41,7 +41,7 @@ class EuclidianDistanceAnnotationDetector(AnnotationDetector):
                 == self.original_ts_lens_mapped_to_scans.get(current_reading[0])
                 for current_reading in self.current_ts_arrays.items()
             ]
-        ):
+        ) and len(self.current_ts_arrays.keys()) == len(self.original_ts_arrays.keys()):
             current_combined_array = np.concatenate(
                 [
                     self.current_ts_arrays.get(self.scanned_timeseries_iris.get(iri))

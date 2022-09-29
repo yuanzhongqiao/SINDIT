@@ -123,6 +123,12 @@ class AnnotationNodesDao(object):
         node.update(activate_occurance_scan=active)
         self.ps.graph_push(node)
 
+    def change_matcher_precision(self, matcher_iri: str, precision: float):
+        matcher = NodeMatcher(self.ps.graph)
+        node: Node = matcher.match(iri=matcher_iri).first()
+        node.update(detection_precision=precision)
+        self.ps.graph_push(node)
+
     def create_annotation_detection(
         self,
         id_short: str,

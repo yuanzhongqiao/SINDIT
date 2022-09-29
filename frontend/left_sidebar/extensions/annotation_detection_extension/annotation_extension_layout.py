@@ -98,6 +98,32 @@ def get_layout():
                                     ),
                                 ],
                             ),
+                            dbc.Collapse(
+                                id="annotation-matcher-settings-container",
+                                className="annotation-click-context-feature-container",
+                                is_open=False,
+                                children=[
+                                    dcc.Store(id="annotation-matcher-settings-changed"),
+                                    html.Div(
+                                        "Settings for the selected Annotation Timeseries Matcher:",
+                                        style={
+                                            "font-weight": "bold",
+                                            "padding-bottom": "5px",
+                                        },
+                                    ),
+                                    html.Div(
+                                        "Here, you can adjust how precise the timeseries will be matched.",
+                                        style={"padding-bottom": "5px"},
+                                    ),
+                                    dcc.Slider(
+                                        0,
+                                        1,
+                                        marks=None,
+                                        value=0.5,
+                                        id="annotation-matcher-precission-slider",
+                                    ),
+                                ],
+                            ),
                             html.Div(
                                 id="annotations-buttons-container",
                                 className="annotations-bottom-buttons",

@@ -64,6 +64,7 @@ def change_navigation_tab_content(tab, selected_el):
     Input("annotation-creation-store-step", "data"),
     State("last-manually-selected-tab", "data"),
     Input("annotation-instance-scan-toggled", "modified_timestamp"),
+    Input("annotation-matcher-settings-changed", "modified_timestamp"),
     prevent_initial_update=False,
 )
 def add_remove_navigation_tabs(
@@ -72,6 +73,7 @@ def add_remove_navigation_tabs(
     annotation_creation_step,
     last_manually_opened_tab,
     scanning_toggled,
+    matcher_settings_changed,
 ):
     if ctx.triggered_id == "tabs-infos":
         last_manually_opened_tab = active_tab

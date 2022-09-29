@@ -167,7 +167,9 @@ def get_visualized_attributes_for_node_type(node: BaseNode) -> List[Tuple[str, s
             )
         )
     elif isinstance(node, AnnotationTimeseriesMatcherNodeFlat):
-        pass
+        attributes_list.append(
+            ("Precision used for Finding new Occurances", str(node.detection_precision))
+        )
 
     return attributes_list
 
