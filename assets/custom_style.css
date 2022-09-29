@@ -723,3 +723,8 @@ body {
     max-height: 100px;
     overflow: scroll;
 }
+
+
+.annotation-click-context-feature-container {
+    padding-bottom: 200px;
+}

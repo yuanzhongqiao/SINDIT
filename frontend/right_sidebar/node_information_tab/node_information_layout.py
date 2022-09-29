@@ -79,6 +79,7 @@ def get_visualized_attributes_for_node_type(node: BaseNode) -> List[Tuple[str, s
                     ", ".join([str(feature) for feature in node.reduced_feature_list]),
                 )
             )
+
     elif isinstance(node, SupplementaryFileNodeFlat):
         attributes_list.append(("File Name", node.file_name))
         attributes_list.append(("File Type", node.file_type))
@@ -114,6 +115,9 @@ def get_visualized_attributes_for_node_type(node: BaseNode) -> List[Tuple[str, s
                 "End of the Situation",
                 node.occurance_end_date_time.strftime(STRF_DATETIME_FORMAT),
             )
+        )
+        attributes_list.append(
+            ("Active Scanning for New Occurances", str(node.activate_occurance_scan))
         )
     elif isinstance(node, AnnotationPreIndicatorNodeFlat):
         attributes_list.append(

@@ -74,6 +74,30 @@ def get_layout():
                                     ),
                                 ],
                             ),
+                            dbc.Collapse(
+                                id="annotation-instance-scan-toggle-container",
+                                className="annotation-click-context-feature-container",
+                                is_open=False,
+                                children=[
+                                    dcc.Store(id="annotation-instance-scan-toggled"),
+                                    html.Div(
+                                        "Settings for the selected Annotation Instance:",
+                                        style={"font-weight": "bold"},
+                                    ),
+                                    dbc.Checklist(
+                                        id="annotation-instance-scanning-toggle",
+                                        options=[
+                                            {
+                                                "label": "Activate Scannning for new Occurances",
+                                                "value": True,
+                                            }
+                                        ],
+                                        value=[True],
+                                        switch=True,
+                                        style={"margin-top": "10px"},
+                                    ),
+                                ],
+                            ),
                             html.Div(
                                 id="annotations-buttons-container",
                                 className="annotations-bottom-buttons",

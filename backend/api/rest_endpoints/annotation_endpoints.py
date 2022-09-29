@@ -47,6 +47,16 @@ async def post_annotation_definition(definition: AnnotationDefinitionArguments):
     )
 
 
+@app.patch("/annotation/instance/toggle_occurance_scan")
+async def patch_annotation_instance_toggle_occurance_scan(
+    instance_iri: str, active: bool
+):
+    logger.info(
+        f"Toggling occurance scan to active: {active} for annotation instance: {instance_iri}..."
+    )
+    ANNOTATIONS_DAO.toggle_annotation_instance_occurance_scan(instance_iri, active)
+
+
 class AnnotationInstanceArguments(BaseModel):
     id_short: str
     asset_iri: str

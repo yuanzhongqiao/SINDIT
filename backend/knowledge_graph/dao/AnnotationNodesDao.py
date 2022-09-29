@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List
-from py2neo import NodeMatcher, Relationship
+from py2neo import NodeMatcher, Relationship, Node
 from backend.knowledge_graph.dao.TimeseriesNodesDao import TimeseriesNodesDao
 from graph_domain.expert_annotations.AnnotationDefinitionNode import (
     AnnotationDefinitionNodeFlat,
@@ -95,6 +95,7 @@ class AnnotationNodesDao(object):
         end_datetime: datetime,
         caption: str | None = None,
         description: str | None = None,
+        activate_occurance_scan: bool = True,
     ) -> str:
         """Creates a new annotation instance"""
         iri = IRI_PREFIX_ANNOTATION_INSTANCE + id_short
@@ -108,10 +109,19 @@ class AnnotationNodesDao(object):
             creation_date_time=datetime.now(),
             occurance_start_date_time=start_datetime,
             occurance_end_date_time=end_datetime,
+            activate_occurance_scan=activate_occurance_scan,
         )
         self.ps.graph_push(instance)
 
         return iri
+
+    def toggle_annotation_instance_occurance_scan(
+        self, instance_iri: str, active: bool
+    ):
+        matcher = NodeMatcher(self.ps.graph)
+        node: Node = matcher.match(iri=instance_iri).first()
+        node.update(activate_occurance_scan=active)
+        self.ps.graph_push(node)
 
     def create_annotation_detection(
         self,
@@ -497,8 +507,13 @@ class AnnotationNodesDao(object):
         return len(self.get_annotation_instance_for_definition(definition_iri))
 
     @validate_result_nodes
-    def get_annotation_instances(self):
+    def get_annotation_instances(self, only_active_scanned_instances: bool = False):
         matches = self.ps.repo_match(model=AnnotationInstanceNodeFlat)
+
+        if only_active_scanned_instances:
+            matches = matches.where(
+                "not exists(_.activate_occurance_scan) or _.activate_occurance_scan = true"
+            )
 
         return matches.all()
 

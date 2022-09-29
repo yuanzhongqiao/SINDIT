@@ -85,7 +85,7 @@ class AnnotationDetectorContainer:
         annotations_dao: AnnotationNodesDao = AnnotationNodesDao.instance()
         updated_instance_nodes_flat: List[
             AnnotationInstanceNodeFlat
-        ] = annotations_dao.get_annotation_instances()
+        ] = annotations_dao.get_annotation_instances(only_active_scanned_instances=True)
 
         updated_detector_tuples: List[Tuple[str, str]] = []
         for instance in updated_instance_nodes_flat:
