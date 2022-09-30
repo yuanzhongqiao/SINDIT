@@ -2,7 +2,7 @@ import abc
 from ctypes.wintypes import BOOL
 from datetime import datetime
 from math import floor
-from typing import Tuple
+from typing import Tuple, Dict
 
 from graph_domain.main_digital_twin.TimeseriesNode import (
     TimeseriesNodeFlat,
@@ -15,7 +15,7 @@ class TimeseriesInput(abc.ABC):
         self, iri: str, connection_topic: str, connection_keyword: str, value_type: str
     ):
         self._last_reading: Tuple[datetime, float | int | bool | str] = None
-        self._handlers = []
+        self._handlers: Dict[str, callable] = dict()
         self.iri = iri
         self.connection_topic = connection_topic
         self.connection_keyword = connection_keyword
@@ -36,14 +36,17 @@ class TimeseriesInput(abc.ABC):
         """
         return self._last_reading
 
-    def register_handler(self, handler_method) -> None:
+    def register_handler(self, handler_method, handler_id: str) -> None:
         """
         Registers a given handler method to be called whenever a reading is being received
         :param handler_method: Callable taking three arguments: id_uri: str, value: Any,
         reading_time: datetime.
         :return: None
         """
-        self._handlers.append(handler_method)
+        self._handlers[handler_id] = handler_method
+
+    def remove_handler(self, handler_id: str):
+        self._handlers.pop(handler_id)
 
     def handle_reading(self, reading_time, reading_value):
         """
@@ -73,6 +76,6 @@ class TimeseriesInput(abc.ABC):
         if isinstance(reading_value, str):
             pass
 
-        for handler in self._handlers:
+        for handler in self._handlers.values():
             handler(self.iri, reading_value, reading_time)
         self._last_reading = reading_time, reading_value

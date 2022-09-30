@@ -718,3 +718,13 @@ body {
 .node-information-attribute-header {
     font-weight: bold;
 }
+
+.node-information-attribute-content {
+    max-height: 100px;
+    overflow: scroll;
+}
+
+
+.annotation-click-context-feature-container {
+    padding-bottom: 200px;
+}

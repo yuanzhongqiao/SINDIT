@@ -7,12 +7,12 @@ BASE_NODE_DAO: BaseNodeDao = BaseNodeDao.instance()
 
 
 @app.patch("/node_position")
-def update_node_position(iri: str, pos_x: float, pos_y: float):
+async def update_node_position(iri: str, pos_x: float, pos_y: float):
     python_graph_endpoints.update_node_position(iri, pos_x, pos_y)
 
 
 @app.get("/node_details")
-def get_node_details(iri: str):
+async def get_node_details(iri: str):
 
     node = BASE_NODE_DAO.get_generic_node(iri)
 

@@ -103,39 +103,46 @@ subscription.subscribe_data_change(test_node)
 sleep(10)
 
 while True:
-    # random_type = random.choice(PIECE_TYPES)
-
-    # Acknowledge errors, if some occured. This sometimes happens (reason and further error information still to be discovered)
-    dv = asyncua.ua.DataValue(asyncua.ua.Variant(True, asyncua.ua.VariantType.Boolean))
-    # dv.ServerTimestamp = None
-    # dv.SourceTimestamp = None
-    acknowledge_error_node.set_value(dv)
-
-    # Get available pieces:
-    first_available_type = None
     try:
-        if last_stock_status is not None:
-            stock_dict = json.loads(last_stock_status)
-            for storage in stock_dict["stockItems"]:
-                if storage["workpiece"]["type"] != "":
-                    first_available_type = storage["workpiece"]["type"]
-                    break
-    except KeyError:
-        logger.info("KeyError in MQTT stock message!")
+        # random_type = random.choice(PIECE_TYPES)
 
-    formatted_time = datetime.now().isoformat()[:-3] + "Z"
-    if first_available_type is not None:
-        logger.info(f"Ordering piece ({first_available_type}, {formatted_time})")
-
-        success_info = mqtt_client.publish(
-            topic="f/o/order",
-            payload='{"type":"'
-            + first_available_type
-            + '","ts":"'
-            + formatted_time
-            + '"}',
+        # Acknowledge errors, if some occured. This sometimes happens (reason and further error information still to be discovered)
+        dv = asyncua.ua.DataValue(
+            asyncua.ua.Variant(True, asyncua.ua.VariantType.Boolean)
         )
-    else:
-        logger.info(f"No piece available! ({formatted_time})")
+        # dv.ServerTimestamp = None
+        # dv.SourceTimestamp = None
+        acknowledge_error_node.set_value(dv)
+
+        # Get available pieces:
+        first_available_type = None
+        try:
+            if last_stock_status is not None:
+                stock_dict = json.loads(last_stock_status)
+                for storage in stock_dict["stockItems"]:
+                    if storage["workpiece"]["type"] != "":
+                        first_available_type = storage["workpiece"]["type"]
+                        break
+        except KeyError:
+            logger.info("KeyError in MQTT stock message!")
+
+        formatted_time = datetime.now().isoformat()[:-3] + "Z"
+        if first_available_type is not None:
+            logger.info(f"Ordering piece ({first_available_type}, {formatted_time})")
+
+            success_info = mqtt_client.publish(
+                topic="f/o/order",
+                payload='{"type":"'
+                + first_available_type
+                + '","ts":"'
+                + formatted_time
+                + '"}',
+            )
+        else:
+            logger.info(f"No piece available! ({formatted_time})")
+
+    except Exception as exc:
+        print(f"Exception occured. Trying to re-establish soon. {exc}")
+        pass
 
     sleep(200)

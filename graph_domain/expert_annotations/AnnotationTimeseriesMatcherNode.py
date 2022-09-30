@@ -32,6 +32,8 @@ class AnnotationTimeseriesMatcherNodeFlat(BaseNode):
     # Identifier for the node-type:
     __primarylabel__ = LABEL
 
+    detection_precision: float = Property(default=0.5)
+
     def validate_metamodel_conformance(self):
         """
         Used to validate if the current node (self) and its child elements is conformant to the defined metamodel.

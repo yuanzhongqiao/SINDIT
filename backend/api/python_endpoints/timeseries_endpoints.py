@@ -56,7 +56,7 @@ def get_timeseries_current_range(
     )
 
 
-def _get_related_timeseries_database_service(iri: str) -> TimeseriesPersistenceService:
+def get_related_timeseries_database_service(iri: str) -> TimeseriesPersistenceService:
     try:
         # Get related timeseries-database service:
         ts_con_node: DatabaseConnectionsDao = (
@@ -97,12 +97,12 @@ def get_timeseries_range(
     try:
         # Get related timeseries-database service:
         ts_service: TimeseriesPersistenceService = (
-            _get_related_timeseries_database_service(iri)
+            get_related_timeseries_database_service(iri)
         )
 
         # Read the actual measurements:
         readings_df = ts_service.read_period_to_dataframe(
-            id_uri=iri,
+            iri=iri,
             begin_time=date_time - timedelta(seconds=duration)
             if duration is not None
             else None,
@@ -130,11 +130,11 @@ def get_timeseries_entries_count(
     try:
         # Get related timeseries-database service:
         ts_service: TimeseriesPersistenceService = (
-            _get_related_timeseries_database_service(iri)
+            get_related_timeseries_database_service(iri)
         )
 
         return ts_service.count_entries_for_period(
-            id_uri=iri,
+            iri=iri,
             begin_time=date_time - timedelta(seconds=duration)
             if duration is not None
             else None,

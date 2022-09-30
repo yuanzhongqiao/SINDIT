@@ -44,6 +44,8 @@ class AnnotationInstanceNodeFlat(BaseNode):
     __primarylabel__ = LABEL
 
     # Additional properties:
+    activate_occurance_scan: bool = Property(default=True)
+
     _creation_date_time: str | datetime = Property(key="creation_date_time")
 
     @property

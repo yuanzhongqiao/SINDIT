@@ -1,5 +1,14 @@
 from datetime import datetime
 from dash import ctx
+from graph_domain.BaseNode import BaseNode
+from graph_domain.expert_annotations.AnnotationInstanceNode import (
+    AnnotationInstanceNodeDeep,
+    AnnotationInstanceNodeFlat,
+)
+from graph_domain.expert_annotations.AnnotationTimeseriesMatcherNode import (
+    AnnotationTimeseriesMatcherNodeFlat,
+)
+from graph_domain.factory_graph_ogm_matches import OGM_CLASS_FOR_NODE_TYPE
 
 from util.log import logger
 from frontend.app import app
@@ -93,6 +102,87 @@ def annotation_info(info_open, sidebar_open_classname):
             )
 
     return None, None, None, None
+
+
+@app.callback(
+    Output("annotation-instance-scan-toggle-container", "is_open"),
+    Output("annotation-instance-scanning-toggle", "value"),
+    Input("selected-graph-element-store", "data"),
+    prevent_initial_call=False,
+)
+def show_instance_scan_toggle_switch(selected_el_json):
+    if selected_el_json is None:
+        return False, []
+
+    selected_el: GraphSelectedElement = GraphSelectedElement.from_json(selected_el_json)
+    if selected_el.type == NodeTypes.ANNOTATION_INSTANCE.value:
+        node_details_json = api_client.get_json("/node_details", iri=selected_el.iri)
+        node_class = OGM_CLASS_FOR_NODE_TYPE.get(selected_el.type)
+        node: AnnotationInstanceNodeFlat = node_class.from_dict(node_details_json)
+
+        return True, [True] if node.activate_occurance_scan else []
+    else:
+        return False, []
+
+
+@app.callback(
+    Output("annotation-instance-scan-toggled", "data"),
+    Input("annotation-instance-scanning-toggle", "value"),
+    State("selected-graph-element-store", "data"),
+    prevent_initial_call=True,
+)
+def toggle_instance_scan(toggle_value, selected_el_json):
+    activated = True in toggle_value
+    selected_el: GraphSelectedElement = GraphSelectedElement.from_json(selected_el_json)
+
+    api_client.patch(
+        "/annotation/instance/toggle_occurance_scan",
+        instance_iri=selected_el.iri,
+        active=activated,
+    )
+
+    return datetime.now()
+
+
+@app.callback(
+    Output("annotation-matcher-settings-container", "is_open"),
+    Output("annotation-matcher-precission-slider", "value"),
+    Input("selected-graph-element-store", "data"),
+    prevent_initial_call=False,
+)
+def show_annotation_matcher_settings(selected_el_json):
+    if selected_el_json is None:
+        return False, 0
+
+    selected_el: GraphSelectedElement = GraphSelectedElement.from_json(selected_el_json)
+    if selected_el.type == NodeTypes.ANNOTATION_TS_MATCHER.value:
+        node_details_json = api_client.get_json("/node_details", iri=selected_el.iri)
+        node_class = OGM_CLASS_FOR_NODE_TYPE.get(selected_el.type)
+        node: AnnotationTimeseriesMatcherNodeFlat = node_class.from_dict(
+            node_details_json
+        )
+
+        return True, node.detection_precision
+    else:
+        return False, 0
+
+
+@app.callback(
+    Output("annotation-matcher-settings-changed", "data"),
+    Input("annotation-matcher-precission-slider", "value"),
+    State("selected-graph-element-store", "data"),
+    prevent_initial_call=True,
+)
+def change_matcher_settings(value, selected_el_json):
+    selected_el: GraphSelectedElement = GraphSelectedElement.from_json(selected_el_json)
+
+    api_client.patch(
+        "/annotation/ts_matcher/detection_precision",
+        matcher_iri=selected_el.iri,
+        detection_precision=value,
+    )
+
+    return datetime.now()
 
 
 ##########################################

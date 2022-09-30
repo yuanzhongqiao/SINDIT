@@ -4,7 +4,6 @@ from frontend.app import app
 from dash.dependencies import Input, Output
 from frontend import api_client
 from dateutil import tz
-
 from dash import html
 
 from frontend.left_sidebar.global_information import global_information_layout

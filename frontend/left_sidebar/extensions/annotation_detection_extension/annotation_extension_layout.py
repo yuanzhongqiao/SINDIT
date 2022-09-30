@@ -44,7 +44,7 @@ def get_layout():
                                     ),
                                     html.Div(
                                         className="node-information-attribute-header",
-                                        children="Sum of Active Scans for New Occurances:",
+                                        children="Total Amount of Active Detectors:",
                                         style={"margin-top": "10px"},
                                     ),
                                     html.Div(
@@ -71,6 +71,56 @@ def get_layout():
                                         className="node-information-attribute-content",
                                         id="annotations-info-confirmed-detections",
                                         children="",
+                                    ),
+                                ],
+                            ),
+                            dbc.Collapse(
+                                id="annotation-instance-scan-toggle-container",
+                                className="annotation-click-context-feature-container",
+                                is_open=False,
+                                children=[
+                                    dcc.Store(id="annotation-instance-scan-toggled"),
+                                    html.Div(
+                                        "Settings for the selected Annotation Instance:",
+                                        style={"font-weight": "bold"},
+                                    ),
+                                    dbc.Checklist(
+                                        id="annotation-instance-scanning-toggle",
+                                        options=[
+                                            {
+                                                "label": "Activate Scannning for new Occurances",
+                                                "value": True,
+                                            }
+                                        ],
+                                        value=[True],
+                                        switch=True,
+                                        style={"margin-top": "10px"},
+                                    ),
+                                ],
+                            ),
+                            dbc.Collapse(
+                                id="annotation-matcher-settings-container",
+                                className="annotation-click-context-feature-container",
+                                is_open=False,
+                                children=[
+                                    dcc.Store(id="annotation-matcher-settings-changed"),
+                                    html.Div(
+                                        "Settings for the selected Annotation Timeseries Matcher:",
+                                        style={
+                                            "font-weight": "bold",
+                                            "padding-bottom": "5px",
+                                        },
+                                    ),
+                                    html.Div(
+                                        "Here, you can adjust how precise the timeseries will be matched.",
+                                        style={"padding-bottom": "5px"},
+                                    ),
+                                    dcc.Slider(
+                                        0,
+                                        1,
+                                        marks=None,
+                                        value=0.5,
+                                        id="annotation-matcher-precission-slider",
                                     ),
                                 ],
                             ),

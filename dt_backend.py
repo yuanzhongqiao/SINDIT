@@ -12,6 +12,9 @@ import uvicorn
 
 from dateutil import tz
 from threading import Thread
+from backend.annotation_detection.AnnotationDetectorContainer import (
+    AnnotationDetectorContainer,
+)
 from util.environment_and_configuration import (
     ConfigGroups,
     get_configuration,
@@ -67,6 +70,8 @@ from util.environment_and_configuration import (
     get_environment_variable_int,
 )
 
+import util.inter_process_cache as cache
+
 
 # #############################################################################
 # Setup sensor connections and timeseries persistence
@@ -89,29 +94,33 @@ def init_database_data_if_not_available():
         logger.info("Finished initilization.")
 
 
-def refresh_ts_inputs():
-    timeseries_nodes_dao: TimeseriesNodesDao = TimeseriesNodesDao.instance()
+def refresh_workers():
     runtime_con_container: RuntimeConnectionContainer = (
         RuntimeConnectionContainer.instance()
     )
-    timeseries_deep_nodes = timeseries_nodes_dao.get_all_timeseries_nodes_deep()
+    detectors_container: AnnotationDetectorContainer = (
+        AnnotationDetectorContainer.instance()
+    )
+    runtime_con_container.refresh_connection_inputs_and_handlers()
+    detectors_container.refresh_annotation_detectors()
 
-    runtime_con_container.refresh_connection_inputs_and_handlers(timeseries_deep_nodes)
 
-
-def refresh_time_series_thread_loop():
+def refresh_workers_thread_loop():
 
     while True:
         time.sleep(120)
-        logger.info("Refreshing time-series inputs and connections...")
-        refresh_ts_inputs()
+        logger.info("Refreshing worker services...")
 
-        logger.info("Done refreshing time-series inputs and connections.")
+        refresh_workers()
+
+        logger.info("Done refreshing worker services.")
 
 
 # #############################################################################
 # Launch backend
 # #############################################################################
+
+
 if __name__ == "__main__":
 
     logger.info("Initializing Knowledge Graph...")
@@ -130,59 +139,24 @@ if __name__ == "__main__":
     )
     logger.info("Done initializing specialized databases.")
 
-    logger.info("Loading time-series inputs and connections...")
-    refresh_ts_inputs()
-    logger.info("Done loading time-series inputs and connections.")
+    logger.info(
+        "Loading worker services: time-series inputs and connections as well as annotation detectors..."
+    )
+    refresh_workers()
+    logger.info("Done loading worker services.")
 
-    # Thread checking regulary, if timeseries inputs and runtime-connections have been added / removed
-    ts_refresh_thread = Thread(target=refresh_time_series_thread_loop)
-    ts_refresh_thread.start()
+    # Thread checking regulary, if timeseries inputs, runtime-connections and annotation detectors have been added / removed
+    workers_refresh_thread = Thread(target=refresh_workers_thread_loop)
+    workers_refresh_thread.start()
 
     # Start cleanup thread deleting obsolete backups:
     start_storage_cleanup_thread()
 
-    #
-    # TODO: remove this. Just for
-    #
-    # from backend.knowledge_graph.dao.AnnotationNodesDao import AnnotationNodesDao
-    # from datetime import datetime
+    # Start getting the connectivity status for runtime connections
+    RuntimeConnectionContainer.instance().start_active_connections_status_thread()
+    # Start getting the connectivity status for runtime connections
 
-    # annotations_dao: AnnotationNodesDao = AnnotationNodesDao.instance()
-
-    # detection_iri = annotations_dao.create_annotation_detection(
-    #     id_short="test-detection",
-    #     start_datetime=datetime.now().astimezone(
-    #         tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
-    #     )
-    #     - timedelta(minutes=10),
-    #     end_datetime=datetime.now().astimezone(
-    #         tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
-    #     ),
-    #     caption="Test Detection",
-    # )
-
-    # annotations_dao.create_annotation_detection_timeseries_relationship(
-    #     detection_iri=detection_iri,
-    #     timeseries_iri="www.sintef.no/aas_identifiers/learning_factory/sensors/hbw_actual_pos_vertical",
-    # )
-    # annotations_dao.create_annotation_detection_timeseries_relationship(
-    #     detection_iri=detection_iri,
-    #     timeseries_iri="www.sintef.no/aas_identifiers/learning_factory/sensors/factory_humidity_raw",
-    # )
-
-    # annotations_dao.create_annotation_detection_asset_relationship(
-    #     detection_iri=detection_iri,
-    #     asset_iri="www.sintef.no/aas_identifiers/learning_factory/machines/hbw",
-    # )
-
-    # annotations_dao.create_annotation_detection_instance_relationship(
-    #     detection_iri=detection_iri,
-    #     instance_iri="www.sintef.no/aas_identifiers/learning_factory/annotations/instances/test_annotation_definition_hbw_2022-09-18T20:30:29.263466",
-    # )
-
-    #
-    #
-    #
+    AnnotationDetectorContainer.instance().start_active_detectors_status_thread()
 
     # Run fast API
     # noinspection PyTypeChecker
@@ -190,8 +164,6 @@ if __name__ == "__main__":
         "dt_backend:app",
         host=get_environment_variable("FAST_API_HOST"),
         port=get_environment_variable_int("FAST_API_PORT"),
-        # workers=4,
-        # # TODO: decide whether to introduce inter-process communication
-        # (e.g. for runtime-connection status) and to activate workers!
+        workers=4,
         access_log=False,
     )

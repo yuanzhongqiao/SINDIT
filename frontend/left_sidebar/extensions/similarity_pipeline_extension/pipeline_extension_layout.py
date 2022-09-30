@@ -15,7 +15,7 @@ def get_layout():
             ),
             dbc.CardBody(
                 html.Div(
-                    "Pipeline status info (and control?) coming soon...",
+                    "This is the place where you will soon be able to view some information about the similarity pipeline (and maybe start it). Currently, the pipeline has to be manually executet via a script.",
                 )
             ),
         ],

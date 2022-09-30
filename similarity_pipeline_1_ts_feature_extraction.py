@@ -25,7 +25,8 @@ logger.info("\n\n\nSTEP 1: Timeseries feature extraction\n")
 comparison_end_date_time = datetime(
     year=2022, month=7, day=29, hour=11, minute=0, second=0
 )
-comparison_duration = timedelta(hours=20).total_seconds()  # ~ 30 sec per timeseries
+comparison_duration = timedelta(hours=2).total_seconds()
+# comparison_duration = timedelta(hours=20).total_seconds()  # ~ 30 sec per timeseries
 
 # comparison_duration = timedelta(hours=12).total_seconds()  # ~ 10 sec per timeseries
 
@@ -74,6 +75,12 @@ for timeseries_node in timeseries_nodes_flat:
         duration=comparison_duration,
     )
     logger.info(f"Total entry count: {ts_entry_count}")
+
+    if ts_entry_count > 10000:
+        logger.warning(
+            f"Skipped extracting features for {timeseries_node.caption} because it has over 10000 entries."
+        )
+        continue
 
     # Cancel, if not int or float
     if timeseries_node.value_type in [

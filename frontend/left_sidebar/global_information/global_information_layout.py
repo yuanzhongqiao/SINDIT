@@ -8,7 +8,7 @@ def get_layout():
             dbc.CardHeader(
                 id="global-information-container-card",
                 children=[
-                    html.Div("Connectivity status"),
+                    html.Div("Connectivity Status"),
                 ],
             ),
             dbc.CardBody(

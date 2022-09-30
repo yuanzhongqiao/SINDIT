@@ -96,7 +96,7 @@ def get_layout():
                                                 [
                                                     visibility_settings_layout.get_layout(),
                                                 ],
-                                                title="Graph visibility settings",
+                                                title="Graph Visibility Settings",
                                             ),
                                             dbc.AccordionItem(
                                                 [

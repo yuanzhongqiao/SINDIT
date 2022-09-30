@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import List
-from py2neo import NodeMatcher, Relationship
+from py2neo import NodeMatcher, Relationship, Node
+from backend.knowledge_graph.dao.TimeseriesNodesDao import TimeseriesNodesDao
 from graph_domain.expert_annotations.AnnotationDefinitionNode import (
     AnnotationDefinitionNodeFlat,
 )
@@ -38,6 +39,8 @@ IRI_PREFIX_ANNOTATION_DETECTION = IRI_PREFIX_GLOBAL + "annotations/detections/"
 IRI_PREFIX_ANNOTATION_DEFINITION = IRI_PREFIX_GLOBAL + "annotations/definitions/"
 IRI_PREFIX_ANNOTATION_TS_MATCHER = IRI_PREFIX_GLOBAL + "annotations/ts_matchers/"
 IRI_PREFIX_ANNOTATION_PRE_INDICATOR = IRI_PREFIX_GLOBAL + "annotations/pre_indicators/"
+
+TS_NODES_DAO: TimeseriesNodesDao = TimeseriesNodesDao.instance()
 
 
 class AnnotationNodesDao(object):
@@ -92,6 +95,7 @@ class AnnotationNodesDao(object):
         end_datetime: datetime,
         caption: str | None = None,
         description: str | None = None,
+        activate_occurance_scan: bool = True,
     ) -> str:
         """Creates a new annotation instance"""
         iri = IRI_PREFIX_ANNOTATION_INSTANCE + id_short
@@ -105,10 +109,25 @@ class AnnotationNodesDao(object):
             creation_date_time=datetime.now(),
             occurance_start_date_time=start_datetime,
             occurance_end_date_time=end_datetime,
+            activate_occurance_scan=activate_occurance_scan,
         )
         self.ps.graph_push(instance)
 
         return iri
+
+    def toggle_annotation_instance_occurance_scan(
+        self, instance_iri: str, active: bool
+    ):
+        matcher = NodeMatcher(self.ps.graph)
+        node: Node = matcher.match(iri=instance_iri).first()
+        node.update(activate_occurance_scan=active)
+        self.ps.graph_push(node)
+
+    def change_matcher_precision(self, matcher_iri: str, precision: float):
+        matcher = NodeMatcher(self.ps.graph)
+        node: Node = matcher.match(iri=matcher_iri).first()
+        node.update(detection_precision=precision)
+        self.ps.graph_push(node)
 
     def create_annotation_detection(
         self,
@@ -401,7 +420,7 @@ class AnnotationNodesDao(object):
         return matches.first()
 
     @validate_result_nodes
-    def get_matcher_original_annotated_ts(self, matcher_iri):
+    def get_matcher_original_annotated_ts(self, matcher_iri) -> TimeseriesNodeFlat:
         """Returns the timeseries node that the matcher is related to"""
         matches = self.ps.repo_match(model=TimeseriesNodeFlat).where(
             "(_)<-[:"
@@ -414,6 +433,20 @@ class AnnotationNodesDao(object):
         )
 
         return matches.first()
+
+    @validate_result_nodes
+    def get_matched_ts_for_matcher(self, matcher_iri) -> List[TimeseriesNodeFlat]:
+        matches = self.ps.repo_match(model=TimeseriesNodeFlat).where(
+            "(_)<-[:"
+            + RelationshipTypes.TS_MATCH.value
+            + "]-(:"
+            + NodeTypes.ANNOTATION_TS_MATCHER.value
+            + ' {iri: "'
+            + matcher_iri
+            + '"}) '
+        )
+
+        return matches.all()
 
     @validate_result_nodes
     def get_annotation_instance_for_definition(self, definition_iri):
@@ -430,14 +463,63 @@ class AnnotationNodesDao(object):
 
         return matches.all()
 
+    @validate_result_nodes
+    def get_scanned_assets_for_annotation_instance(
+        self, instance_iri
+    ) -> List[AssetNodeFlat]:
+        query = (
+            "(_)-[:"
+            + RelationshipTypes.OCCURANCE_SCAN.value
+            + "]->(:"
+            + NodeTypes.ANNOTATION_DEFINITION.value
+            + ")<-[:"
+            + RelationshipTypes.INSTANCE_OF.value
+            + "]-(:"
+            + NodeTypes.ANNOTATION_INSTANCE.value
+            + ' {iri: "'
+            + instance_iri
+            + '"}) '
+        )
+
+        scanned_assets_matches = self.ps.repo_match(model=AssetNodeFlat).where(query)
+
+        scanned_assets = scanned_assets_matches.all()
+
+        matchers = self.get_matchers_for_annotation_instance(instance_iri)
+
+        # Filter: Only the assets that have a active matching for all matchers of the instance
+        instance_scanned_assets = []
+        for asset in scanned_assets:
+            skip_asset = False
+            asset_ts_iris = [
+                ts.iri for ts in TS_NODES_DAO.get_timeseries_of_asset(asset.iri)
+            ]
+
+            for matcher in matchers:
+                matched_ts_iris = [
+                    ts.iri for ts in self.get_matched_ts_for_matcher(matcher.iri)
+                ]
+                if any([ts not in asset_ts_iris for ts in matched_ts_iris]):
+                    skip_asset = True
+                    break
+            if not skip_asset:
+                instance_scanned_assets.append(asset)
+
+        return instance_scanned_assets
+
     def get_annotation_instance_count_for_definition(self, definition_iri):
         """Returns the instances related to the given annotation definition"""
 
         return len(self.get_annotation_instance_for_definition(definition_iri))
 
     @validate_result_nodes
-    def get_annotation_instances(self):
+    def get_annotation_instances(self, only_active_scanned_instances: bool = False):
         matches = self.ps.repo_match(model=AnnotationInstanceNodeFlat)
+
+        if only_active_scanned_instances:
+            matches = matches.where(
+                "not exists(_.activate_occurance_scan) or _.activate_occurance_scan = true"
+            )
 
         return matches.all()
 
@@ -560,3 +642,23 @@ class AnnotationNodesDao(object):
             return len(self.get_confirmed_annotation_detections())
         else:
             return len(self.get_unconfirmed_annotation_detections())
+
+    @validate_result_nodes
+    def get_matchers_for_annotation_instance(
+        self, instance_iri
+    ) -> AnnotationTimeseriesMatcherNodeFlat:
+        matches = self.ps.repo_match(model=AnnotationTimeseriesMatcherNodeFlat).where(
+            "(_)<-[:"
+            + RelationshipTypes.DETECTABLE_WITH.value
+            + "]-(:"
+            + NodeTypes.ANNOTATION_INSTANCE.value
+            + ' {iri: "'
+            + instance_iri
+            + '"})'
+        )
+
+        return matches.all()
+
+    def get_detection_precision_sum_for_instance(self, instance_iri):
+        matchers = self.get_matchers_for_annotation_instance(instance_iri)
+        return sum([m.detection_precision for m in matchers])

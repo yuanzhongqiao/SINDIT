@@ -29,7 +29,7 @@ def get_layout():
                                 id="graph-header-row",
                                 children=[
                                     dbc.Col(
-                                        html.Div("Factory graph"),
+                                        html.Div("Factory Graph"),
                                         align="center",
                                     ),
                                     dbc.Col(

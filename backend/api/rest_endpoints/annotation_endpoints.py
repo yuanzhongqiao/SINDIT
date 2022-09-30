@@ -3,6 +3,10 @@ import json
 from dateutil import tz
 from fastapi import HTTPException
 from typing import List
+from backend.annotation_detection.AnnotationDetectorContainer import (
+    AnnotationDetectorContainer,
+)
+from util.inter_process_cache import memcache
 from backend.api.api import app
 from backend.knowledge_graph.dao.BaseNodesDao import BaseNodeDao
 from graph_domain.expert_annotations.AnnotationDetectionNode import (
@@ -41,6 +45,26 @@ async def post_annotation_definition(definition: AnnotationDefinitionArguments):
         caption=definition.caption,
         description=definition.description,
     )
+
+
+@app.patch("/annotation/instance/toggle_occurance_scan")
+async def patch_annotation_instance_toggle_occurance_scan(
+    instance_iri: str, active: bool
+):
+    logger.info(
+        f"Toggling occurance scan to active: {active} for annotation instance: {instance_iri}..."
+    )
+    ANNOTATIONS_DAO.toggle_annotation_instance_occurance_scan(instance_iri, active)
+
+
+@app.patch("/annotation/ts_matcher/detection_precision")
+async def patch_annotation_matcher_detection_precision(
+    matcher_iri: str, detection_precision: float
+):
+    logger.info(
+        f"Changing scan precision to {detection_precision} for annotation matcher: {matcher_iri}..."
+    )
+    ANNOTATIONS_DAO.change_matcher_precision(matcher_iri, detection_precision)
 
 
 class AnnotationInstanceArguments(BaseModel):
@@ -185,10 +209,7 @@ def get_annotation_detection_details(detection_iri: None | str = None):
             ANNOTATIONS_DAO.get_oldest_unconfirmed_detection()
         )
         if detection_node is None:
-            logger.info(
-                "Annotation detection details for current detection "
-                "ordered when there was no new detection!"
-            )
+            # not yet open -> skip
             return None
     else:
         detection_node: AnnotationDetectionNodeFlat = BASE_NODE_DAO.get_generic_node(
@@ -305,7 +326,7 @@ async def get_annotation_status():
     """
     status_dict = {
         "total_annotations_count": ANNOTATIONS_DAO.get_annotation_instance_count(),
-        "sum_of_scans": "?",  # TODO
+        "sum_of_scans": int(memcache.get("active_annotation_detectors_count")),
         "unconfirmed_detections": ANNOTATIONS_DAO.get_annotation_detections_count(
             confirmed=False
         ),

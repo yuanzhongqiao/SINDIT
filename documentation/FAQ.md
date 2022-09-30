@@ -8,6 +8,8 @@
 > 
 > To temporally fix the problem, press 'Acknowledge Errors' at the Node-RED Dashboard. Note that this Dashboard is not publicly available and can only be reached from within the local network of the factory.
 
+Node-RED Dashboard is available in the local network of the factory at: `1880/ui/`
+
 ### Development with the Devcontainer
 
 **The port is already in use when (re-)launching either the backend or frontend.**

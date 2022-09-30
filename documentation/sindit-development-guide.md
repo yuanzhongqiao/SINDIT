@@ -39,6 +39,8 @@ This project is run via docker-compose. Run `docker-compose up -d` inside the re
 
 At the first start, this will pull the image used for the frontend and backend containers and for the databases. Use a good network, as the images are not small.
 
+To update the images, run `docker-compose pull`.
+
 To stop the containers, run `docker-compose stop`. 
 
 To destroy the containers but keep the images and data, run `docker-compose down`.

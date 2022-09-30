@@ -60,6 +60,26 @@ def get_visualized_attributes_for_node_type(node: BaseNode) -> List[Tuple[str, s
         attributes_list.append(("Connection Topic", node.connection_topic))
         attributes_list.append(("Connection Keyword", node.connection_keyword))
         attributes_list.append(("Value Type", node.value_type))
+        if node.feature_dict is not None:
+            attributes_list.append(
+                (
+                    "Extracted Features",
+                    ", ".join(
+                        [
+                            f"{feature_tuple[0]}: {feature_tuple[1]}"
+                            for feature_tuple in node.feature_dict.items()
+                        ]
+                    ),
+                )
+            )
+        if node.reduced_feature_list is not None:
+            attributes_list.append(
+                (
+                    "PCA-reduced Features",
+                    ", ".join([str(feature) for feature in node.reduced_feature_list]),
+                )
+            )
+
     elif isinstance(node, SupplementaryFileNodeFlat):
         attributes_list.append(("File Name", node.file_name))
         attributes_list.append(("File Type", node.file_type))
@@ -95,6 +115,9 @@ def get_visualized_attributes_for_node_type(node: BaseNode) -> List[Tuple[str, s
                 "End of the Situation",
                 node.occurance_end_date_time.strftime(STRF_DATETIME_FORMAT),
             )
+        )
+        attributes_list.append(
+            ("Active Scanning for New Occurances", str(node.activate_occurance_scan))
         )
     elif isinstance(node, AnnotationPreIndicatorNodeFlat):
         attributes_list.append(
@@ -144,7 +167,9 @@ def get_visualized_attributes_for_node_type(node: BaseNode) -> List[Tuple[str, s
             )
         )
     elif isinstance(node, AnnotationTimeseriesMatcherNodeFlat):
-        pass
+        attributes_list.append(
+            ("Precision used for Finding new Occurances", str(node.detection_precision))
+        )
 
     return attributes_list
 
