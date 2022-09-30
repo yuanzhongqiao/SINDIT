@@ -5,8 +5,7 @@ apt-get update
 
 apt-get install -y curl wget
 
-# Inter-process communication
-apt-get install memcached
+
 
 # git required for the pke keyphrase extraction library (git pip link)
 apt-get install -y git
@@ -29,6 +28,9 @@ pip install tsfresh
 wget https://dl.influxdata.com/influxdb/releases/influxdb2-client-2.4.0-amd64.deb
 apt install ./influxdb2-client-2.4.0-amd64.deb
 rm influxdb2-client-2.4.0-amd64.deb
+
+# Inter-process communication
+apt-get install -y memcached
 
 apt-get clean
 
