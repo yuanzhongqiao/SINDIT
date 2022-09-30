@@ -196,6 +196,64 @@ class InfluxDbPersistenceService(TimeseriesPersistenceService):
             # Waiting for reconnect...
             return None
 
+    # override
+    def max_value_for_period(
+        self, iri: str, begin_time: datetime = None, end_time: datetime = None
+    ) -> int:
+        warnings.simplefilter("ignore", MissingPivotFunction)
+        range_query = self._timerange_query(begin_time, end_time)
+
+        query = (
+            f'from(bucket: "{self.bucket}") \n'
+            f"{range_query} \n"
+            f'|> filter(fn: (r) => r["_measurement"] == "{iri}") \n'
+            f'|> max(column: "_value") \n'
+            f'|> keep(columns: ["_value"])'
+        )
+
+        # pylint: disable=W0703
+        try:
+            df: pd.DataFrame = self._query_api.query_data_frame(query=query)
+
+            return int(df["_value"][0]) if not df.empty else 0
+
+        except KeyError:
+            # id_uri not found
+            raise IdNotFoundException
+        except Exception:
+            # Using generic exception on purpose, since there are many different ones occuring, that
+            # Waiting for reconnect...
+            return None
+
+    # override
+    def min_value_for_period(
+        self, iri: str, begin_time: datetime = None, end_time: datetime = None
+    ) -> int:
+        warnings.simplefilter("ignore", MissingPivotFunction)
+        range_query = self._timerange_query(begin_time, end_time)
+
+        query = (
+            f'from(bucket: "{self.bucket}") \n'
+            f"{range_query} \n"
+            f'|> filter(fn: (r) => r["_measurement"] == "{iri}") \n'
+            f'|> min(column: "_value") \n'
+            f'|> keep(columns: ["_value"])'
+        )
+
+        # pylint: disable=W0703
+        try:
+            df: pd.DataFrame = self._query_api.query_data_frame(query=query)
+
+            return int(df["_value"][0]) if not df.empty else 0
+
+        except KeyError:
+            # id_uri not found
+            raise IdNotFoundException
+        except Exception:
+            # Using generic exception on purpose, since there are many different ones occuring, that
+            # Waiting for reconnect...
+            return None
+
     def backup(self, backup_path: str):
         logger.info("Backing up InfluxDB...")
 

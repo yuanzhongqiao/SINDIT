@@ -58,3 +58,9 @@ class TimeseriesPersistenceService(SpecializedDatabasePersistenceService):
         :raise IdNotFoundException: if the id_uri is not found
         """
         pass
+
+    @abc.abstractmethod
+    def max_value_for_period(
+        self, iri: str, begin_time: datetime = None, end_time: datetime = None
+    ) -> int:
+        pass

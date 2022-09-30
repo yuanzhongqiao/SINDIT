@@ -68,6 +68,9 @@ class AnnotationDetector(abc.ABC):
 
         self.active = False
         self.stop_signal = False
+        self.last_detection_timestamp = datetime.fromtimestamp(0).astimezone(
+            tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+        )
 
         # Dict: annotated ts iri -> scanned ts iri
         self.scanned_timeseries_iris: Dict[str, str] = scanned_timeseries_iris
@@ -106,6 +109,25 @@ class AnnotationDetector(abc.ABC):
             self.scanned_timeseries_detection_precisions_relative[
                 ts_iri
             ] = matcher.detection_precision
+
+        # Min max
+        self.timeseries_min_values_for_original: Dict[str, float] = dict()
+        self.timeseries_min_values_for_scanned: Dict[str, float] = dict()
+        self.timeseries_max_values_for_original: Dict[str, float] = dict()
+        self.timeseries_max_values_for_scanned: Dict[str, float] = dict()
+        for ts_iri in self.scanned_timeseries_iris.keys():
+            self.timeseries_max_values_for_original[
+                ts_iri
+            ] = self.persistence_services.get(ts_iri).max_value_for_period(ts_iri)
+            self.timeseries_min_values_for_original[
+                ts_iri
+            ] = self.persistence_services.get(ts_iri).min_value_for_period(ts_iri)
+            self.timeseries_min_values_for_scanned[
+                self.scanned_timeseries_iris.get(ts_iri)
+            ] = self.timeseries_min_values_for_original.get(ts_iri)
+            self.timeseries_max_values_for_scanned[
+                self.scanned_timeseries_iris.get(ts_iri)
+            ] = self.timeseries_max_values_for_original.get(ts_iri)
 
         self._prepare_original_dataset()
 
