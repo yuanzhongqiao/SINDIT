@@ -30,18 +30,18 @@ class EuclidianDistanceAnnotationDetector(AnnotationDetector):
         value = reading[1]
         time = reading[2]
 
+        # Load the watched array or create it
         ts_array: np.array = self.current_ts_arrays.get(reading_iri)
         if ts_array is None:
             ts_array = np.array([])
             self.current_ts_arrays[reading_iri] = ts_array
 
+        # Move the watched window
         ts_array = np.append(ts_array, [value])
-
         if len(ts_array) > self.original_ts_lens_mapped_to_scans.get(reading_iri):
             ts_array = np.delete(ts_array, 0)
 
         self.current_ts_arrays[reading_iri] = ts_array
-        # print(len(ts_array))
 
         if all(
             [
@@ -188,6 +188,9 @@ class EuclidianDistanceAnnotationDetector(AnnotationDetector):
             self.original_ts_dataframes[ts_iri] = dataframe
 
     def _normalize_array(self, array: np.array, min_value, max_value) -> np.array:
+        if min_value is None or max_value is None:
+            # This can happen for data types not supporting min / max like bool
+            return array
         # Subtract min value (get to starting at 0)
         non_negative_array = np.subtract(array, min_value)
         # Divide through (max-value - min-value)

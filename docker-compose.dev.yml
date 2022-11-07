@@ -37,7 +37,7 @@ services:
       - 7689:7687
     volumes:
       - sindit-devcontainer-neo4j-conf-volume:/var/lib/neo4j/conf/
-      - sindit-devcontainer-neo4j-logs-volumes:/logs
+      - sindit-devcontainer-neo4j-logs-volume:/logs
       - sindit-devcontainer-neo4j-data-volume:/data
 
   sindit_minio_s3_devcontainer:
