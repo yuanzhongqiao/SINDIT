@@ -5,6 +5,7 @@ from queue import Empty
 from re import A
 from threading import Thread
 import time
+import numpy as np
 from typing import Dict, List
 from backend.exceptions.EnvironmentalVariableNotFoundError import (
     EnvironmentalVariableNotFoundError,
@@ -96,6 +97,13 @@ class AnnotationDetector(abc.ABC):
                 begin_time=self.scanned_annotation_instance.occurance_start_date_time,
                 end_time=self.scanned_annotation_instance.occurance_end_date_time,
             )
+
+            # Convert bools to integers to allow comparison
+            if len(dataframe["value"]) > 0 and isinstance(
+                dataframe["value"][0], np.bool_
+            ):
+                dataframe["value"] = dataframe["value"].astype(int)
+
             self.original_ts_dataframes[ts_iri] = dataframe
 
         # Detection precision
@@ -152,9 +160,14 @@ class AnnotationDetector(abc.ABC):
                     f"Stopping process scanning {self.scanned_asset.caption} for occurances of {self.scanned_annotation_instance.caption}"
                 )
                 return
+
             try:
                 reading = self.detector_input_queue.get(block=True, timeout=3)
+                no_reading = reading is None or reading[1] is None
             except Empty:
+                no_reading = True
+
+            if no_reading:
                 if active and self.detector_active_status_queue.qsize() == 0:
                     try:
                         self.detector_active_status_queue.get_nowait()
@@ -246,6 +259,9 @@ class AnnotationDetector(abc.ABC):
         self.active = True
 
     def _reading_handler(self, ts_iri, reading_value, reading_time):
+        # Convert bool values to integers
+        if isinstance(reading_value, bool):
+            reading_value = 1 if reading_value else 0
         self.detector_input_queue.put((ts_iri, reading_value, reading_time))
 
     def stop_detection(self):
