@@ -6,6 +6,7 @@ import shutil
 from typing import List
 from fastapi.responses import StreamingResponse
 from fastapi import Form, HTTPException
+from backend.aas_serializer import serialize_to_aasx
 from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
     KnowledgeGraphPersistenceService,
 )
@@ -31,6 +32,10 @@ from graph_domain.main_digital_twin.DatabaseConnectionNode import (
 )
 from util.file_name_utils import _replace_illegal_characters_from_iri
 from util.log import logger
+from backend.knowledge_graph.dao.AssetNodesDao import AssetsDao
+
+
+ASSETS_DAO: AssetsDao = AssetsDao.instance()
 
 DB_CON_NODE_DAO: DatabaseConnectionsDao = DatabaseConnectionsDao.instance()
 SUPPL_FILE_DAO: SupplementaryFileNodesDao = SupplementaryFileNodesDao.instance()
@@ -43,8 +48,9 @@ DB_CONNECTION_LABEL_PREFIX = {
     DatabaseConnectionTypes.S3.value: "Files DB",
 }
 
-DATABASE_EXPORT_DIRECTORY = "database_export/"
-DATABASE_IMPORT_DIRECTORY = "database_import/"
+AAS_EXPORT_DIRECTORY = "aas_export/"
+AAS_IMPORT_DIRECTORY = "aas_import/"
+AAS_EXPORT_FILE_NAME_PREFIX = "sindit_aas_"
 
 DATETIME_STRF_FORMAT = "%Y_%m_%d_%H_%M_%S_%f"
 
@@ -59,20 +65,22 @@ async def export_database_dumps():
     """
     logger.info("Started AASX export...")
 
-    # backup_date_time = datetime.now()
-    # backup_date_time_file_string = backup_date_time.astimezone(
-    #     tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
-    # ).strftime(DATETIME_STRF_FORMAT)
+    backup_date_time = datetime.now()
+    backup_date_time_file_string = backup_date_time.astimezone(
+        tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+    ).strftime(DATETIME_STRF_FORMAT)
 
-    # backup_base_path = DATABASE_EXPORT_DIRECTORY + backup_date_time_file_string + "/"
+    os.makedirs(AAS_EXPORT_DIRECTORY, exist_ok=True)
 
-    # os.makedirs(backup_base_path)
+    # export_base_path = AAS_EXPORT_DIRECTORY + backup_date_time_file_string + "/"
+
+    # os.makedirs(export_base_path)
 
     # if all_databases:
     #     db_list = [option[0] for option in get_exportable_databases_list_sync()]
     # else:
     #     if database_iri is None:
-    #         shutil.rmtree(backup_base_path)
+    #         shutil.rmtree(export_base_path)
     #         raise IdNotFoundException()
     #     db_list = [database_iri]
 
@@ -83,18 +91,18 @@ async def export_database_dumps():
     # for db in db_list:
     #     if db == GRAPH_DATABASE_FAKE_IRI:
     #         backup_folder = GRAPH_DATABASE_BACKUP_FOLDER
-    #         backup_path = backup_base_path + backup_folder
+    #         backup_path = export_base_path + backup_folder
     #         KnowledgeGraphPersistenceService.instance().backup(backup_path)
     #         backup_folder_names[db] = backup_folder
     #     else:
     #         backup_folder = _replace_illegal_characters_from_iri(db)
-    #         backup_path = backup_base_path + backup_folder
+    #         backup_path = export_base_path + backup_folder
     #         persistence_service = persistence_container.get_persistence_service(db)
     #         persistence_service.backup(backup_path)
 
     #         backup_folder_names[db] = backup_folder
 
-    # # Create info file:
+    # Create info file:
     # logger.info("Creating backup info file...")
     # info_dict = {
     #     "sindit_export_version": get_configuration(
@@ -107,23 +115,42 @@ async def export_database_dumps():
     # info_json = json.dumps(info_dict, indent=4)
 
     # with open(
-    #     backup_base_path + EXPORT_INFO_FILE_NAME, "w", encoding="utf-8"
+    #     export_base_path + EXPORT_INFO_FILE_NAME, "w", encoding="utf-8"
     # ) as info_file:
     #     info_file.write(info_json)
 
-    # # Zip the folder and delete it
+    # Zip the folder and delete it
     # logger.info("Zipping the backup...")
-    # zip_file_path = DATABASE_EXPORT_DIRECTORY + backup_date_time_file_string
+    # zip_file_path = AAS_EXPORT_DIRECTORY + backup_date_time_file_string
     # zip_file_path_with_extension = zip_file_path + ".zip"
-    # shutil.make_archive(zip_file_path, "zip", backup_base_path)
-    # shutil.rmtree(backup_base_path)
+    # shutil.make_archive(zip_file_path, "zip", export_base_path)
+    # shutil.rmtree(export_base_path)
     # logger.info("Finished zipping the backup. Sending...")
 
-    # def iterfile():
-    #     with open(zip_file_path_with_extension, mode="rb") as file_like:
-    #         yield from file_like
+    # Load the content:
+    assets = ASSETS_DAO.get_assets_deep()
+    asset_similarities = ASSETS_DAO.get_asset_similarities()
 
-    # return StreamingResponse(iterfile(), media_type="application/octet-stream")
+    # Create the AASX package
+    aas_file_path = (
+        AAS_EXPORT_DIRECTORY
+        + AAS_EXPORT_FILE_NAME_PREFIX
+        + backup_date_time_file_string
+    )
+    aasx_file_path_with_extension = aas_file_path + ".aasx"
+    serialize_to_aasx(
+        aasx_file_path=aasx_file_path_with_extension,
+        assets=assets,
+        asset_similarities=asset_similarities,
+    )
+
+    # TODO: Potentially delete intermediate files
+
+    def iterfile():
+        with open(aasx_file_path_with_extension, mode="rb") as file_like:
+            yield from file_like
+
+    return StreamingResponse(iterfile(), media_type="application/octet-stream")
 
 
 @app.post("/import/aas")
