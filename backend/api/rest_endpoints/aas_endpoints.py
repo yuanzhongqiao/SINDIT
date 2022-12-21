@@ -6,6 +6,7 @@ import shutil
 from typing import List
 from fastapi.responses import StreamingResponse
 from fastapi import Form, HTTPException
+from backend.aas_deserializer import deserialize_from_aasx
 from backend.aas_serializer import serialize_to_aasx
 from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
     KnowledgeGraphPersistenceService,
@@ -156,30 +157,38 @@ async def export_database_dumps():
 @app.post("/import/aas")
 async def upload(file_name: str = Form(...), file_data: str = Form(...)):
     logger.info(f"Importing AASX package: {file_name}")
-    # restore_date_time = datetime.now()
-    # restore_date_time_file_string = restore_date_time.astimezone(
-    #     tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
-    # ).strftime(DATETIME_STRF_FORMAT)
 
-    # restore_base_path = DATABASE_IMPORT_DIRECTORY + restore_date_time_file_string + "/"
-    # os.makedirs(restore_base_path)
+    # Retrieve and prepare file:
+    restore_date_time = datetime.now()
+    restore_date_time_file_string = restore_date_time.astimezone(
+        tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+    ).strftime(DATETIME_STRF_FORMAT)
 
-    # content_type, content_string = file_data.split(",")
-    # if content_type != "data:application/zip;base64":
-    #     shutil.rmtree(restore_base_path)
-    #     raise HTTPException(
-    #         status_code=403, detail="Invalid file: only zip archives allowed."
-    #     )
+    restore_base_path = AAS_IMPORT_DIRECTORY + restore_date_time_file_string + "/"
+    os.makedirs(restore_base_path)
 
-    # decoded_bytes = base64.b64decode(content_string)
+    content_type, content_string = file_data.split(",")
+    if content_type != "data:application/octet-stream;base64":
+        shutil.rmtree(restore_base_path)
+        raise HTTPException(
+            status_code=403, detail="Invalid file: only AASX zip archives allowed."
+        )
 
-    # zip_file_name = restore_base_path + "zip_archive.zip"
-    # with open(zip_file_name, "wb") as f:
-    #     f.write(decoded_bytes)
+    decoded_bytes = base64.b64decode(content_string)
 
-    # shutil.unpack_archive(filename=zip_file_name, extract_dir=restore_base_path)
-    # os.remove(zip_file_name)
+    aasx_file_name = restore_base_path + "zip_archive.zip"
+    with open(aasx_file_name, "wb") as f:
+        f.write(decoded_bytes)
 
+    # Deserialize
+    deserialize_from_aasx(aasx_file_path=aasx_file_name)
+
+    # Cleanup
+    os.remove(aasx_file_name)
+
+    return {"message": f"Successfuly imported {file_name}"}
+
+    # shutil.unpack_archive(filename=aasx_file_name, extract_dir=restore_base_path)
     # # Parse info file:
     # try:
     #     with open(

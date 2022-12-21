@@ -40,7 +40,7 @@ def get_supplementary_file_stream(iri: str):
     :return:
     """
     try:
-        # Get related timeseries-database service:
+        # Get related database service:
         file_con_node: DatabaseConnectionsDao = (
             DB_CON_NODE_DAO.get_database_connection_for_node(iri)
         )
@@ -71,7 +71,7 @@ def get_supplementary_file_temporary_link(iri: str):
     :return:
     """
     try:
-        # Get related timeseries-database service:
+        # Get related database service:
         file_con_node: DatabaseConnectionsDao = (
             DB_CON_NODE_DAO.get_database_connection_for_node(iri)
         )
