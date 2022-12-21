@@ -53,7 +53,7 @@ def get_layout():
                 id="import-export-dropdown",
                 is_open=False,
                 children=[
-                    dbc.PopoverHeader("Export"),
+                    dbc.PopoverHeader("Database Export"),
                     dbc.PopoverBody(
                         children=[
                             html.Div(
@@ -107,12 +107,50 @@ def get_layout():
                             ),
                         ],
                     ),
-                    dbc.PopoverHeader("Import"),
+                    dbc.PopoverHeader("Asset Administration Shell (AAS) Export"),
+                    dbc.PopoverBody(
+                        children=[
+                            html.Div(
+                                "Here, you can export the Digital Twin to an AASX package. Note that this does not contain time-series values."
+                            ),
+                            dbc.Button(
+                                [
+                                    html.I(className="bi bi-download me-2"),
+                                    "Export to AASX package",
+                                ],
+                                id="export-aas-button",
+                                n_clicks=0,
+                                color="primary",
+                                size="sm",
+                                style={
+                                    "border": "none",
+                                    "margin-top": "10px",
+                                    "width": "100%",
+                                    "margin-bottom": "10px",
+                                },
+                            ),
+                            dcc.Download(id="aas-export-download"),
+                            dbc.Alert(
+                                children="Export started. This can take a while!",
+                                id="aas-export-started-notifier",
+                                class_name="inline-alert",
+                                is_open=False,
+                                duration=5000,
+                                style={"padding-top": "8px"},
+                            ),
+                        ],
+                    ),
+                    dbc.PopoverHeader(
+                        "Import (Database or Asset Administration Shell)"
+                    ),
                     dbc.PopoverBody(
                         [
                             html.Div(
                                 "Here, you can import backups of either the whole system, or of specific databases.\n"
                                 "The backups must be a valid ZIP archive as can be exported above."
+                                "You can also import compatible AASX packages.\n"
+                                "Since AAS is a very flexible standard, not all expressible contents can be loaded into SINTEF. \n"
+                                "Press 'Help' for more information."
                             ),
                             dcc.Upload(
                                 id="upload-import",

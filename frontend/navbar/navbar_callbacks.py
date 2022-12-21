@@ -13,6 +13,7 @@ from util.log import logger
 logger.info("Initializing navbar callbacks...")
 
 EXPORT_FILE_NAME_BASE = "sindit_database_export_"
+AAS_EXPORT_FILE_NAME_BASE = "sindit_aas_"
 DATETIME_STRF_FORMAT = "%Y_%m_%d_%H_%M_%S_%f"
 
 
@@ -72,6 +73,16 @@ def download_notifier(n, m):
 
 
 @app.callback(
+    Output("aas-export-started-notifier", "is_open"),
+    Input("export-aaas-button", "n_clicks"),
+    prevent_initial_call=True,
+)
+def download_notifier_aas(n, m):
+    # Separate callback to display the notifier before the end of the main callback!
+    return True
+
+
+@app.callback(
     Output("import-started-notifier", "is_open"),
     Input("import-upload-button", "n_clicks"),
     prevent_initial_call=True,
@@ -114,6 +125,28 @@ def download_export(n, m, selected_db):
 
 
 @app.callback(
+    Output("aas-export-download", "data"),
+    Input("export-aas-button", "n_clicks"),
+    prevent_initial_call=True,
+)
+def aas_download_export(_):
+    logger.info(f"Started AASX export")
+
+    date_time_str = (
+        datetime.now()
+        .astimezone(
+            tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+        )
+        .strftime(DATETIME_STRF_FORMAT)
+    )
+    file_name = AAS_EXPORT_FILE_NAME_BASE + date_time_str + ".aasx"
+
+    file_data = api_client.get_raw(relative_path="/export/aas")
+    logger.info("AASX export finished.")
+    return dcc.send_bytes(src=file_data, filename=file_name)
+
+
+@app.callback(
     Output("import-file-selected-info", "children"),
     Output("import-file-selected-info-collapse", "is_open"),
     Output("import-upload-button", "disabled"),
@@ -137,30 +170,24 @@ def select_upload_file(filename):
     State("upload-import", "contents"),
     prevent_initial_call=True,
 )
-def upload_file(n, file_name, file_data):
-    logger.info(f"Started database import: {file_name} ...")
-    response_body_text = api_client.post(
-        relative_path="/import/database_dumps",
-        data={"file_name": file_name, "file_data": file_data},
-    )
-    logger.info("Finished database import.")
+def upload_file(n, file_name: str, file_data):
+    logger.info(f"Started import: {file_name} ...")
+
+    if file_name.endswith(".zip"):
+        logger.info(f"ZIP file detected. Starting database import...")
+        response_body_text = api_client.post(
+            relative_path="/import/database_dumps",
+            data={"file_name": file_name, "file_data": file_data},
+        )
+        logger.info("Finished database import.")
+    elif file_name.endswith(".aasx"):
+        logger.info(f"AASX file detected. Starting AAS import...")
+        response_body_text = api_client.post(
+            relative_path="/import/aas",
+            data={"file_name": file_name, "file_data": file_data},
+        )
+        logger.info("Finished AASX import.")
+    else:
+        logger.warn("Uploaded file type does not match allowed ZIP and AASX endings!")
+
     return None, datetime.now()
-
-
-# @app.callback(
-#     Output("output-data-upload", "children"),
-#     Input("upload-import", "contents"),
-#     State("upload-import", "filename"),
-#     State("upload-import", "last_modified"),
-#     prevent_initial_call=True,
-# )
-# def upload_file(list_of_contents, list_of_names, list_of_dates):
-#     pass
-
-
-# if list_of_contents is not None:
-#     children = [
-#         parse_contents(c, n, d)
-#         for c, n, d in zip(list_of_contents, list_of_names, list_of_dates)
-#     ]
-#     return children
