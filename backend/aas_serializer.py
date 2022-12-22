@@ -817,7 +817,7 @@ def serialize_to_aasx(
                 sub_submodels.append(
                     model.Property(
                         id_short="key_phrases",
-                        value=", ".join(
+                        value=json.dumps(
                             [
                                 key_phrase.keyword
                                 for key_phrase in suppl_file.extracted_keywords
