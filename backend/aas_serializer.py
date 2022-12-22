@@ -573,7 +573,7 @@ def serialize_to_aasx(
                 sub_submodels.append(
                     model.Property(
                         id_short="pca_reduced_feature_list",
-                        value=", ".join([str(val) for val in ts.reduced_feature_list]),
+                        value=ts._reduced_feature_list,
                         value_type=model.datatypes.String,
                         semantic_id=model.AASReference.from_referable(
                             reduced_features_concept

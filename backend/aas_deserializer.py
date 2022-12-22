@@ -1,4 +1,5 @@
 import datetime
+import json
 from pathlib import Path  # Used for easier handling of auxiliary file's local path
 
 import pyecma376_2  # The base library for Open Packaging Specifications. We will use the OPCCoreProperties class.
@@ -15,6 +16,7 @@ from graph_domain.main_digital_twin.AssetNode import AssetNodeDeep
 from graph_domain.main_digital_twin.RuntimeConnectionNode import RuntimeConnectionNode
 from graph_domain.main_digital_twin.TimeseriesNode import TimeseriesNodeDeep
 from graph_domain.main_digital_twin.UnitNode import UnitNode
+from graph_domain.similarities.TimeseriesClusterNode import TimeseriesClusterNode
 
 # def _serialize_asset(asset: AssetNodeDeep):
 #     pass
@@ -88,9 +90,29 @@ def deserialize_from_aasx(
                 )
             )
 
-            # TODO: features
+            # Reduced features
+            reduced_features_properties = [
+                el
+                for el in submodel_elements
+                if el.id_short == "pca_reduced_feature_list"
+            ]
+            if len(reduced_features_properties) > 0:
+                reduced_features = reduced_features_properties[0].value
+            else:
+                reduced_features = None
 
-            # TODO: cluster
+            # Feature dict
+            features_properties = [
+                el for el in submodel_elements if el.id_short == "extracted_features"
+            ]
+            if len(features_properties) > 0:
+                features_property_collection = features_properties[0].value
+                feature_dict = dict()
+                for feature in features_property_collection:
+                    feature_dict[feature.id_short] = float(feature.value)
+                feature_json = json.dumps(feature_dict)
+            else:
+                feature_json = None
 
             ts = TimeseriesNodeDeep(
                 id_short=ts_meta.id_short,
@@ -98,6 +120,8 @@ def deserialize_from_aasx(
                 iri=iri_property.value,
                 _explizit_caption=caption_property.value,
                 value_type=value_type_object.id_short,
+                _reduced_feature_list=reduced_features,
+                _feature_dict=feature_json,
             )
 
             # Unit
@@ -115,6 +139,26 @@ def deserialize_from_aasx(
                         iri=unit_object.identification.id,
                         id_short=unit_object.id_short,
                         description=unit_object.description.get("en"),
+                    )
+                )
+
+            # CLuster
+            cluster_properties = [
+                el for el in submodel_elements if el.id_short == "cluster_affiliation"
+            ]
+            if len(cluster_properties) > 0:
+                cluster_property = cluster_properties[0]
+                cluster_object = object_store.get_identifiable(
+                    model.Identifier(
+                        cluster_property.value_id.key[0].value, model.IdentifierType.IRI
+                    )
+                )
+
+                ts._ts_clusters.add(
+                    TimeseriesClusterNode(
+                        iri=cluster_object.identification.id,
+                        id_short=cluster_object.id_short,
+                        description=cluster_object.description.get("en"),
                     )
                 )
 
