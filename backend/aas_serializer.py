@@ -6,8 +6,12 @@ import random  # Used for easier handling of auxiliary file's local path
 import pyecma376_2  # The base library for Open Packaging Specifications. We will use the OPCCoreProperties class.
 from basyx.aas import model
 from basyx.aas.adapter import aasx
+from graph_domain import BaseNode
+from graph_domain.main_digital_twin import UnitNode
 from graph_domain.main_digital_twin.RuntimeConnectionNode import RuntimeConnectionTypes
 from graph_domain.main_digital_twin.SupplementaryFileNode import SupplementaryFileTypes
+from graph_domain.main_digital_twin.TimeseriesNode import TimeseriesValueTypes
+from graph_domain.similarities.TimeseriesClusterNode import TimeseriesClusterNode
 from util.environment_and_configuration import (
     ConfigGroups,
     get_configuration,
@@ -45,6 +49,30 @@ def _get_unique_suffix() -> str:
     return date_time_str + "_" + str(random.randrange(0, 99999, 1))
 
 
+def _load_or_create_concept_descr_reference(
+    node: BaseNode,
+    concepts_dict: Dict[str, model.Identifiable],
+    object_store: model.DictObjectStore,
+    all_identifiers_list: List[model.Identifier],
+):
+    if node is None:
+        return None
+    if node.iri not in concepts_dict.keys():
+        concept = model.concept.ConceptDescription(
+            identification=model.Identifier(
+                node.iri,
+                model.IdentifierType.IRI,
+            ),
+            id_short=node.id_short,
+            description=dict(en=node.description),
+        )
+        object_store.add(concept)
+        all_identifiers_list.append(concept.identification)
+        concepts_dict[node.iri] = model.AASReference.from_referable(concept)
+
+    return concepts_dict.get(node.iri)
+
+
 def serialize_to_aasx(
     aasx_file_path: str,
     assets: List[AssetNodeDeep],
@@ -56,6 +84,8 @@ def serialize_to_aasx(
     object_store = model.DictObjectStore([])
     file_store = aasx.DictSupplementaryFileContainer()
     all_identifiers_list: List[model.Identifier] = []
+
+    dynamic_concepts_dict: Dict[str, model.Identifiable] = dict()
 
     ###############################
     # Concept descriptions
@@ -249,6 +279,49 @@ def serialize_to_aasx(
     object_store.add(con_keyword_connection_concept)
     all_identifiers_list.append(con_keyword_connection_concept.identification)
 
+    # Datatypes
+    integer_concept = model.concept.ConceptDescription(
+        identification=model.Identifier(
+            CONCEPT_DESCRIPTION_IRI_PATH + "integer",
+            model.IdentifierType.IRI,
+        ),
+        id_short="INTEGER",
+    )
+    object_store.add(integer_concept)
+    all_identifiers_list.append(integer_concept.identification)
+
+    bool_concept = model.concept.ConceptDescription(
+        identification=model.Identifier(
+            CONCEPT_DESCRIPTION_IRI_PATH + "boolean",
+            model.IdentifierType.IRI,
+        ),
+        id_short="BOOLEAN",
+    )
+    object_store.add(bool_concept)
+    all_identifiers_list.append(bool_concept.identification)
+
+    decimal_concept = model.concept.ConceptDescription(
+        identification=model.Identifier(
+            CONCEPT_DESCRIPTION_IRI_PATH + "decimal",
+            model.IdentifierType.IRI,
+        ),
+        id_short="DECIMAL",
+    )
+    object_store.add(decimal_concept)
+    all_identifiers_list.append(decimal_concept.identification)
+
+    string_concept = model.concept.ConceptDescription(
+        identification=model.Identifier(
+            CONCEPT_DESCRIPTION_IRI_PATH + "string",
+            model.IdentifierType.IRI,
+        ),
+        id_short="STRING",
+    )
+    object_store.add(string_concept)
+    all_identifiers_list.append(string_concept.identification)
+
+    # Units
+
     ###############################
 
     # Create the AAS objects
@@ -282,6 +355,54 @@ def serialize_to_aasx(
         )
         for ts in sindit_asset.timeseries:
             sub_submodels = []
+
+            # Value type
+            if ts.value_type == TimeseriesValueTypes.DECIMAL.value:
+                value_semantic = model.AASReference.from_referable(decimal_concept)
+            elif ts.value_type == TimeseriesValueTypes.BOOL.value:
+                value_semantic = model.AASReference.from_referable(bool_concept)
+            elif ts.value_type == TimeseriesValueTypes.STRING.value:
+                value_semantic = model.AASReference.from_referable(string_concept)
+            else:
+                value_semantic = model.AASReference.from_referable(integer_concept)
+
+            sub_submodels.append(
+                model.Property(
+                    id_short="value_type",
+                    value_type=model.datatypes.String,
+                    value_id=value_semantic,
+                )
+            )
+
+            # Attached unit if present
+            if ts.unit is not None:
+                sub_submodels.append(
+                    model.Property(
+                        id_short="unit",
+                        value_type=model.datatypes.String,
+                        value_id=_load_or_create_concept_descr_reference(
+                            ts.unit,
+                            dynamic_concepts_dict,
+                            object_store,
+                            all_identifiers_list,
+                        ),
+                    )
+                )
+
+            # Attached cluster if present
+            if ts.ts_cluster is not None:
+                sub_submodels.append(
+                    model.Property(
+                        id_short="cluster_affiliation",
+                        value_type=model.datatypes.String,
+                        value_id=_load_or_create_concept_descr_reference(
+                            ts.ts_cluster,
+                            dynamic_concepts_dict,
+                            object_store,
+                            all_identifiers_list,
+                        ),
+                    )
+                )
 
             # Extracted features if present
             if len(ts.feature_dict) > 0:
