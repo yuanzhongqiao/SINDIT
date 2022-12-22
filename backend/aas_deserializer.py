@@ -71,10 +71,37 @@ def deserialize_from_aasx(
             sm for sm in aas_submodels if sm.id_short == "supplementary_files"
         ][0]
 
+        # caption
+        asset_caption_properties = [
+            detail
+            for detail in sindit_submodel.submodel_element
+            if detail.id_short == "CAPTION"
+        ]
+        if len(asset_caption_properties) > 0:
+            caption = asset_caption_properties[0].value
+        else:
+            caption = None
+
+        # node positions
+        positions_properties = [
+            detail
+            for detail in sindit_submodel.submodel_element
+            if detail.id_short == "sindit_node_positions"
+        ]
+        if len(positions_properties) > 0:
+            positions_json = positions_properties[0].value
+            positions_dict = json.loads(positions_json)
+        else:
+            positions_dict = dict()
+
+        positions = positions_dict.get(aas_asset.identification.id)
         asset = AssetNodeDeep(
             iri=aas_asset.identification.id,
             id_short=aas_asset.id_short,
             description=aas_asset.description.get("en"),
+            _explizit_caption=caption,
+            visualization_positioning_x=positions[0] if positions is not None else None,
+            visualization_positioning_y=positions[1] if positions is not None else None,
         )
 
         # Files
@@ -99,6 +126,7 @@ def deserialize_from_aasx(
                 )
             )
 
+            positions = positions_dict.get(iri_property.value)
             file = SupplementaryFileNodeDeep(
                 id_short=file_meta.id_short,
                 description=file_meta.description.get("en"),
@@ -106,6 +134,12 @@ def deserialize_from_aasx(
                 _explizit_caption=caption_property.value,
                 file_name=file_name,
                 file_type=file_type_concept.id_short,
+                visualization_positioning_x=positions[0]
+                if positions is not None
+                else None,
+                visualization_positioning_y=positions[1]
+                if positions is not None
+                else None,
             )
 
             # Extracted keyphrases
@@ -117,12 +151,20 @@ def deserialize_from_aasx(
                 key_phrases_list = json.loads(key_phrases_json)
 
                 for kp in key_phrases_list:
+                    iri = f"www.sintef.no/aas_identifiers/learning_factory/similarity_analysis/extracted_keyword_{kp}"
+                    positions = positions_dict.get(iri)
                     file._extracted_keywords.add(
                         ExtractedKeywordNode(
-                            iri=f"www.sintef.no/aas_identifiers/learning_factory/similarity_analysis/extracted_keyword_{kp}",
+                            iri=iri,
                             id_short=f"extracted_keyword_{kp}",
                             keyword=kp,
                             _explizit_caption=kp,
+                            visualization_positioning_x=positions[0]
+                            if positions is not None
+                            else None,
+                            visualization_positioning_y=positions[1]
+                            if positions is not None
+                            else None,
                         )
                     )
 
@@ -175,6 +217,7 @@ def deserialize_from_aasx(
                 if el.id_short == "key_environmental_variable"
             ][0]
 
+            positions = positions_dict.get(db_con_iri.value)
             file._db_connections.add(
                 DatabaseConnectionNode(
                     iri=db_con_iri.value,
@@ -186,6 +229,12 @@ def deserialize_from_aasx(
                     port_environment_variable=db_con_port.value,
                     user_environment_variable=db_con_user.value,
                     key_environment_variable=db_con_key.value,
+                    visualization_positioning_x=positions[0]
+                    if positions is not None
+                    else None,
+                    visualization_positioning_y=positions[1]
+                    if positions is not None
+                    else None,
                 )
             )
 
@@ -232,6 +281,7 @@ def deserialize_from_aasx(
             else:
                 feature_json = None
 
+            positions = positions_dict.get(iri_property.value)
             ts = TimeseriesNodeDeep(
                 id_short=ts_meta.id_short,
                 description=ts_meta.description.get("en"),
@@ -240,6 +290,12 @@ def deserialize_from_aasx(
                 value_type=value_type_object.id_short,
                 _reduced_feature_list=reduced_features,
                 _feature_dict=feature_json,
+                visualization_positioning_x=positions[0]
+                if positions is not None
+                else None,
+                visualization_positioning_y=positions[1]
+                if positions is not None
+                else None,
             )
 
             # Unit
@@ -252,11 +308,18 @@ def deserialize_from_aasx(
                     )
                 )
 
+                positions = positions_dict.get(unit_object.identification.id)
                 ts._units.add(
                     UnitNode(
                         iri=unit_object.identification.id,
                         id_short=unit_object.id_short,
                         description=unit_object.description.get("en"),
+                        visualization_positioning_x=positions[0]
+                        if positions is not None
+                        else None,
+                        visualization_positioning_y=positions[1]
+                        if positions is not None
+                        else None,
                     )
                 )
 
@@ -272,11 +335,18 @@ def deserialize_from_aasx(
                     )
                 )
 
+                positions = positions_dict.get(cluster_object.identification.id)
                 ts._ts_clusters.add(
                     TimeseriesClusterNode(
                         iri=cluster_object.identification.id,
                         id_short=cluster_object.id_short,
                         description=cluster_object.description.get("en"),
+                        visualization_positioning_x=positions[0]
+                        if positions is not None
+                        else None,
+                        visualization_positioning_y=positions[1]
+                        if positions is not None
+                        else None,
                     )
                 )
 
@@ -329,6 +399,7 @@ def deserialize_from_aasx(
                 if el.id_short == "key_environmental_variable"
             ][0]
 
+            positions = positions_dict.get(db_con_iri.value)
             ts._db_connections.add(
                 DatabaseConnectionNode(
                     iri=db_con_iri.value,
@@ -340,6 +411,12 @@ def deserialize_from_aasx(
                     port_environment_variable=db_con_port.value,
                     user_environment_variable=db_con_user.value,
                     key_environment_variable=db_con_key.value,
+                    visualization_positioning_x=positions[0]
+                    if positions is not None
+                    else None,
+                    visualization_positioning_y=positions[1]
+                    if positions is not None
+                    else None,
                 )
             )
 
@@ -392,6 +469,7 @@ def deserialize_from_aasx(
                 if el.id_short == "key_environmental_variable"
             ][0]
 
+            positions = positions_dict.get(rt_con_iri.value)
             ts._runtime_connections.add(
                 RuntimeConnectionNode(
                     iri=rt_con_iri.value,
@@ -401,6 +479,12 @@ def deserialize_from_aasx(
                     port_environment_variable=rt_con_port.value,
                     user_environment_variable=rt_con_user.value,
                     key_environment_variable=rt_con_key.value,
+                    visualization_positioning_x=positions[0]
+                    if positions is not None
+                    else None,
+                    visualization_positioning_y=positions[1]
+                    if positions is not None
+                    else None,
                 )
             )
             ts.connection_topic = rt_con_topic.value
@@ -416,24 +500,3 @@ def deserialize_from_aasx(
         ps.graph.push(asset)
 
     pass
-
-    # Create the AAS objects
-    # for sindit_asset in assets:
-
-    #     aas_asset = model.Asset(
-    #         kind=model.AssetKind.INSTANCE,
-    #         identification=model.Identifier(
-    #             id_=sindit_asset.iri, id_type=model.IdentifierType.IRI
-    #         ),
-    #     )
-    #     aas = model.AssetAdministrationShell(
-    #         identification=model.Identifier(
-    #             sindit_asset.iri + "_administration_shell", model.IdentifierType.IRI
-    #         ),
-    #         asset=model.AASReference.from_referable(aas_asset),
-    #         submodel={},
-    #     )
-
-    #     aas_list.append(aas)
-    #     object_store.add(aas_asset)
-    #     object_store.add(aas)
