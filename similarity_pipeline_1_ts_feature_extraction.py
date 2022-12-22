@@ -1,4 +1,5 @@
 from datetime import date, datetime, timedelta
+import random
 import sys
 from typing import Dict, List
 from tsfresh import extract_features
@@ -21,25 +22,13 @@ from util.log import logger
 # #############################################################################
 logger.info("\n\n\nSTEP 1: Timeseries feature extraction\n")
 
-# Restricted comparison time
+# Restricted comparison time (since the factory is not running all the time, a specific range was selected)
 comparison_end_date_time = datetime(
     year=2022, month=7, day=29, hour=11, minute=0, second=0
 )
 comparison_duration = timedelta(hours=2).total_seconds()
-# comparison_duration = timedelta(hours=20).total_seconds()  # ~ 30 sec per timeseries
 
-# comparison_duration = timedelta(hours=12).total_seconds()  # ~ 10 sec per timeseries
-
-# Fast testing:
-# comparison_duration = timedelta(minutes=10).total_seconds()
-
-# carful! to short durations lead to nan values for some features. This is afterwards not supported by DBSCAN
-
-# Forever. Huge amount of entries!
-# comparison_end_date_time = None
-# comparison_duration = None
-
-timeseries_nodes_flat = timeseries_endpoints.get_timeseries_nodes(deep=False)
+timeseries_nodes = timeseries_endpoints.get_timeseries_nodes(deep=True)
 
 # Get empty feature set to be applied to all not compatible TS:
 test_ts_dataframe = pd.DataFrame(columns=["time", "value"], data=[[0, 1], [1, 2]])
@@ -56,17 +45,36 @@ empty_feature_dict = extracted_test_features.to_dict()[0]
 for key in empty_feature_dict.keys():
     empty_feature_dict[key] = sys.maxsize
     # pseudo value to build a cluster of not supported TS
-    # TODO: to be reimplemented later
+
+#######################
+logger.info("Preparing units for transformation into an additional feature")
+NO_UNIT = "no_unit"
+all_unit_ids_not_unique = [
+    ts.unit.iri for ts in timeseries_nodes if ts.unit is not None
+]
+all_unit_ids = list(set(all_unit_ids_not_unique))
+all_unit_ids.append(NO_UNIT)
+
+# Create feature number assignments for units (multiple times to enhance randomness)
+unit_numbers: List[Dict] = []
+for i in range(5):
+    random.shuffle(all_unit_ids)
+    unit_numbers.append(dict())
+    j = 0
+    for unit in all_unit_ids:
+        unit_numbers[i][unit] = j
+        j += 1
+
 
 i = 1
 pipeline_start_datetime = datetime.now()
 logger.info(f"Timeseries analysis started at {pipeline_start_datetime}")
 timeseries_node: TimeseriesNodeFlat
-for timeseries_node in timeseries_nodes_flat:
+for timeseries_node in timeseries_nodes:
     pipeline_single_node_start_datetime = datetime.now()
 
     logger.info(
-        f"\n\nAnalyzing timeseries {i} of {len(timeseries_nodes_flat)}: {timeseries_node.id_short}"
+        f"\n\nAnalyzing timeseries {i} of {len(timeseries_nodes)}: {timeseries_node.id_short}"
     )
     # Note that this can result in very large ranges, if enough data is present!
     ts_entry_count = timeseries_endpoints.get_timeseries_entries_count(
@@ -104,8 +112,6 @@ for timeseries_node in timeseries_nodes_flat:
         )
         extracted_features = extracted_features.transpose()
         feature_dict = extracted_features.to_dict()[0]
-        # extracted_features.reset_index(inplace=True)
-        # extracted_features.columns = ["feature_key", "value"]
     else:
         logger.info(
             f"Feature calculation with normal timeseries libraries not possible: Unsupported type: {timeseries_node.value_type}"
@@ -118,16 +124,21 @@ for timeseries_node in timeseries_nodes_flat:
         f"Timeseries analysis finished at {pipeline_single_node_end_datetime} after {pipeline_single_node_end_datetime - pipeline_single_node_start_datetime}"
     )
 
+    #######################
+    logger.info("Converting unit-relationship into an additional feature")
+    unit_iri = timeseries_node.unit.iri if timeseries_node.unit is not None else NO_UNIT
+    for j in range(5):
+        feature_dict[f"unit_association_shuffle_{j}"] = unit_numbers[j].get(unit_iri)
+
+    #######################
     logger.info("Writing to KG-DT...")
     timeseries_endpoints.set_ts_feature_dict(timeseries_node.iri, feature_dict)
 
     i += 1
-    pass
+
 
 pipeline_end_datetime = datetime.now()
 
 logger.info(
     f"Timeseries analysis finished at {pipeline_end_datetime} after {pipeline_end_datetime - pipeline_start_datetime}"
 )
-
-pass
