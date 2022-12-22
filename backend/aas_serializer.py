@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 from pathlib import Path
 import re
 import random  # Used for easier handling of auxiliary file's local path
@@ -180,6 +181,32 @@ def serialize_to_aasx(
     object_store.add(reduced_features_concept)
     all_identifiers_list.append(reduced_features_concept.identification)
 
+    similarities_concept = model.concept.ConceptDescription(
+        identification=model.Identifier(
+            CONCEPT_DESCRIPTION_IRI_PATH + "asset_similarities",
+            model.IdentifierType.IRI,
+        ),
+        id_short="ASSET_SIMILARITIES",
+        description=dict(
+            en="List of similarity relationships between assets in JSON format."
+        ),
+    )
+    object_store.add(similarities_concept)
+    all_identifiers_list.append(similarities_concept.identification)
+
+    node_positions_concept = model.concept.ConceptDescription(
+        identification=model.Identifier(
+            CONCEPT_DESCRIPTION_IRI_PATH + "sindit_node_positions",
+            model.IdentifierType.IRI,
+        ),
+        id_short="SINDIT_NODE_POSITIONS",
+        description=dict(
+            en="Dict containing positions the different nodes can be represented with. Encoded in the JSON format."
+        ),
+    )
+    object_store.add(node_positions_concept)
+    all_identifiers_list.append(node_positions_concept.identification)
+
     # File types:
 
     jpg_concept = model.concept.ConceptDescription(
@@ -343,6 +370,102 @@ def serialize_to_aasx(
             asset=model.AASReference.from_referable(aas_asset),
             submodel=set(),
         )
+
+        ###############################
+        # SINDIT details: graph positions, asset caption and asset similarities
+        sindit_submodel = model.Submodel(
+            identification=model.Identifier(
+                SUBMODEL_BASE_IRI_PATH + "sindit_details/" + _get_unique_suffix(),
+                model.IdentifierType.IRI,
+            ),
+            id_short="sindit_details",
+        )
+
+        # Caption
+        sindit_submodel.submodel_element.add(
+            model.Property(
+                id_short="CAPTION",
+                value=sindit_asset.caption,
+                value_type=model.datatypes.String,
+                semantic_id=model.AASReference.from_referable(caption_concept),
+            )
+        )
+
+        # Similarities
+        filtered_similarities_list = [
+            similarity
+            for similarity in asset_similarities
+            if similarity.get("asset1") == sindit_asset.iri
+        ]
+        filtered_similarities_json = json.dumps(filtered_similarities_list)
+        sindit_submodel.submodel_element.add(
+            model.Property(
+                id_short="asset_similarities",
+                value=filtered_similarities_json,
+                value_type=model.datatypes.String,
+                semantic_id=model.AASReference.from_referable(similarities_concept),
+            )
+        )
+
+        # Node positions
+        positions_dict: Dict[str, tuple(float | None, float | None)] = dict()
+        positions_dict[sindit_asset.iri] = (
+            sindit_asset.visualization_positioning_x,
+            sindit_asset.visualization_positioning_y,
+        )
+        for ts in sindit_asset.timeseries:
+            positions_dict[ts.iri] = (
+                ts.visualization_positioning_x,
+                ts.visualization_positioning_y,
+            )
+            positions_dict[ts.db_connection.iri] = (
+                ts.db_connection.visualization_positioning_x,
+                ts.db_connection.visualization_positioning_y,
+            )
+            positions_dict[ts.runtime_connection.iri] = (
+                ts.runtime_connection.visualization_positioning_x,
+                ts.runtime_connection.visualization_positioning_y,
+            )
+            if ts.unit is not None:
+                positions_dict[ts.unit.iri] = (
+                    ts.unit.visualization_positioning_x,
+                    ts.unit.visualization_positioning_y,
+                )
+            if ts.ts_cluster is not None:
+                positions_dict[ts.ts_cluster.iri] = (
+                    ts.ts_cluster.visualization_positioning_x,
+                    ts.ts_cluster.visualization_positioning_y,
+                )
+        for file in sindit_asset.supplementary_files:
+            positions_dict[file.iri] = (
+                file.visualization_positioning_x,
+                file.visualization_positioning_y,
+            )
+            positions_dict[file.db_connection.iri] = (
+                file.db_connection.visualization_positioning_x,
+                file.db_connection.visualization_positioning_y,
+            )
+            for keyword in file.extracted_keywords:
+                positions_dict[keyword.iri] = (
+                    keyword.visualization_positioning_x,
+                    keyword.visualization_positioning_y,
+                )
+
+        positions_json = json.dumps(positions_dict)
+        sindit_submodel.submodel_element.add(
+            model.Property(
+                id_short="sindit_node_positions",
+                value=positions_json,
+                value_type=model.datatypes.String,
+                semantic_id=model.AASReference.from_referable(node_positions_concept),
+            )
+        )
+
+        # Create submodel
+        object_store.add(sindit_submodel)
+        all_identifiers_list.append(sindit_submodel.identification)
+        aas.submodel.add(model.AASReference.from_referable(sindit_submodel))
+        aas.update()
 
         ###############################
         # Time-series
