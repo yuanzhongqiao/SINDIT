@@ -11,6 +11,7 @@ from typing import Dict, List, Set
 from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
     KnowledgeGraphPersistenceService,
 )
+from backend.knowledge_graph.dao.AssetNodesDao import AssetsDao
 from graph_domain.main_digital_twin.SupplementaryFileNode import (
     SupplementaryFileNodeDeep,
 )
@@ -32,6 +33,8 @@ def deserialize_from_aasx(
     # aas_list: List[model.AssetAdministrationShell] = []
     object_store = model.DictObjectStore([])
     file_store = aasx.DictSupplementaryFileContainer()
+
+    asset_similarities = []
 
     # Read the archive
     with aasx.AASXReader(aasx_file_path) as reader:
@@ -103,6 +106,17 @@ def deserialize_from_aasx(
             visualization_positioning_x=positions[0] if positions is not None else None,
             visualization_positioning_y=positions[1] if positions is not None else None,
         )
+
+        # asset similarities
+        similarities_properties = [
+            detail
+            for detail in sindit_submodel.submodel_element
+            if detail.id_short == "asset_similarities"
+        ]
+        if len(similarities_properties) > 0:
+            new_similarities_json = similarities_properties[0].value
+            new_similarities_list = json.loads(new_similarities_json)
+            asset_similarities.extend(new_similarities_list)
 
         # Files
         for file_meta in files_submodel.submodel_element:
@@ -499,4 +513,11 @@ def deserialize_from_aasx(
     for asset in assets_list:
         ps.graph.push(asset)
 
-    pass
+    # Add similarity relationships:
+    ASSETS_DAO: AssetsDao = AssetsDao.instance()
+    for similarity in asset_similarities:
+        ASSETS_DAO.add_asset_similarity(
+            asset1_iri=similarity.get("asset1"),
+            asset2_iri=similarity.get("asset2"),
+            similarity_score=similarity.get("similarity_score"),
+        )
