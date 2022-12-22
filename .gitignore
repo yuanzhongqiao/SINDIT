@@ -18,3 +18,4 @@ aas_import/
 aas_export/
 safety_backups/
 scatter-output.png
+similarity_pipeline_status.yaml
