@@ -98,7 +98,7 @@ class SupplementaryFileNodeDeepNonRecursive(SupplementaryFileNodeFlat):
     )
 
     @property
-    def extracted_keywords(self) -> DatabaseConnectionNode:
+    def extracted_keywords(self) -> List[DatabaseConnectionNode]:
         return [keyword for keyword in self._extracted_keywords]
 
     def validate_metamodel_conformance(self):

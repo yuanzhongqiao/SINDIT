@@ -177,6 +177,7 @@ class SupplementaryFileNodesDao(object):
             id_short=f"extracted_keyword_{keyword}",
             iri=f"www.sintef.no/aas_identifiers/learning_factory/similarity_analysis/extracted_keyword_{keyword}",
             keyword=keyword,
+            _explizit_caption=keyword,
         )
         self.ps.graph_merge(node)
 
