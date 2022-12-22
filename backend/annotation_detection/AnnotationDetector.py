@@ -272,7 +272,8 @@ class AnnotationDetector(abc.ABC):
         rt_con_container = RuntimeConnectionContainer.instance()
         for ts_iri in self.scanned_timeseries_iris.values():
             ts_input = rt_con_container.get_timeseries_input_by_iri(ts_iri)
-            ts_input.remove_handler(handler_id=self.input_handler_id)
+            if ts_input is not None:
+                ts_input.remove_handler(handler_id=self.input_handler_id)
 
         # send stop signal
         self.detector_stop_queue.put(True)

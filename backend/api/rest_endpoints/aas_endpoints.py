@@ -73,61 +73,6 @@ async def export_database_dumps():
 
     os.makedirs(AAS_EXPORT_DIRECTORY, exist_ok=True)
 
-    # export_base_path = AAS_EXPORT_DIRECTORY + backup_date_time_file_string + "/"
-
-    # os.makedirs(export_base_path)
-
-    # if all_databases:
-    #     db_list = [option[0] for option in get_exportable_databases_list_sync()]
-    # else:
-    #     if database_iri is None:
-    #         shutil.rmtree(export_base_path)
-    #         raise IdNotFoundException()
-    #     db_list = [database_iri]
-
-    # backup_folder_names = dict()
-
-    # persistence_container = DatabasePersistenceServiceContainer.instance()
-
-    # for db in db_list:
-    #     if db == GRAPH_DATABASE_FAKE_IRI:
-    #         backup_folder = GRAPH_DATABASE_BACKUP_FOLDER
-    #         backup_path = export_base_path + backup_folder
-    #         KnowledgeGraphPersistenceService.instance().backup(backup_path)
-    #         backup_folder_names[db] = backup_folder
-    #     else:
-    #         backup_folder = _replace_illegal_characters_from_iri(db)
-    #         backup_path = export_base_path + backup_folder
-    #         persistence_service = persistence_container.get_persistence_service(db)
-    #         persistence_service.backup(backup_path)
-
-    #         backup_folder_names[db] = backup_folder
-
-    # Create info file:
-    # logger.info("Creating backup info file...")
-    # info_dict = {
-    #     "sindit_export_version": get_configuration(
-    #         group=ConfigGroups.GENERIC, key="sindit_export_version"
-    #     ),
-    #     "export_date_time": backup_date_time.isoformat(),
-    #     "backup_iri_mappings": backup_folder_names,
-    # }
-
-    # info_json = json.dumps(info_dict, indent=4)
-
-    # with open(
-    #     export_base_path + EXPORT_INFO_FILE_NAME, "w", encoding="utf-8"
-    # ) as info_file:
-    #     info_file.write(info_json)
-
-    # Zip the folder and delete it
-    # logger.info("Zipping the backup...")
-    # zip_file_path = AAS_EXPORT_DIRECTORY + backup_date_time_file_string
-    # zip_file_path_with_extension = zip_file_path + ".zip"
-    # shutil.make_archive(zip_file_path, "zip", export_base_path)
-    # shutil.rmtree(export_base_path)
-    # logger.info("Finished zipping the backup. Sending...")
-
     # Load the content:
     assets = ASSETS_DAO.get_assets_deep()
     asset_similarities = ASSETS_DAO.get_asset_similarities()
@@ -144,8 +89,6 @@ async def export_database_dumps():
         assets=assets,
         asset_similarities=asset_similarities,
     )
-
-    # TODO: Potentially delete intermediate files
 
     def iterfile():
         with open(aasx_file_path_with_extension, mode="rb") as file_like:

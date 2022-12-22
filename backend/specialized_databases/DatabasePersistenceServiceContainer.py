@@ -47,6 +47,10 @@ class DatabasePersistenceServiceContainer:
         self.services: Dict[str, SpecializedDatabasePersistenceService] = {}
 
     def get_persistence_service(self, iri: str):
+
+        if self.services.get(iri) is None:
+            self.initialize_connections()
+
         return self.services.get(iri)
 
     def register_persistence_service(

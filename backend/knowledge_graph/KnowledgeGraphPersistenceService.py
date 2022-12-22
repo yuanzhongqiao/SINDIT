@@ -168,21 +168,25 @@ class KnowledgeGraphPersistenceService(object):
 
     def restore(self, backup_path: str):
         logger.info("Restoring neo4j...")
-        logger.info("Creating a safety backup before overwriting the database...")
-        safety_path = SAFETY_BACKUP_PATH + datetime.now().astimezone(
-            tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
-        ).strftime(DATETIME_STRF_FORMAT)
-        os.makedirs(safety_path)
-        self.backup(backup_path=safety_path + "/neo4j")
-        logger.info("Zipping the safety backup...")
-        zip_file_path = safety_path + "/neo4j"
-        shutil.make_archive(zip_file_path, "zip", safety_path + "/neo4j")
-        shutil.rmtree(safety_path + "/neo4j")
-        logger.info("Finished zipping the safety backup.")
-        # Delete everything:
-        logger.info("Deleting everything...")
-        self.graph.delete_all()
-        logger.info("Deleted everything.")
+
+        logger.info("Check, if the graph is empty...")
+        contents = self.graph.match()
+        if len(contents) > 0:
+            logger.info("Creating a safety backup before overwriting the database...")
+            safety_path = SAFETY_BACKUP_PATH + datetime.now().astimezone(
+                tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone"))
+            ).strftime(DATETIME_STRF_FORMAT)
+            os.makedirs(safety_path)
+            self.backup(backup_path=safety_path + "/neo4j")
+            logger.info("Zipping the safety backup...")
+            zip_file_path = safety_path + "/neo4j"
+            shutil.make_archive(zip_file_path, "zip", safety_path + "/neo4j")
+            shutil.rmtree(safety_path + "/neo4j")
+            logger.info("Finished zipping the safety backup.")
+            # Delete everything:
+            logger.info("Deleting everything...")
+            self.graph.delete_all()
+            logger.info("Deleted everything.")
         logger.info("Restoring...")
         driver = GraphDatabase.driver(
             self.neo4j_uri,

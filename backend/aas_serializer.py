@@ -479,6 +479,25 @@ def serialize_to_aasx(
         for ts in sindit_asset.timeseries:
             sub_submodels = []
 
+            # Iri and the caption
+            sub_submodels.append(
+                model.Property(
+                    id_short="IRI",
+                    value=ts.iri,
+                    value_type=model.datatypes.String,
+                    semantic_id=model.AASReference.from_referable(iri_concept),
+                )
+            )
+            if ts.caption != ts.id_short:
+                sub_submodels.append(
+                    model.Property(
+                        id_short="CAPTION",
+                        value=ts.caption,
+                        value_type=model.datatypes.String,
+                        semantic_id=model.AASReference.from_referable(caption_concept),
+                    )
+                )
+
             # Value type
             if ts.value_type == TimeseriesValueTypes.DECIMAL.value:
                 value_semantic = model.AASReference.from_referable(decimal_concept)
