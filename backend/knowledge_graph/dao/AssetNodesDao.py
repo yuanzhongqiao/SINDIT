@@ -15,6 +15,7 @@ from graph_domain.factory_graph_types import (
     NodeTypes,
     RelationshipTypes,
 )
+from graph_domain.similarities.ExtractedKeywordNode import ExtractedKeywordNode
 
 
 class AssetsDao(object):
@@ -126,3 +127,31 @@ class AssetsDao(object):
         ).to_table()[0][0]
 
         return assets_count
+
+    def add_keyword(self, asset_iri: str, keyword: str):
+        """Adds the keyword by creating a relationship to the keyword and optionally creating the keyword node,
+        if it does not yet exist
+
+        Args:
+            asset_iri (str): _description_
+            keyword (str): _description_
+        """
+        node = ExtractedKeywordNode(
+            id_short=f"extracted_keyword_{keyword}",
+            iri=f"www.sintef.no/aas_identifiers/learning_factory/similarity_analysis/extracted_keyword_{keyword}",
+            keyword=keyword,
+            _explizit_caption=keyword,
+        )
+        self.ps.graph_merge(node)
+
+        relationship = Relationship(
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ASSET.value, iri=asset_iri)
+            .first(),
+            RelationshipTypes.KEYWORD_EXTRACTION.value,
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.EXTRACTED_KEYWORD.value, iri=node.iri)
+            .first(),
+        )
+
+        self.ps.graph_create(relationship)

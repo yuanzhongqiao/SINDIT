@@ -36,6 +36,8 @@ numpy-stl
 textract  # pdf text extraction
 git+https://github.com/boudinfl/pke.git  # pke keyphrase extraction library
 basyx-python-sdk  # AAS serialization (formerly PyI40AAS)
+langdetect
+argostranslate
 
 # tsfresh is manually installed afterwards (via Dockerfile or devcontainer.json)
 # The reason is, that otherwise some issues with importing numpy occur that can 

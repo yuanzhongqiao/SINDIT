@@ -22,10 +22,12 @@ from graph_domain.factory_graph_types import (
     NodeTypes,
     RelationshipTypes,
 )
+from graph_domain.similarities.ExtractedKeywordNode import ExtractedKeywordNode
 
 LABEL = NodeTypes.ASSET.value
 TIMESERIES_RELATIONSHIP = RelationshipTypes.HAS_TIMESERIES.value
 SUPPLEMENTARY_FILE_RELATIONSHIP = RelationshipTypes.HAS_SUPPLEMENTARY_FILE.value
+EXTRACTED_KEYWORD_RELATIONSHIP_LABEL = RelationshipTypes.KEYWORD_EXTRACTION.value
 
 
 @dataclass
@@ -98,6 +100,14 @@ class AssetNodeDeep(AssetNodeFlat):
     def annotation_detections(self) -> List[AnnotationDetectionNodeDeep]:
         return [detection for detection in self._annotation_detections]
 
+    _extracted_keywords: List[ExtractedKeywordNode] = RelatedTo(
+        ExtractedKeywordNode, EXTRACTED_KEYWORD_RELATIONSHIP_LABEL
+    )
+
+    @property
+    def extracted_keywords(self) -> List[ExtractedKeywordNode]:
+        return [keyword for keyword in self._extracted_keywords]
+
     def validate_metamodel_conformance(self):
         """
         Used to validate if the current node (self) and its child elements is conformant to the defined metamodel.
@@ -119,3 +129,6 @@ class AssetNodeDeep(AssetNodeFlat):
 
         for detection in self.annotation_detections:
             detection.validate_metamodel_conformance()
+
+        for keyword in self._extracted_keywords:
+            keyword.validate_metamodel_conformance()

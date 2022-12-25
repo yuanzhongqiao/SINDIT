@@ -30,3 +30,14 @@ def delete_asset_similarities():
 
 def get_assets_count():
     return ASSETS_DAO.get_assets_count()
+
+
+def add_keyword(asset_iri: str, keyword: str):
+    """Adds the keyword by creating a relationship to the keyword and optionally creating the keyword node,
+    if it does not yet exist
+
+    Args:
+        asset_iri (str): _description_
+        keyword (str): _description_
+    """
+    ASSETS_DAO.add_keyword(asset_iri=asset_iri, keyword=keyword)

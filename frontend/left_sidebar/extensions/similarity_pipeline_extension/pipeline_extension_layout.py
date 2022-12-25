@@ -21,7 +21,6 @@ def get_layout():
                         html.Div(
                             className="node-information-attribute-header",
                             children="Stage 1 – Time-series Feature Extraction:",
-                            style={"margin-top": "5px"},
                         ),
                         html.Div(
                             className="node-information-attribute-content",
@@ -40,7 +39,7 @@ def get_layout():
                         html.Div(
                             className="node-information-attribute-header",
                             children="Stage 2 – Time-series Dim. Reduction:",
-                            style={"margin-top": "20px"},
+                            style={"margin-top": "10px"},
                         ),
                         html.Div(
                             className="node-information-attribute-content",
@@ -61,7 +60,7 @@ def get_layout():
                         html.Div(
                             className="node-information-attribute-header",
                             children="Stage 3 – Time-series Clustering:",
-                            style={"margin-top": "20px"},
+                            style={"margin-top": "10px"},
                         ),
                         html.Div(
                             className="node-information-attribute-content",
@@ -80,7 +79,7 @@ def get_layout():
                         html.Div(
                             className="node-information-attribute-header",
                             children="Stage 4 – Text Key-phrase Extraction:",
-                            style={"margin-top": "20px"},
+                            style={"margin-top": "10px"},
                         ),
                         html.Div(
                             className="node-information-attribute-content",
@@ -101,7 +100,7 @@ def get_layout():
                         html.Div(
                             className="node-information-attribute-header",
                             children="Stage 5 – CAD Analysis:",
-                            style={"margin-top": "20px"},
+                            style={"margin-top": "10px"},
                         ),
                         html.Div(
                             className="node-information-attribute-content",
@@ -120,7 +119,7 @@ def get_layout():
                         html.Div(
                             className="node-information-attribute-header",
                             children="Stage 6 – Image Analysis:",
-                            style={"margin-top": "20px"},
+                            style={"margin-top": "10px"},
                         ),
                         html.Div(
                             className="node-information-attribute-content",
@@ -139,7 +138,7 @@ def get_layout():
                         html.Div(
                             className="node-information-attribute-header",
                             children="Stage 7 – Asset Similarity:",
-                            style={"margin-top": "20px"},
+                            style={"margin-top": "10px"},
                         ),
                         html.Div(
                             className="node-information-attribute-content",

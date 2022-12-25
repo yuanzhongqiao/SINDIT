@@ -352,6 +352,21 @@ def get_cytoscape_elements(
                     )
                 )
 
+        # Extracted keywords:
+        for keyword in asset.extracted_keywords:
+            cytoscape_elements.append(
+                _create_cytoscape_node(
+                    keyword, NodeTypes.EXTRACTED_KEYWORD.value, asset
+                )
+            )
+            cytoscape_elements.append(
+                _create_cytoscape_relationship(
+                    asset.iri,
+                    keyword.iri,
+                    RelationshipTypes.KEYWORD_EXTRACTION.value,
+                )
+            )
+
         # Own Annotations:
         for annotation in asset.annotations:
             cytoscape_elements.extend(
