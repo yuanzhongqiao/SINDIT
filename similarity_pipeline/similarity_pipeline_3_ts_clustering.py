@@ -24,9 +24,7 @@ from util.log import logger
 def similarity_pipeline_3_ts_clustering():
     logger.info("\n\n\nSTEP 3: Timeseries clustering\n")
 
-    DBSCAN_EPS = 0.3 * (
-        10**9
-    )  # maximum distance between two samples for one to be considered as in the neighborhood of the other
+    DBSCAN_EPS = 5  # maximum distance between two samples for one to be considered as in the neighborhood of the other
     DBSCAN_MIN_SAMPLES = 2  # The number of samples (or total weight) in a neighborhood for a point to be considered as a core point
 
     # Freshly read the nodes with the newest feature vectors
@@ -34,30 +32,43 @@ def similarity_pipeline_3_ts_clustering():
         TimeseriesNodeFlat
     ] = timeseries_endpoints.get_timeseries_nodes(deep=False)
 
+    # Separate string and non-string time-series
+    string_timeseries_nodes_flat = [
+        ts_node
+        for ts_node in timeseries_nodes_flat
+        if ts_node.value_type == TimeseriesValueTypes.STRING.value
+    ]
+    timeseries_nodes_flat = [
+        ts_node
+        for ts_node in timeseries_nodes_flat
+        if ts_node.value_type != TimeseriesValueTypes.STRING.value
+    ]
+
+    # Prepare input
     reduced_feature_lists = [
         ts_node.reduced_feature_list for ts_node in timeseries_nodes_flat
     ]
 
-    # feature_dicts = [ts_node.feature_dict for ts_node in timeseries_nodes_flat]
+    logger.info("Resetting current time-series clusters if available...")
+    timeseries_endpoints.reset_ts_clusters()
 
-    # # Ignore all nan features (algorithm will fail otherwise)
-    # for key in timeseries_nodes_flat[0].feature_dict.keys():
-    #     ts_node: TimeseriesNodeFlat
-    #     if any(
-    #         [
-    #             (True if np.isnan(ts_node.feature_dict[key]) else False)
-    #             for ts_node in timeseries_nodes_flat
-    #         ]
-    #     ):
-    #         logger.info(f"Removing feature {key} because of NaN occurances...")
-    #         for f_dict in feature_dicts:
-    #             f_dict.pop(key)
+    # Cluster for all incompatible time-series nodes:
+    if len(string_timeseries_nodes_flat) > 0:
+        logger.info(
+            "Adding string-type time-series to separate cluster due to incompability..."
+        )
+        cluster_iri = f"www.sintef.no/aas_identifiers/learning_factory/similarity_analysis/timeseries_cluster_incompatible_value_type_string"
 
-    # # Prepare algorithm input
-    # feature_lists = [
-    #     [value for value in f_dict.values()] if f_dict is not None else []
-    #     for f_dict in feature_dicts
-    # ]
+        timeseries_endpoints.create_ts_cluster(
+            id_short=f"timeseries_cluster_incompatible_value_type_string",
+            caption=f"Cluster of string-type time-series",
+            iri=cluster_iri,
+            description="Node representing a cluster of timeseries inputs",
+        )
+        for ts_node in string_timeseries_nodes_flat:
+            timeseries_endpoints.add_ts_to_cluster(
+                ts_iri=ts_node.iri, cluster_iri=cluster_iri
+            )
 
     # Execute the DBSCAN algorithm:
     clustering = DBSCAN(eps=DBSCAN_EPS, min_samples=DBSCAN_MIN_SAMPLES).fit(
@@ -83,7 +94,6 @@ def similarity_pipeline_3_ts_clustering():
     pass
 
     logger.info("Adding clusters to KG-DT...")
-    timeseries_endpoints.reset_ts_clusters()
 
     i = 0
     for cluster in clusters:
@@ -91,10 +101,10 @@ def similarity_pipeline_3_ts_clustering():
 
         timeseries_endpoints.create_ts_cluster(
             id_short=f"timeseries_cluster_{i}",
+            caption=f"Time-series cluster: {i}",
             iri=cluster_iri,
             description="Node representing a cluster of timeseries inputs",
         )
-        # TODO: maybe add mean values of the features
         for ts_node in cluster:
             timeseries_endpoints.add_ts_to_cluster(
                 ts_iri=ts_node.iri, cluster_iri=cluster_iri

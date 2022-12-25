@@ -1,12 +1,18 @@
 from datetime import datetime
 from frontend.app import app
 from dash.dependencies import Input, Output
-
+import plotly.express as px
+import plotly.graph_objs as go
 from frontend import api_client
 
 from dash import html
+import numpy as np
 
 from frontend.left_sidebar.global_information import global_information_layout
+from graph_domain.main_digital_twin.TimeseriesNode import (
+    TimeseriesNodeDeep,
+    TimeseriesNodeFlat,
+)
 from util.environment_and_configuration import ConfigGroups, get_configuration
 from util.log import logger
 from dateutil import tz
@@ -129,7 +135,7 @@ def execute_stage_ts_dimensionality_reduction(n):
         "/similarity_pipeline/time_series_dimensionality_reduction",
     )
 
-    return None
+    return datetime.now()
 
 
 @app.callback(
@@ -200,3 +206,109 @@ def execute_stage_asset_similarity(n):
     )
 
     return None
+
+
+@app.callback(
+    Output("factory-graph-header", "className"),
+    Output("factory-graph-header-time-series-plot-alternative", "className"),
+    Output("kg-container", "className"),
+    Output("pca-scatter-graph", "className"),
+    Input("show-pca-plot-toggle", "value"),
+    prevent_initial_call=True,
+)
+def toggle_show_pca_scatter(toggle_value):
+    activated = True in toggle_value
+
+    if activated:
+        return (
+            "main-graph-visibility-switch-hidden",
+            "",
+            "main-graph-visibility-switch-hidden",
+            "",
+        )
+    else:
+        return (
+            "",
+            "main-graph-visibility-switch-hidden",
+            "",
+            "main-graph-visibility-switch-hidden",
+        )
+
+
+@app.callback(
+    Output("pca-scatter-graph", "figure"),
+    Input("pca-scatter-graph", "className"),
+    # Input("show-pca-plot-toggle", "value"),
+    Input("graph-reload-button", "n_clicks"),
+    prevent_initial_call=True,
+)
+def update_pca_scatter(classname, n):
+
+    ts_json = api_client.get_json("/timeseries/nodes", deep=True)
+    # pylint: disable=no-member
+    ts_nodes = [TimeseriesNodeDeep.from_json(m) for m in ts_json]
+
+    x = []
+    y = []
+    z = []
+    text = []
+    colors = []
+
+    cluster_colors = dict()
+    cluster_colors["no_cluster"] = 0
+    cluster_color_max = 0
+
+    for ts in ts_nodes:
+        if ts.reduced_feature_list is None:
+            continue
+
+        x.append(ts.reduced_feature_list[0])
+        y.append(ts.reduced_feature_list[1])
+        if len(ts.reduced_feature_list) >= 3:
+            z.append(ts.reduced_feature_list[2])
+        else:
+            z.append(0)
+        text.append(ts.id_short)
+        cluster_id = ts.ts_cluster.iri if ts.ts_cluster is not None else "no_cluster"
+        if cluster_colors.get(cluster_id) is None:
+            cluster_colors[cluster_id] = cluster_color_max + 1
+            cluster_color_max += 1
+        colors.append(cluster_colors.get(cluster_id))
+
+    trace = go.Scatter3d(
+        x=x,
+        y=y,
+        z=z,
+        mode="markers+text",
+        # mode="markers",
+        hovertext=text,
+        text=text,
+        marker=dict(
+            size=3,
+            # color="#003C65"
+            color=colors,  # set color to an array/list of desired values
+            # colorscale="Viridis",
+            colorscale=[
+                "#8c8c8c",
+                "#003C65",
+                "red",
+                "green",
+            ],
+        ),
+    )
+    layout = go.Layout(title="Time-series PCA Distribution")
+    fig = go.Figure(data=[trace], layout=layout)
+
+    fig.update_traces(showlegend=False, selector=dict(type="scatter3d"))
+
+    fig.update_layout(
+        margin=dict(l=0, r=0, t=0, b=0),
+        scene=dict(
+            xaxis_title="First principal component",
+            yaxis_title="Second principal component",
+            zaxis_title="Third principal component",
+        ),
+        # paper_bgcolor="LightSteelBlue",
+    )
+
+    return fig

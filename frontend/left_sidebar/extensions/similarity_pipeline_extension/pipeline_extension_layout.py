@@ -155,6 +155,18 @@ def get_layout():
                             style={"margin-top": "5px"},
                         ),
                         ###################
+                        dbc.Checklist(
+                            id="show-pca-plot-toggle",
+                            options=[
+                                {
+                                    "label": "Show a plot of the principal components and clusters of time-series nodes instead of the main factory graph (Stages 1–3 should be run before this).",
+                                    "value": True,
+                                }
+                            ],
+                            value=[],
+                            switch=True,
+                            style={"margin-top": "30px"},
+                        ),
                     ],
                 ),
             ),

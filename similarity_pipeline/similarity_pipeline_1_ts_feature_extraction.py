@@ -4,7 +4,11 @@ import sys
 from typing import Dict, List
 from tsfresh import extract_features
 import pandas as pd
-
+from dateutil import tz
+from util.environment_and_configuration import (
+    ConfigGroups,
+    get_configuration,
+)
 import backend.api.python_endpoints.timeseries_endpoints as timeseries_endpoints
 from graph_domain.main_digital_twin.TimeseriesNode import (
     TimeseriesNodeFlat,
@@ -25,27 +29,18 @@ def similarity_pipeline_1_ts_feature_extraction():
 
     # Restricted comparison time (since the factory is not running all the time, a specific range was selected)
     comparison_end_date_time = datetime(
-        year=2022, month=7, day=29, hour=11, minute=0, second=0
+        year=2022,
+        month=8,
+        day=19,
+        hour=15,
+        minute=0,
+        second=0,
+        tzinfo=tz.gettz(get_configuration(group=ConfigGroups.FRONTEND, key="timezone")),
     )
+
     comparison_duration = timedelta(hours=2).total_seconds()
 
     timeseries_nodes = timeseries_endpoints.get_timeseries_nodes(deep=True)
-
-    # Get empty feature set to be applied to all not compatible TS:
-    test_ts_dataframe = pd.DataFrame(columns=["time", "value"], data=[[0, 1], [1, 2]])
-
-    # Add id row that is required by tsfresh
-    test_ts_dataframe.insert(loc=0, column="id", value=0)
-
-    logger.info("Finished loading dataframe. Extracting features...")
-    extracted_test_features: pd.DataFrame = extract_features(
-        test_ts_dataframe, column_id="id", column_sort="time", column_value="value"
-    )
-    extracted_test_features = extracted_test_features.transpose()
-    empty_feature_dict = extracted_test_features.to_dict()[0]
-    for key in empty_feature_dict.keys():
-        empty_feature_dict[key] = sys.maxsize
-        # pseudo value to build a cluster of not supported TS
 
     #######################
     logger.info("Preparing units for transformation into an additional feature")
@@ -90,10 +85,11 @@ def similarity_pipeline_1_ts_feature_extraction():
             )
             continue
 
-        # Cancel, if not int or float
+        # Separate datatypes: Decimal and Integer is the standard, bool to int (0 and 1) and string time-series are ignored
         if timeseries_node.value_type in [
             TimeseriesValueTypes.DECIMAL.value,
             TimeseriesValueTypes.INT.value,
+            TimeseriesValueTypes.BOOL.value,
         ]:
             logger.info("Loading dataframe...")
             ts_range_df = timeseries_endpoints.get_timeseries_range(
@@ -106,6 +102,9 @@ def similarity_pipeline_1_ts_feature_extraction():
             # Add id row that is required by tsfresh
             ts_range_df.insert(loc=0, column="id", value=0)
 
+            if timeseries_node.value_type == TimeseriesValueTypes.BOOL.value:
+                ts_range_df["value"] = ts_range_df["value"].map({True: 1, False: 0})
+
             logger.info("Finished loading dataframe. Extracting features...")
             extracted_features: pd.DataFrame = extract_features(
                 ts_range_df, column_id="id", column_sort="time", column_value="value"
@@ -116,8 +115,13 @@ def similarity_pipeline_1_ts_feature_extraction():
             logger.info(
                 f"Feature calculation with normal timeseries libraries not possible: Unsupported type: {timeseries_node.value_type}"
             )
-            logger.info("Applying empty feature dict...")
-            feature_dict = empty_feature_dict
+            logger.info("Skipping time-series...")
+            logger.info("Writing info about skipped extraction to KG-DT...")
+            timeseries_endpoints.set_ts_feature_dict(
+                timeseries_node.iri,
+                {"feature_extraction_skipped_due_to_incompability": True},
+            )
+            continue
 
         pipeline_single_node_end_datetime = datetime.now()
         logger.info(

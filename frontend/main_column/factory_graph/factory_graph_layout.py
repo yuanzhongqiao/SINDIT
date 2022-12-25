@@ -29,7 +29,17 @@ def get_layout():
                                 id="graph-header-row",
                                 children=[
                                     dbc.Col(
-                                        html.Div("Factory Graph"),
+                                        [
+                                            html.Div(
+                                                "Factory Graph",
+                                                id="factory-graph-header",
+                                            ),
+                                            html.Div(
+                                                "Time-series Principal Components and Clusters",
+                                                id="factory-graph-header-time-series-plot-alternative",
+                                                className="main-graph-visibility-switch-hidden",
+                                            ),
+                                        ],
                                         align="center",
                                     ),
                                     dbc.Col(
@@ -77,6 +87,11 @@ def get_layout():
                                 id="factory-graph-loading-state",
                                 storage_type="memory",
                             ),
+                            dcc.Graph(
+                                id="pca-scatter-graph",
+                                className="main-graph-visibility-switch-hidden",
+                                style={"height": "80%"},
+                            ),
                             html.Div(
                                 id="kg-container",
                                 children=[
@@ -86,6 +101,7 @@ def get_layout():
                                         type="dot",
                                         color="#446e9b",
                                         children=[
+                                            #
                                             cyto.Cytoscape(
                                                 id="cytoscape-graph",
                                                 layout={"name": "preset"},
@@ -101,7 +117,7 @@ def get_layout():
                                                 className="factory-graph",
                                             ),
                                         ],
-                                    )
+                                    ),
                                 ],
                             ),
                         ]
