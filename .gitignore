@@ -19,3 +19,4 @@ aas_export/
 safety_backups/
 scatter-output.png
 similarity_pipeline_status.yaml
+object_detection_outputs/

@@ -46,8 +46,16 @@ pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cpu/torch1.12.
 # RUN pip install mmdet
 cd dependencies
 
-git clone --depth=1 https://github.com/open-mmlab/mmdetection.git
+git clone --depth=1 https://github.com/open-mmlab/mmdetection.git --branch v2.26.0
 
 cd mmdetection
 pip install -v -e .
-cd ..
+
+# Install the model:
+mkdir checkpoints
+cd checkpoints
+mkdir faster_rcnn
+cd faster_rcnn
+wget https://download.openmmlab.com/mmdetection/v2.0/faster_rcnn/faster_rcnn_r50_fpn_1x_coco/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth
+
+cd ../../..

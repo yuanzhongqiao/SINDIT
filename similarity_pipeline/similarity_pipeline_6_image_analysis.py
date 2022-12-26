@@ -4,12 +4,13 @@ from typing import Dict, List
 from tsfresh import extract_features
 import pandas as pd
 from numpy import nan
+import langdetect
 from numpy import linalg as linalg
 import numpy as np
+import textract
 import io
 import os
 import numpy
-from stl import mesh
 import torch
 from mmdet.apis import init_detector, inference_detector
 import mmcv
@@ -18,19 +19,25 @@ import mmcv
 # from OCP.Core.BRepGProp import brepgprop_VolumeProperties
 
 from backend.api.python_endpoints import asset_endpoints
-from backend.api.python_endpoints import timeseries_endpoints
 from backend.api.python_endpoints import file_endpoints
 from graph_domain.main_digital_twin.SupplementaryFileNode import (
     SupplementaryFileNodeFlat,
 )
 from graph_domain.main_digital_twin.SupplementaryFileNode import SupplementaryFileTypes
-
-from graph_domain.main_digital_twin.TimeseriesNode import (
-    TimeseriesNodeFlat,
-    TimeseriesValueTypes,
+from similarity_pipeline.similarity_pipeline_4_text_key_phrase_extraction import (
+    _extract_keyphrases,
+    _translate_if_nescessary,
 )
-from similarity_pipeline.similarity_pipeline_status_manager import SimilarityPipelineStatusManager
+
+from similarity_pipeline.similarity_pipeline_status_manager import (
+    SimilarityPipelineStatusManager,
+)
 from util.log import logger
+
+CONFIG_FILE = "./mmdetection/configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py"
+CHECKPOINT_FILE = "./mmdetection/checkpoints/faster_rcnn/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth"
+
+CONFIDENCE_THRESHOLD = 0.8
 
 # #############################################################################
 # Image object detection
@@ -38,71 +45,11 @@ from util.log import logger
 def similarity_pipeline_6_image_analysis():
     logger.info("\n\n\nSTEP 6: Image object detection\n")
 
-    # logger.info(f"CUDA is available: {torch.cuda.is_available()}")
-
-
-    # config_file = "./mm_test/yolov3_mobilenetv2_320_300e_coco.py"
-    # checkpoint_file = (
-    #     "./mm_test/yolov3_mobilenetv2_320_300e_coco_20210719_215349-d18dff72.pth"
-    # )
-    # model = init_detector(config_file, checkpoint_file, device="cpu")  # or device='cuda:0'
-    # inference_results = inference_detector(
-    #     model, "learning_factory_instance/binaries_import/dps_model.jpg"
-    # )
-
-    # logger.info(inference_results)
-
-    #
-    #
-    #
-    #############################
-    # Specify the path to model config and checkpoint file
-    #############################
-
-    # Test 1: trucks and trains...
-    # config_file = "./dependencies/mmdetection/configs/faster_rcnn/faster_rcnn_x101_64x4d_fpn_1x_coco.py"
-    # checkpoint_file = (
-    #     "./mmcv_models/faster_rcnn/faster_rcnn_x101_64x4d_fpn_1x_coco_20200204-833ee192.pth"
-    # )
-
-    # # Test 2: no outputs detected
-    config_file = (
-        "./dependencies/mmdetection/configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py"
-    )
-    checkpoint_file = (
-        "./mmcv_models/faster_rcnn/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth"
-    )
-
-    # # Test 3:
-    # config_file = "./dependencies/mmdetection/configs/faster_rcnn/faster_rcnn_x101_64x4d_fpn_1x_coco.py"
-    # checkpoint_file = (
-    #     "./mmcv_models/faster_rcnn/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth"
-    # )
-
-    # build the model from a config file and a checkpoint file
-    model = init_detector(config_file, checkpoint_file, device="cpu")
-
-    # test a single image and show the results
-    img = "./dependencies/mmdetection/demo/demo.jpg"  # or img = mmcv.imread(img), which will only load it once
-    result = inference_detector(model, img)
-    # # visualize the results in a new window
-    # model.show_result(img, result)
-    # or save the visualization results to image files
-    model.show_result(img, result, out_file="result.jpg")
-
-    ################################################
-    # logger.info("Deleting previosly calculated features...")
-    # file_endpoints.reset_extracted_keywords()
-    # TODO
-
+    model = init_detector(CONFIG_FILE, CHECKPOINT_FILE, device="cpu")
 
     ################################################
     logger.info("Loading file-nodes...")
 
-    # get file nodes flat (just for iris)
-    # file_nodes_flat: List[SupplementaryFileNodeFlat] = file_endpoints.get_file_nodes(
-    #     deep=False, filter_by_type=True, type=SupplementaryFileTypes.CAD_STEP.value
-    # )
     file_nodes_flat: List[SupplementaryFileNodeFlat] = file_endpoints.get_file_nodes(
         deep=False,
         filter_by_type=True,
@@ -131,54 +78,59 @@ def similarity_pipeline_6_image_analysis():
         logger.info("Detecting objects...")
 
         result = inference_detector(model, tmp_file_path)
-        # # visualize the results in a new window
-        # model.show_result(img, result)
-        # or save the visualization results to image files
-        model.show_result(tmp_file_path, result, out_file="result.jpg")
+        # Save the visualization results to image files
+        model.show_result(
+            tmp_file_path,
+            result,
+            out_file=f"./object_detection_outputs/{file_node.id_short}.jpg",
+        )
 
-        pass
+        # Extract detected labels
+        detected_labels = set()
+        j = 0
+        for inf_class in model.CLASSES:
+            class_result = result[j]
+            if class_result is not None and len(class_result) > 0:
+                for bounding_box in class_result:
+                    confidence = bounding_box[4]
+                    if confidence >= CONFIDENCE_THRESHOLD:
+                        detected_labels.add(inf_class)
 
-        # prop = GProp_GProps()
-        # tolerance = 1e-5  # Adjust to your liking
-        # volume = brepgprop_VolumeProperties(cad_workplane, prop, tolerance)
-        # logger.info(volume)
+            j += 1
 
-        pass
+        # Save key-phrases and relationships to KG
+        for keyword in detected_labels:
+            file_endpoints.add_keyword(file_iri=file_node.iri, keyword=keyword)
 
-        # logger.info("Saving to KG...")
-        # file_endpoints.save_extracted_text(file_iri=file_node.iri, text=text)
-        # TODO
+        #######################################
+        # OCR text detection:
 
+        logger.info("Extracting text from PDF...")
+        text_encoded = textract.process(
+            tmp_file_path,
+            method="tesseract",
+            # language="eng",
+        )
+        text = str(text_encoded, "UTF-8")
+
+        # translate:
+        try:
+            text = _translate_if_nescessary(text)
+        except langdetect.lang_detect_exception.LangDetectException:
+            pass
+
+        extracted_key_phrases = _extract_keyphrases(text)
+
+        # Save key-phrases and relationships to KG
+        for keyword in extracted_key_phrases:
+            file_endpoints.add_keyword(file_iri=file_node.iri, keyword=keyword)
+
+        # Cleanup
         logger.info("Deleting temporary file...")
         os.remove(tmp_file_path)
 
-        # logger.info("Processing text: Searching most relevant keyphrases from the text...")
-
-        # extractor = pke.unsupervised.TopicRank()
-        # extractor.load_document(text, language="en")
-
-        # extractor.candidate_selection()
-        # extractor.candidate_weighting()
-        # keyphrases = extractor.get_n_best(n=30)
-
-        # TODO: evtl. nachfiltern (redundanzen entfernen etc.)
-
-        # logger.info("\n TopicRank")
-        # logger.info(keyphrases)
-
-        # TODO
-
-        # extracted_keywords = [
-        #     keyphrase_score_pair[0] for keyphrase_score_pair in keyphrases
-        # ]
-
-        # logger.info(f"Extracted {len(extracted_keywords)} keywords")
-
-        # # Save keywords and relationships to KG
-        # logger.info("Saving keywords to KG...")
-        # for keyword in extracted_keywords:
-        #     file_endpoints.add_keyword(file_iri=file_node.iri, keyword=keyword)
-
         i += 1
 
-    SimilarityPipelineStatusManager.instance().set_active(active=False, stage="image_analysis")
+    SimilarityPipelineStatusManager.instance().set_active(
+        active=False, stage="image_analysis"
+    )
