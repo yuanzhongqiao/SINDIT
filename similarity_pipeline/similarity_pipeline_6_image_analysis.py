@@ -72,8 +72,8 @@ def similarity_pipeline_6_image_analysis():
         tmp_file_path = "./temporary_picture.jpg"
 
         with io.FileIO(tmp_file_path, "w") as tmp_file:
-            for pdf_line in file_stream:
-                tmp_file.write(pdf_line)
+            for file_line in file_stream:
+                tmp_file.write(file_line)
 
         logger.info("Detecting objects...")
 
@@ -108,7 +108,7 @@ def similarity_pipeline_6_image_analysis():
         logger.info("Extracting text from PDF...")
         text_encoded = textract.process(
             tmp_file_path,
-            method="tesseract",
+            method="tesseract-ocr",
             # language="eng",
         )
         text = str(text_encoded, "UTF-8")

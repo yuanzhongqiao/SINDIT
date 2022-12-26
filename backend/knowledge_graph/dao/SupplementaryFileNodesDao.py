@@ -206,23 +206,6 @@ class SupplementaryFileNodesDao(object):
         node.update(extracted_text=text)
         self.ps.graph_push(node)
 
-    def get_keywords_set_for_asset(self, asset_iri: str):
-        keywords_table = self.ps.graph_run(
-            "MATCH p=(a:"
-            + NodeTypes.ASSET.value
-            + ' {iri: "'
-            + asset_iri
-            + '"})-[r1:'
-            + RelationshipTypes.HAS_SUPPLEMENTARY_FILE.value
-            + "]->(t)-[r2:"
-            + RelationshipTypes.KEYWORD_EXTRACTION.value
-            + "]->(c) RETURN c.keyword"
-        ).to_table()
-
-        keyword_list = [keyword[0] for keyword in keywords_table]
-
-        return set(keyword_list)
-
     def reset_dimension_clusters(self):
         self.ps.graph_run(
             f"MATCH (n:{NodeTypes.DIMENSION_CLUSTER.value}) DETACH DELETE n"
@@ -252,3 +235,19 @@ class SupplementaryFileNodesDao(object):
         )
 
         self.ps.graph_create(relationship)
+
+    def get_dimensions_cluster_for_asset(self, asset_iri: str):
+
+        cluster_matches = self.ps.repo_match(model=DimensionClusterNode).where(
+            "(:"
+            + NodeTypes.ASSET.value
+            + ' {iri: "'
+            + asset_iri
+            + '"})-[:'
+            + RelationshipTypes.HAS_SUPPLEMENTARY_FILE.value
+            + "]->()-[:"
+            + RelationshipTypes.PART_OF_DIMENSION_CLUSTER.value
+            + "]->(_)"
+        )
+
+        return cluster_matches.first()

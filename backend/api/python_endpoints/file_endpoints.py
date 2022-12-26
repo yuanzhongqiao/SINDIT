@@ -162,10 +162,6 @@ def save_extracted_text(file_iri: str, text: str):
     SUPPL_FILE_DAO.save_extracted_text(file_iri=file_iri, text=text)
 
 
-def get_keywords_set_for_asset(asset_iri: str):
-    return SUPPL_FILE_DAO.get_keywords_set_for_asset(asset_iri=asset_iri)
-
-
 def reset_dimension_clusters():
     SUPPL_FILE_DAO.reset_dimension_clusters()
 
@@ -182,3 +178,7 @@ def add_file_to_dimension_cluster(file_iri: str, cluster_iri: str):
     SUPPL_FILE_DAO.add_file_to_dimension_cluster(
         file_iri=file_iri, cluster_iri=cluster_iri
     )
+
+
+def get_dimensions_cluster_for_asset(asset_iri: str):
+    return SUPPL_FILE_DAO.get_dimensions_cluster_for_asset(asset_iri=asset_iri)

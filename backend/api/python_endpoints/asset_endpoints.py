@@ -41,3 +41,7 @@ def add_keyword(asset_iri: str, keyword: str):
         keyword (str): _description_
     """
     ASSETS_DAO.add_keyword(asset_iri=asset_iri, keyword=keyword)
+
+
+def get_keywords_set_for_asset(asset_iri: str):
+    return ASSETS_DAO.get_keywords_set_for_asset(asset_iri=asset_iri)

@@ -155,3 +155,38 @@ class AssetsDao(object):
         )
 
         self.ps.graph_create(relationship)
+
+    def get_keywords_set_for_asset(self, asset_iri: str):
+        # File keywords
+        file_keywords_table = self.ps.graph_run(
+            "MATCH p=(a:"
+            + NodeTypes.ASSET.value
+            + ' {iri: "'
+            + asset_iri
+            + '"})-[r1:'
+            + RelationshipTypes.HAS_SUPPLEMENTARY_FILE.value
+            + "]->(t)-[r2:"
+            + RelationshipTypes.KEYWORD_EXTRACTION.value
+            + "]->(c) RETURN c.keyword"
+        ).to_table()
+
+        file_keyword_list = [keyword[0] for keyword in file_keywords_table]
+
+        # Asset keywords
+        asset_keywords_table = self.ps.graph_run(
+            "MATCH p=(a:"
+            + NodeTypes.ASSET.value
+            + ' {iri: "'
+            + asset_iri
+            + '"})-[r1:'
+            + RelationshipTypes.KEYWORD_EXTRACTION.value
+            + "]->(c) RETURN c.keyword"
+        ).to_table()
+
+        asset_keyword_list = [keyword[0] for keyword in asset_keywords_table]
+
+        # Combine
+        keyword_list = file_keyword_list
+        keyword_list.extend(asset_keyword_list)
+
+        return set(keyword_list)

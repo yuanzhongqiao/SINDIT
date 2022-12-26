@@ -6,8 +6,6 @@ import pandas as pd
 from numpy import nan
 from numpy import linalg as linalg
 import numpy as np
-from sklearn.cluster import DBSCAN
-from sklearn.decomposition import PCA
 
 from backend.api.python_endpoints import asset_endpoints
 from backend.api.python_endpoints import timeseries_endpoints
@@ -16,7 +14,9 @@ from graph_domain.main_digital_twin.TimeseriesNode import (
     TimeseriesNodeFlat,
     TimeseriesValueTypes,
 )
-from similarity_pipeline.similarity_pipeline_status_manager import SimilarityPipelineStatusManager
+from similarity_pipeline.similarity_pipeline_status_manager import (
+    SimilarityPipelineStatusManager,
+)
 from util.log import logger
 
 # #############################################################################
@@ -33,7 +33,9 @@ def similarity_pipeline_7_asset_similarity():
     logger.info("Loading assets and related nodes...")
 
     # get assets flat (just for iris)
-    asset_nodes_flat: List[TimeseriesNodeFlat] = asset_endpoints.get_asset_nodes(deep=False)
+    asset_nodes_flat: List[TimeseriesNodeFlat] = asset_endpoints.get_asset_nodes(
+        deep=False
+    )
 
     # per asset: get connected ts-clusters, keywords... (seperated, so they can be easily weighted differently)
     timeseries_clusters = []
@@ -44,9 +46,17 @@ def similarity_pipeline_7_asset_similarity():
 
     keyword_sets = []
     for asset_node in asset_nodes_flat:
-        keyword_sets.append(
-            file_endpoints.get_keywords_set_for_asset(asset_iri=asset_node.iri)
+        keyword_set = asset_endpoints.get_keywords_set_for_asset(
+            asset_iri=asset_node.iri
         )
+        # Handle dimension clusters like key-phrases, as they can only occur once per asset
+        cluster = file_endpoints.get_dimensions_cluster_for_asset(
+            asset_iri=asset_node.iri
+        )
+        if cluster is not None:
+            keyword_set.add(cluster.iri)
+
+        keyword_sets.append(keyword_set)
 
     ################################################
     logger.info("Calculating similarity scores...")
@@ -70,7 +80,8 @@ def similarity_pipeline_7_asset_similarity():
 
             cosine_similarity = round(
                 number=float(
-                    np.dot(vector1, vector2) / (linalg.norm(vector1) * linalg.norm(vector2))
+                    np.dot(vector1, vector2)
+                    / (linalg.norm(vector1) * linalg.norm(vector2))
                 ),
                 ndigits=4,
             )
@@ -98,8 +109,9 @@ def similarity_pipeline_7_asset_similarity():
                 similarity_score=combined_similarity,
             )
 
-
     ################################################
     # logger.info("Building clusters...") TODO
 
-    SimilarityPipelineStatusManager.instance().set_active(active=False, stage="asset_similarity")
+    SimilarityPipelineStatusManager.instance().set_active(
+        active=False, stage="asset_similarity"
+    )

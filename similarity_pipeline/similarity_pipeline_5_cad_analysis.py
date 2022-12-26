@@ -123,9 +123,9 @@ def similarity_pipeline_5_cad_analysis():
                 max_z = max(point[stl.Dimension.Z], max_z)
                 min_z = min(point[stl.Dimension.Z], min_z)
 
-        length = max_x - min_x
-        width = max_y - min_y
-        height = max_z - min_z
+        width = max_x - min_x
+        height = max_y - min_y
+        length = max_z - min_z
 
         properties_dict = {
             "length": float(length),
