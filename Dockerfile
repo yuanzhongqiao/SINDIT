@@ -20,7 +20,6 @@ COPY dt_frontend.py ./
 COPY init_learning_factory_from_cypher_file.py ./
 COPY learning_factory_continuous_ordering.py ./
 COPY similarity_pipeline similarity_pipeline
-COPY mmdetection mmdetection
 
 EXPOSE 8050
 EXPOSE 8000
