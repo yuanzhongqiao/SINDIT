@@ -22,6 +22,7 @@ from backend.knowledge_graph.KnowledgeGraphPersistenceService import (
 from backend.knowledge_graph.knowledge_graph_metamodel_validator import (
     validate_result_nodes,
 )
+from graph_domain.similarities.DimensionClusterNode import DimensionClusterNode
 from graph_domain.similarities.ExtractedKeywordNode import ExtractedKeywordNode
 
 
@@ -193,6 +194,12 @@ class SupplementaryFileNodesDao(object):
 
         self.ps.graph_create(relationship)
 
+    def save_extracted_properties(self, file_iri: str, properties_string: str):
+        matcher = NodeMatcher(self.ps.graph)
+        node: Node = matcher.match(iri=file_iri).first()
+        node.update(extracted_properties=properties_string)
+        self.ps.graph_push(node)
+
     def save_extracted_text(self, file_iri: str, text: str):
         matcher = NodeMatcher(self.ps.graph)
         node: Node = matcher.match(iri=file_iri).first()
@@ -215,3 +222,33 @@ class SupplementaryFileNodesDao(object):
         keyword_list = [keyword[0] for keyword in keywords_table]
 
         return set(keyword_list)
+
+    def reset_dimension_clusters(self):
+        self.ps.graph_run(
+            f"MATCH (n:{NodeTypes.DIMENSION_CLUSTER.value}) DETACH DELETE n"
+        )
+
+    def create_dimension_cluster(
+        self,
+        iri: str,
+        id_short: str,
+        description: str | None = None,
+        caption: str | None = None,
+    ):
+        cluster_node = DimensionClusterNode(
+            iri=iri, id_short=id_short, description=description, caption=caption
+        )
+        self.ps.graph_push(cluster_node)
+
+    def add_file_to_dimension_cluster(self, file_iri: str, cluster_iri: str):
+        relationship = Relationship(
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.SUPPLEMENTARY_FILE.value, iri=file_iri)
+            .first(),
+            RelationshipTypes.PART_OF_DIMENSION_CLUSTER.value,
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.DIMENSION_CLUSTER.value, iri=cluster_iri)
+            .first(),
+        )
+
+        self.ps.graph_create(relationship)

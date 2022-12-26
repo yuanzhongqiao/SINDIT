@@ -7,6 +7,7 @@ from py2neo.ogm import Property, RelatedTo
 
 from graph_domain.BaseNode import BaseNode
 from graph_domain.main_digital_twin.DatabaseConnectionNode import DatabaseConnectionNode
+from graph_domain.similarities.DimensionClusterNode import DimensionClusterNode
 from graph_domain.similarities.ExtractedKeywordNode import ExtractedKeywordNode
 from graph_domain.main_digital_twin.RuntimeConnectionNode import RuntimeConnectionNode
 from graph_domain.main_digital_twin.UnitNode import UnitNode
@@ -22,6 +23,7 @@ LABEL = NodeTypes.SUPPLEMENTARY_FILE.value
 DB_CONNECTION_RELATIONSHIP_LABEL = RelationshipTypes.FILE_DB_ACCESS.value
 SECONDARY_FORMAT_RELATIONSHIP_LABEL = RelationshipTypes.SECONDARY_FORMAT.value
 EXTRACTED_KEYWORD_RELATIONSHIP_LABEL = RelationshipTypes.KEYWORD_EXTRACTION.value
+DIMENSION_CLUSTER_RELATIONSHIP_LABEL = RelationshipTypes.PART_OF_DIMENSION_CLUSTER.value
 
 
 class SupplementaryFileTypes(Enum):
@@ -51,6 +53,9 @@ class SupplementaryFileNodeFlat(BaseNode):
     file_type: str = Property(
         key="type", default=SupplementaryFileTypes.DOCUMENT_PDF.value
     )
+
+    # Extracted properties (e.g. dimensions)
+    extracted_properties: str | None = Property()
 
     # extracted text excluded here for performance reasons!
 
@@ -101,6 +106,17 @@ class SupplementaryFileNodeDeepNonRecursive(SupplementaryFileNodeFlat):
     def extracted_keywords(self) -> List[ExtractedKeywordNode]:
         return [keyword for keyword in self._extracted_keywords]
 
+    # The OGM framework does not allow constraining to only one item!
+    # Can only be one unit (checked by metamodel validator)
+    _dimension_clusters: List[DimensionClusterNode] = RelatedTo(
+        DimensionClusterNode, DIMENSION_CLUSTER_RELATIONSHIP_LABEL
+    )
+
+    @property
+    def dimension_cluster(self) -> DimensionClusterNode | None:
+        clusters = [cluster for cluster in self._dimension_clusters]
+        return clusters[0] if len(clusters) > 0 else None
+
     def validate_metamodel_conformance(self):
         """
         Used to validate if the current node (self) and its child elements is conformant to the defined metamodel.
@@ -118,6 +134,15 @@ class SupplementaryFileNodeDeepNonRecursive(SupplementaryFileNodeFlat):
 
         for keyword in self._extracted_keywords:
             keyword.validate_metamodel_conformance()
+
+        if not len(self._dimension_clusters) <= 1:
+            raise GraphNotConformantToMetamodelError(
+                self,
+                f"Invalid number of referenced dimension clusters: {len(self._dimension_clusters)}",
+            )
+
+        if self.dimension_cluster is not None:
+            self.dimension_cluster.validate_metamodel_conformance()
 
 
 @dataclass

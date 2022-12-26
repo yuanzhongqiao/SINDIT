@@ -76,6 +76,13 @@
         }
     },
     {
+        "selector": ".DIMENSION_CLUSTER",
+        "style": {
+            "background-color": "#6b449b",
+            "background-image": "https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/scatter_plot/wght500/48px.svg"
+        }
+    },
+    {
         "selector": ".ASSET_SIMILARITY",
         "style": {
             "curve-style": "bezier",

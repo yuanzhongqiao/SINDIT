@@ -83,6 +83,8 @@ def get_visualized_attributes_for_node_type(node: BaseNode) -> List[Tuple[str, s
     elif isinstance(node, SupplementaryFileNodeFlat):
         attributes_list.append(("File Name", node.file_name))
         attributes_list.append(("File Type", node.file_type))
+        if node.extracted_properties is not None:
+            attributes_list.append(("Extracted Properties", node.extracted_properties))
     elif isinstance(node, DatabaseConnectionNode):
         attributes_list.append(("Database Type", node.type))
         attributes_list.append(("Database Instance", node.database))

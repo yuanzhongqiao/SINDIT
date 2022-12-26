@@ -34,6 +34,10 @@ SELECTABLE_ELEMENT_TYPES = [
         "value": NodeTypes.TIMESERIES_CLUSTER.value,
     },
     {
+        "label": "Dimension Clusters",
+        "value": NodeTypes.DIMENSION_CLUSTER.value,
+    },
+    {
         "label": "Extracted Keywords",
         "value": NodeTypes.EXTRACTED_KEYWORD.value,
     },

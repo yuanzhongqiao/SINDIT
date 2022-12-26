@@ -1,4 +1,5 @@
 from datetime import date, datetime, timedelta
+import json
 import sys
 from typing import Dict, List
 from tsfresh import extract_features
@@ -7,7 +8,7 @@ from numpy import nan
 from numpy import linalg as linalg
 import numpy as np
 from sklearn.cluster import DBSCAN
-from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 import textract
 import io
 import os
@@ -16,7 +17,7 @@ import pke.unsupervised
 import cadquery
 import cqkit
 import numpy
-from stl import mesh
+import stl
 
 # from OCP.Core.GProp import GProp_GProps
 # from OCP.Core.BRepGProp import brepgprop_VolumeProperties
@@ -25,6 +26,7 @@ from backend.api.python_endpoints import asset_endpoints
 from backend.api.python_endpoints import timeseries_endpoints
 from backend.api.python_endpoints import file_endpoints
 from graph_domain.main_digital_twin.SupplementaryFileNode import (
+    SupplementaryFileNodeDeep,
     SupplementaryFileNodeFlat,
 )
 from graph_domain.main_digital_twin.SupplementaryFileNode import SupplementaryFileTypes
@@ -33,8 +35,14 @@ from graph_domain.main_digital_twin.TimeseriesNode import (
     TimeseriesNodeFlat,
     TimeseriesValueTypes,
 )
-from similarity_pipeline.similarity_pipeline_status_manager import SimilarityPipelineStatusManager
+from similarity_pipeline.similarity_pipeline_status_manager import (
+    SimilarityPipelineStatusManager,
+)
 from util.log import logger
+
+DBSCAN_EPS = 2.5  # maximum distance between two samples for one to be considered as in the neighborhood of the other
+DBSCAN_MIN_SAMPLES = 2  # The number of samples (or total weight) in a neighborhood for a point to be considered as a core point
+
 
 # #############################################################################
 # CAD Analysis
@@ -43,34 +51,41 @@ def similarity_pipeline_5_cad_analysis():
     logger.info("\n\n\nSTEP 5: CAD analysis\n")
 
     ################################################
-    # logger.info("Deleting previosly calculated features...")
-    # file_endpoints.reset_extracted_keywords()
-    # TODO
-
-    ################################################
     logger.info("Loading file-nodes...")
-
-    # get file nodes flat (just for iris)
-    # file_nodes_flat: List[SupplementaryFileNodeFlat] = file_endpoints.get_file_nodes(
-    #     deep=False, filter_by_type=True, type=SupplementaryFileTypes.CAD_STEP.value
-    # )
-    file_nodes_flat: List[SupplementaryFileNodeFlat] = file_endpoints.get_file_nodes(
-        deep=False,
+    main_cad_file_nodes_flat: List[
+        SupplementaryFileNodeDeep
+    ] = file_endpoints.get_file_nodes(
+        deep=True,
         filter_by_type=True,
-        type=SupplementaryFileTypes.CAD_STL.value,
-        exclude_secondary_format_nodes=False,
+        type=SupplementaryFileTypes.CAD_STEP.value,
+        exclude_secondary_format_nodes=True,
     )
+
+    step_conversion_nodes = [
+        [
+            sec_format
+            for sec_format in step_cad.secondary_formats
+            if sec_format.file_type == SupplementaryFileTypes.CAD_STL.value
+        ][0]
+        for step_cad in main_cad_file_nodes_flat
+    ]
+
+    feature_lists = []
 
     ################################################
     logger.info("Extracting features per CAD file...")
 
-    i = 1
-    for file_node in file_nodes_flat:
+    i = 0
+    for main_file_node in main_cad_file_nodes_flat:
+        stl_file_node = step_conversion_nodes[i]
+
         logger.info(
-            f"\nProcessing file {i} of {len(file_nodes_flat)}: {file_node.id_short}"
+            f"\nProcessing file {i+1} of {len(main_cad_file_nodes_flat)}: {main_file_node.id_short}"
         )
         logger.info("Loading file...")
-        file_stream = file_endpoints.get_supplementary_file_stream(iri=file_node.iri)
+        file_stream = file_endpoints.get_supplementary_file_stream(
+            iri=stl_file_node.iri
+        )
 
         # tmp_file_path = "./temporary_cad.step"
         tmp_file_path = "./temporary_cad.stl"
@@ -84,51 +99,104 @@ def similarity_pipeline_5_cad_analysis():
 
         pass
 
-        your_mesh = mesh.Mesh.from_file(tmp_file_path)
-        volume, cog, inertia = your_mesh.get_mass_properties()
+        cad_mesh = stl.mesh.Mesh.from_file(tmp_file_path)
+        # Volume
+        volume, cog, inertia = cad_mesh.get_mass_properties()
         logger.info("Volume = {0}".format(volume))
 
-        # prop = GProp_GProps()
-        # tolerance = 1e-5  # Adjust to your liking
-        # volume = brepgprop_VolumeProperties(cad_workplane, prop, tolerance)
-        # logger.info(volume)
+        # Height, width, length
+        min_x = max_x = min_y = max_y = min_z = max_z = None
+        for point in cad_mesh.points:
+            # p contains (x, y, z)
+            if min_x is None:
+                min_x = point[stl.Dimension.X]
+                max_x = point[stl.Dimension.X]
+                min_y = point[stl.Dimension.Y]
+                max_y = point[stl.Dimension.Y]
+                min_z = point[stl.Dimension.Z]
+                max_z = point[stl.Dimension.Z]
+            else:
+                max_x = max(point[stl.Dimension.X], max_x)
+                min_x = min(point[stl.Dimension.X], min_x)
+                max_y = max(point[stl.Dimension.Y], max_y)
+                min_y = min(point[stl.Dimension.Y], min_y)
+                max_z = max(point[stl.Dimension.Z], max_z)
+                min_z = min(point[stl.Dimension.Z], min_z)
 
-        pass
+        length = max_x - min_x
+        width = max_y - min_y
+        height = max_z - min_z
 
-        # logger.info("Saving to KG...")
-        # file_endpoints.save_extracted_text(file_iri=file_node.iri, text=text)
-        # TODO
+        properties_dict = {
+            "length": float(length),
+            "width": float(width),
+            "height": float(height),
+            "volume": float(volume),
+        }
+
+        feature_lists.append(
+            [float(length), float(width), float(height), float(volume)]
+        )
+
+        properties_string = json.dumps(properties_dict)
+
+        logger.info("Saving extracted properties to KG...")
+        file_endpoints.save_extracted_properties(
+            file_iri=main_file_node.iri, properties_string=properties_string
+        )
 
         logger.info("Deleting temporary file...")
         os.remove(tmp_file_path)
 
-        # logger.info("Processing text: Searching most relevant keyphrases from the text...")
+        i += 1
 
-        # extractor = pke.unsupervised.TopicRank()
-        # extractor.load_document(text, language="en")
+    ##################################
+    # Standardization and Clustering
+    logger.info("Resetting current time-series clusters if available...")
+    file_endpoints.reset_dimension_clusters()
 
-        # extractor.candidate_selection()
-        # extractor.candidate_weighting()
-        # keyphrases = extractor.get_n_best(n=30)
+    scaler = StandardScaler()
+    standardized_feature_lists = scaler.fit_transform(feature_lists)
 
-        # TODO: evtl. nachfiltern (redundanzen entfernen etc.)
+    clustering = DBSCAN(eps=DBSCAN_EPS, min_samples=DBSCAN_MIN_SAMPLES).fit(
+        standardized_feature_lists
+    )
 
-        # logger.info("\n TopicRank")
-        # logger.info(keyphrases)
+    cluster_count = max(clustering.labels_) + 1
+    logger.info("Cluster count: " + str(cluster_count))
 
-        # TODO
+    clusters = [[] for i in range(cluster_count)]
+    for i in range(len(main_cad_file_nodes_flat)):
+        if clustering.labels_[i] != -1:
+            clusters[clustering.labels_[i]].append(main_cad_file_nodes_flat[i])
 
-        # extracted_keywords = [
-        #     keyphrase_score_pair[0] for keyphrase_score_pair in keyphrases
-        # ]
+    logger.info("Clusters:")
+    i = 1
+    for cluster in clusters:
+        logger.info(
+            f"Cluster: {i}, count: {len(cluster)}: {[node.id_short for node in cluster]}"
+        )
+        i += 1
 
-        # logger.info(f"Extracted {len(extracted_keywords)} keywords")
+    logger.info("Adding clusters to KG-DT...")
 
-        # # Save keywords and relationships to KG
-        # logger.info("Saving keywords to KG...")
-        # for keyword in extracted_keywords:
-        #     file_endpoints.add_keyword(file_iri=file_node.iri, keyword=keyword)
+    i = 0
+    for cluster in clusters:
+        cluster_iri = f"www.sintef.no/aas_identifiers/learning_factory/similarity_analysis/dimension_cluster_{i}"
+
+        file_endpoints.create_dimension_cluster(
+            id_short=f"dimension_cluster_{i}",
+            caption=f"Dimension cluster: {i}",
+            iri=cluster_iri,
+            description="Node representing a cluster of assets in regards to their dimensions.",
+        )
+        for node in cluster:
+            file_endpoints.add_file_to_dimension_cluster(
+                file_iri=node.iri, cluster_iri=cluster_iri
+            )
 
         i += 1
 
-    SimilarityPipelineStatusManager.instance().set_active(active=False, stage="cad_analysis")
+    SimilarityPipelineStatusManager.instance().set_active(
+        active=False, stage="cad_analysis"
+    )

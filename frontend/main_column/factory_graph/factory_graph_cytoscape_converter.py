@@ -318,6 +318,25 @@ def get_cytoscape_elements(
                     )
                 )
 
+            # (Dimension) Cluster:
+            if suppl_file.dimension_cluster is not None:
+
+                cytoscape_elements.append(
+                    _create_cytoscape_node(
+                        suppl_file.dimension_cluster,
+                        NodeTypes.DIMENSION_CLUSTER.value,
+                        asset,
+                    )
+                )
+
+                cytoscape_elements.append(
+                    _create_cytoscape_relationship(
+                        suppl_file.iri,
+                        suppl_file.dimension_cluster.iri,
+                        RelationshipTypes.PART_OF_DIMENSION_CLUSTER.value,
+                    )
+                )
+
             # Alternative formats (always connected to one main type)
             for secondary_suppl_file in suppl_file.secondary_formats:
                 # Supplementary file (alternative format):
