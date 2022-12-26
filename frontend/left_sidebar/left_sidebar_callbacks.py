@@ -99,7 +99,7 @@ def left_sidebar_collapse(store):
             SIDEBAR_HIDDEN,
             COLLAPSE_BUTTON_UNCOLLAPSED,
             COLLAPSE_BUTTON_COLLAPSED,
-            SIDEBAR_CONTAINER_NORMAL,
+            SIDEBAR_CONTAINER_EXTENDED,
         )
     else:
         return (

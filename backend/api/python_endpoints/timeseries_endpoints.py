@@ -161,9 +161,11 @@ def set_ts_reduced_feature_list(iri: str, reduced_feature_list: List):
     )
 
 
-def create_ts_cluster(iri: str, id_short: str, description: str | None = None):
+def create_ts_cluster(
+    iri: str, id_short: str, description: str | None = None, caption: str | None = None
+):
     TIMESERIES_NODES_DAO.create_ts_cluster(
-        iri=iri, id_short=id_short, description=description
+        iri=iri, id_short=id_short, description=description, caption=caption
     )
 
 

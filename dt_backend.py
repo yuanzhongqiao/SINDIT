@@ -63,6 +63,9 @@ from backend.api.rest_endpoints import db_import_export_endpoints
 # noinspection PyUnresolvedReferences
 from backend.api.rest_endpoints import aas_endpoints
 
+# noinspection PyUnresolvedReferences
+from backend.api.rest_endpoints import similarity_pipeline_endpoints
+
 from init_learning_factory_from_cypher_file import (
     generate_alternative_cad_format,
     import_binary_data,

@@ -589,7 +589,7 @@ body {
 }
 
 #left-sidebar-collapse-similarity-pipeline-content {
-    width: 320px;
+    width: 400px;
     height: 100%;
     max-height: 100%;
     overflow: hidden;
@@ -608,6 +608,10 @@ body {
 
 .left-sidebar-full-height-card {
     height: 100%;
+}
+
+.main-graph-visibility-switch-hidden {
+    display: none;
 }
 
 

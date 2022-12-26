@@ -318,6 +318,25 @@ def get_cytoscape_elements(
                     )
                 )
 
+            # (Dimension) Cluster:
+            if suppl_file.dimension_cluster is not None:
+
+                cytoscape_elements.append(
+                    _create_cytoscape_node(
+                        suppl_file.dimension_cluster,
+                        NodeTypes.DIMENSION_CLUSTER.value,
+                        asset,
+                    )
+                )
+
+                cytoscape_elements.append(
+                    _create_cytoscape_relationship(
+                        suppl_file.iri,
+                        suppl_file.dimension_cluster.iri,
+                        RelationshipTypes.PART_OF_DIMENSION_CLUSTER.value,
+                    )
+                )
+
             # Alternative formats (always connected to one main type)
             for secondary_suppl_file in suppl_file.secondary_formats:
                 # Supplementary file (alternative format):
@@ -351,6 +370,21 @@ def get_cytoscape_elements(
                         RelationshipTypes.FILE_DB_ACCESS.value,
                     )
                 )
+
+        # Extracted keywords:
+        for keyword in asset.extracted_keywords:
+            cytoscape_elements.append(
+                _create_cytoscape_node(
+                    keyword, NodeTypes.EXTRACTED_KEYWORD.value, asset
+                )
+            )
+            cytoscape_elements.append(
+                _create_cytoscape_relationship(
+                    asset.iri,
+                    keyword.iri,
+                    RelationshipTypes.KEYWORD_EXTRACTION.value,
+                )
+            )
 
         # Own Annotations:
         for annotation in asset.annotations:

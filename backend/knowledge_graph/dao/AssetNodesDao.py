@@ -15,6 +15,7 @@ from graph_domain.factory_graph_types import (
     NodeTypes,
     RelationshipTypes,
 )
+from graph_domain.similarities.ExtractedKeywordNode import ExtractedKeywordNode
 
 
 class AssetsDao(object):
@@ -126,3 +127,66 @@ class AssetsDao(object):
         ).to_table()[0][0]
 
         return assets_count
+
+    def add_keyword(self, asset_iri: str, keyword: str):
+        """Adds the keyword by creating a relationship to the keyword and optionally creating the keyword node,
+        if it does not yet exist
+
+        Args:
+            asset_iri (str): _description_
+            keyword (str): _description_
+        """
+        node = ExtractedKeywordNode(
+            id_short=f"extracted_keyword_{keyword}",
+            iri=f"www.sintef.no/aas_identifiers/learning_factory/similarity_analysis/extracted_keyword_{keyword}",
+            keyword=keyword,
+            _explizit_caption=keyword,
+        )
+        self.ps.graph_merge(node)
+
+        relationship = Relationship(
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.ASSET.value, iri=asset_iri)
+            .first(),
+            RelationshipTypes.KEYWORD_EXTRACTION.value,
+            NodeMatcher(self.ps.graph)
+            .match(NodeTypes.EXTRACTED_KEYWORD.value, iri=node.iri)
+            .first(),
+        )
+
+        self.ps.graph_create(relationship)
+
+    def get_keywords_set_for_asset(self, asset_iri: str):
+        # File keywords
+        file_keywords_table = self.ps.graph_run(
+            "MATCH p=(a:"
+            + NodeTypes.ASSET.value
+            + ' {iri: "'
+            + asset_iri
+            + '"})-[r1:'
+            + RelationshipTypes.HAS_SUPPLEMENTARY_FILE.value
+            + "]->(t)-[r2:"
+            + RelationshipTypes.KEYWORD_EXTRACTION.value
+            + "]->(c) RETURN c.keyword"
+        ).to_table()
+
+        file_keyword_list = [keyword[0] for keyword in file_keywords_table]
+
+        # Asset keywords
+        asset_keywords_table = self.ps.graph_run(
+            "MATCH p=(a:"
+            + NodeTypes.ASSET.value
+            + ' {iri: "'
+            + asset_iri
+            + '"})-[r1:'
+            + RelationshipTypes.KEYWORD_EXTRACTION.value
+            + "]->(c) RETURN c.keyword"
+        ).to_table()
+
+        asset_keyword_list = [keyword[0] for keyword in asset_keywords_table]
+
+        # Combine
+        keyword_list = file_keyword_list
+        keyword_list.extend(asset_keyword_list)
+
+        return set(keyword_list)
