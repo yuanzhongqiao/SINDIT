@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Exit with an error if any command fails
+set -e
 
 apt-get update
 
@@ -10,7 +12,12 @@ apt-get install -y curl wget
 # git required for the pke keyphrase extraction library (git pip link)
 apt-get install -y git
 
-pip install --upgrade pip
+# Install cqkit from the repository because the pip version is broken
+git clone --depth=1 https://github.com/michaelgale/cq-kit.git
+cd cq-kit
+python setup.py install
+cd ..
+
 pip install --no-cache-dir -r requirements.txt
 
 # libgl required for CAD module
