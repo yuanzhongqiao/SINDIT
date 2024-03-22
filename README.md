@@ -1,95 +1,54 @@
-# SINDIT - SINTEF Digital Twin
-
-## Public Demonstrator
-
-A publicly accessible demonstration-instance of this work can be visited at:
-
-[https://sindit.sintef.cloud](https://sindit.sintef.cloud)
-
-## Description
-
-### Demonstration Factory
-For the demonstration of this project, we use a **fischertechnik © Training Factory Industry 4.0 24V**. 
-
-![](documentation/img/554868_Lernfabrik_Training_Factory_Fabrik_24V.jpg)
-> Image source: fischertechnik
-
-This factory consists of multiple machines like a automated High-Bay-Warehouse and simulates a ordering- production- and delivery-process. It offers various time-series outputs that are available either via MQTT or OPC-UA. Most of those are included and utilized for this demonstrator.
-
-The controllers of the factory also expose multiple interfaces. More details can be found [here](documentation/fischertechnik-training-factory-information.md).
-
-Additional details about the factory can be found at [fischertechnik](https://www.fischertechnik.de/en/products/learning/training-models/554868-edu-training-factory-industry-4-0-24v-education#imagedownload).
-
-### SINDIT Digital Twin Platform
-
-![](documentation/img/dt_dashboard.png)
-
-The core of SINDIT is a universal Digital Twin platform, that holds all relevant information
-about the assets from a connected factory and is synchronized in real-time to the
-physical assets.
-
-The Digital Twin serves as a contextualization layer connecting available data to provide a general
-synopsis. 
-The system contains both static information like documents, as well as dynamic time-series data.
-
-Knowledge Graphs (KG) are a convenient method to represent structures of connected entities and allow efficient querying. For this reason, SINDIT utilizes such a KG as its main structure. 
-
-To make the concept be applicable to various domains and factories, a very generic meta-model has been
-created:
-
-![](documentation/img/kg_dt_meta_model.svg)
-
-For specific data like time series or documents, specialized databases have been integrated. Connectors to commonly used messaging protocols like OPC UA and MQTT serve the real-time aspects of the digital twin.  
-
-The graph-based Dashboard shown in the picture above serves as universal user interface and
-visualizes both the structure and data of the assets, as well as interfaces to additional packages described below.
-
-A REST-API is provided by the digital-twin service and is utilized by the dashboard-frontend. The following diagram provides an overview over the deployment architecture:
-
-![](documentation/img/dt_deployment_diagram_single_factory.svg)
-
-
-
-### Similarity Measures and Clustering
-
-Overview over the implemented similarity-pipeline for generic, human-understandable comparisons between factory assets:
-
-![](documentation/img/pipeline_overview.svg)
-
-More information about the similarity measures will follow soon.
-
-### Situation-related Knowledge Transfer and Domain Expert Annotations
-
-Information about this package will follow soon.
-
-## Installation, Requirements & How to Run
-
-This project is set up using Docker and Docker-Compose. 
-
-For developers, a Devcontainer-setup for Visual Studio Code is implemented. It can be used together with SSH remote development if needed.
-
-Please take into account that the application with all its required database-systems has some increased memory requirements.
-
-If you want to try SINDIT, please find the details on the requirements and how to develop or run SINDIT [here](documentation/sindit-development-guide.md).
-
-That file also contains information about the exposed API and interfaces.
-
-## FAQ
-
-You can find answers to frequent questions [here](documentation/FAQ.md).  
-
-## Historic Version of SINDIT
-
-The original release of SINDIT was based on a fictive chocolate factory and has bee presented at the [ICSA22 conference](https://icsa-conferences.org/2022/conference-tracks/new-and-emerging-ideas/). The paper can be found [here](https://ieeexplore.ieee.org/document/9779654). Watch the presentation [here](https://www.youtube.com/watch?v=ExHNP6527d8&list=PLmMTZhDUcVmuFcJG9tbxR6AAWcOl2Jej3&index=29&t=2s).
-
-You can find the source code of the old version under [Release v1.0.0](https://github.com/SINTEF-9012/SINDIT/releases/tag/v1.0.0).
-
-## Blame & Contact
-
-- Timo Peter [timo.peter@sintef.no](mailto:timo.peter@sintef.no)
-
-- An Ngoc Lam [an.lam@sintef.no](mailto:an.lam@sintef.no)
-
----
-
-This package is provided without any warranty.
+<div class="Box-sc-g0xbh4-0 bJMeLZ js-snippet-clipboard-copy-unpositioned" data-hpc="true"><article class="markdown-body entry-content container-lg" itemprop="text"><div class="markdown-heading" dir="auto"><h1 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">SINDIT - SINTEF 数字孪生</font></font></h1><a id="user-content-sindit---sintef-digital-twin" class="anchor" aria-label="永久链接：SINDIT - SINTEF 数字孪生" href="#sindit---sintef-digital-twin"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">公众示威者</font></font></h2><a id="user-content-public-demonstrator" class="anchor" aria-label="永久链接：公共示威者" href="#public-demonstrator"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">可以在以下位置访问该作品的公开演示实例：</font></font></p>
+<p dir="auto"><a href="https://sindit.sintef.cloud" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">https://sindit.sintef.cloud</font></font></a></p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">描述</font></font></h2><a id="user-content-description" class="anchor" aria-label="永久链接：描述" href="#description"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<div class="markdown-heading" dir="auto"><h3 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">示范工厂</font></font></h3><a id="user-content-demonstration-factory" class="anchor" aria-label="永久链接：示范工厂" href="#demonstration-factory"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">为了演示该项目，我们使用</font></font><strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">fischertechnik © Training Factory Industry 4.0 24V</font></font></strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/SINTEF-9012/SINDIT/blob/main/documentation/img/554868_Lernfabrik_Training_Factory_Fabrik_24V.jpg"><img src="/SINTEF-9012/SINDIT/raw/main/documentation/img/554868_Lernfabrik_Training_Factory_Fabrik_24V.jpg" alt="" style="max-width: 100%;"></a></p>
+<blockquote>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">图片来源：fischertechnik</font></font></p>
+</blockquote>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">该工厂由多台机器组成，例如自动化高架仓库，并模拟订购、生产和交付流程。</font><font style="vertical-align: inherit;">它提供可通过 MQTT 或 OPC-UA 获得的各种时间序列输出。</font><font style="vertical-align: inherit;">其中大部分已包含并用于此演示程序。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">工厂的控制器也暴露了多个接口。</font></font><a href="/SINTEF-9012/SINDIT/blob/main/documentation/fischertechnik-training-factory-information.md"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">更多详情可在这</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">找到</font><font style="vertical-align: inherit;">。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">有关工厂的更多详细信息，请访问</font></font><a href="https://www.fischertechnik.de/en/products/learning/training-models/554868-edu-training-factory-industry-4-0-24v-education#imagedownload" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">fischertechnik</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h3 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">SINDIT 数字孪生平台</font></font></h3><a id="user-content-sindit-digital-twin-platform" class="anchor" aria-label="永久链接：SINDIT 数字孪生平台" href="#sindit-digital-twin-platform"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/SINTEF-9012/SINDIT/blob/main/documentation/img/dt_dashboard.png"><img src="/SINTEF-9012/SINDIT/raw/main/documentation/img/dt_dashboard.png" alt="" style="max-width: 100%;"></a></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">SINDIT 的核心是一个通用的数字孪生平台，它保存来自互联工厂的资产的所有相关信息，并实时同步到物理资产。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">数字孪生作为连接可用数据以提供一般概要的上下文层。</font><font style="vertical-align: inherit;">该系统既包含文档等静态信息，也包含动态时间序列数据。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">知识图（KG）是一种表示连接实体结构并允许高效查询的便捷方法。</font><font style="vertical-align: inherit;">为此，SINDIT采用这样的KG作为其主要结构。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">为了使这个概念适用于各种领域和工厂，创建了一个非常通用的元模型：</font></font></p>
+<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/SINTEF-9012/SINDIT/blob/main/documentation/img/kg_dt_meta_model.svg"><img src="/SINTEF-9012/SINDIT/raw/main/documentation/img/kg_dt_meta_model.svg" alt="" style="max-width: 100%;"></a></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">对于时间序列或文档等特定数据，已经集成了专门的数据库。</font><font style="vertical-align: inherit;">OPC UA 和 MQTT 等常用消息传递协议的连接器服务于数字孪生的实时方面。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">上图所示的基于图形的仪表板用作通用用户界面，并可视化资产的结构和数据，以及下面描述的其他包的接口。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">REST-API 由数字孪生服务提供，并由仪表板前端使用。</font><font style="vertical-align: inherit;">下图概述了部署架构：</font></font></p>
+<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/SINTEF-9012/SINDIT/blob/main/documentation/img/dt_deployment_diagram_single_factory.svg"><img src="/SINTEF-9012/SINDIT/raw/main/documentation/img/dt_deployment_diagram_single_factory.svg" alt="" style="max-width: 100%;"></a></p>
+<div class="markdown-heading" dir="auto"><h3 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">相似性度量和聚类</font></font></h3><a id="user-content-similarity-measures-and-clustering" class="anchor" aria-label="永久链接：相似性度量和聚类" href="#similarity-measures-and-clustering"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">概述已实施的相似性管道，用于工厂资产之间通用的、人类可理解的比较：</font></font></p>
+<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/SINTEF-9012/SINDIT/blob/main/documentation/img/pipeline_overview.svg"><img src="/SINTEF-9012/SINDIT/raw/main/documentation/img/pipeline_overview.svg" alt="" style="max-width: 100%;"></a></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">有关相似性度量的更多信息即将发布。</font></font></p>
+<div class="markdown-heading" dir="auto"><h3 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">情境相关知识转移和领域专家注释</font></font></h3><a id="user-content-situation-related-knowledge-transfer-and-domain-expert-annotations" class="anchor" aria-label="永久链接：情境相关知识转移和领域专家注释" href="#situation-related-knowledge-transfer-and-domain-expert-annotations"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">有关此包的信息将很快发布。</font></font></p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">安装、要求和如何运行</font></font></h2><a id="user-content-installation-requirements--how-to-run" class="anchor" aria-label="永久链接：安装、要求和如何运行" href="#installation-requirements--how-to-run"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">该项目是使用 Docker 和 Docker-Compose 设置的。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">对于开发人员来说，实现了 Visual Studio Code 的 Devcontainer 设置。</font><font style="vertical-align: inherit;">如果需要，可以与SSH远程开发配合使用。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请考虑到应用程序及其所有必需的数据库系统具有一些增加的内存要求。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"></font><a href="/SINTEF-9012/SINDIT/blob/main/documentation/sindit-development-guide.md"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如果您想尝试 SINDIT，请在此处</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">查找有关要求以及如何开发或运行 SINDIT 的详细信息</font><font style="vertical-align: inherit;">。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">该文件还包含有关公开的 API 和接口的信息。</font></font></p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">常问问题</font></font></h2><a id="user-content-faq" class="anchor" aria-label="永久链接：常见问题解答" href="#faq"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"></font><a href="/SINTEF-9012/SINDIT/blob/main/documentation/FAQ.md"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">您可以在这里</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">找到常见问题的答案</font><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">SINDIT 的历史版本</font></font></h2><a id="user-content-historic-version-of-sindit" class="anchor" aria-label="永久链接：SINDIT 的历史版本" href="#historic-version-of-sindit"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">SINDIT 的最初版本基于一个虚构的巧克力工厂，并已在</font></font><a href="https://icsa-conferences.org/2022/conference-tracks/new-and-emerging-ideas/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">ICSA22 会议</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">上展示。</font></font><a href="https://ieeexplore.ieee.org/document/9779654" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">该论文可以在这里</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">找到</font><font style="vertical-align: inherit;">。</font></font><a href="https://www.youtube.com/watch?v=ExHNP6527d8&amp;list=PLmMTZhDUcVmuFcJG9tbxR6AAWcOl2Jej3&amp;index=29&amp;t=2s" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请在此处</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">观看演示</font><font style="vertical-align: inherit;">。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"></font><a href="https://github.com/SINTEF-9012/SINDIT/releases/tag/v1.0.0"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">您可以在Release v1.0.0</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">下找到旧版本的源代码</font><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">责备与联系</font></font></h2><a id="user-content-blame--contact" class="anchor" aria-label="永久链接：指责与联系" href="#blame--contact"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<ul dir="auto">
+<li>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">蒂莫·彼得</font></font><a href="mailto:timo.peter@sintef.no"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">timo.peter@sintef.no</font></font></a></p>
+</li>
+<li>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">安玉林</font></font><a href="mailto:an.lam@sintef.no"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">an.lam@sintef.no</font></font></a></p>
+</li>
+</ul>
+<hr>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">此套件不提供任何保证。</font></font></p>
+</article></div>
